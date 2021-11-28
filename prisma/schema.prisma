@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://litao:Li1218040201@rm-bp1rzk2qoex2351o6vo.mysql.rds.aliyuncs.com:3306/caption-learning"
+}
+
+model User {
+  id            Int     @id @default(autoincrement())
+  uid           String  @unique
+  email         String  @unique
+  nickname      String?
+  avatar        String?
+  password      String
+  salt          String
+  created_at    DateTime
+  last_updated  DateTime
+}
+
+model Email {
+  id            Int     @id @default(autoincrement())
+  userId        Int?
+  email         String  @unique
+}
+
+model Caption {
+  id        Int     @id @default(autoincrement())
+  title     String
+  content   String? @db.LongText
+  published Boolean @default(false)
+  authorId  Int?
+}
+

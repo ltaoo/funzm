@@ -1,29 +1,19 @@
-import supabase from "../utils/request";
+/**
+ * @file 用户登录、授权相关
+ */
+import axios from "axios";
 
 /**
  * 注册用户
  */
 export async function register({ email, password }) {
-  const { user, session, error } = await supabase.auth.signUp({
+  return axios.post("/api/user/register", {
     email,
     password,
   });
-  if (error) {
-    throw error;
-  }
-  return user;
 }
 
 /**
  * 用户登录
  */
-export async function login({ email, password }) {
-  const { user, session, error } = await supabase.auth.signIn({
-    email,
-    password,
-  });
-  if (error) {
-    throw error;
-  }
-  return user;
-}
+export async function login({ email, password }) {}

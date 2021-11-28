@@ -5,14 +5,20 @@
 import React, { useCallback, useState } from "react";
 import { Button, Upload } from "antd";
 
-import {
-  parseCaptionContent,
-  parseCaptionFile,
-  readTextFromFile,
-} from "../../domains/caption";
+import { parseCaptionFile, stringifyCaption } from "@/domains/caption";
+import { fetchCaptionsService } from "@/lib/caption";
 
-const CaptionPreviewPage = () => {
+import { addCaption } from "@/services/caption";
+
+const CaptionPreviewPage = (props) => {
   const [caption, setCaption] = useState(null);
+
+  console.log("[PAGE]CaptionManagePage - render", props.data);
+
+  const saveCaption = useCallback(() => {
+    addCaption(stringifyCaption(caption));
+  }, [caption]);
+
   const preventUpload = useCallback(() => {
     return false;
   }, []);
@@ -26,13 +32,13 @@ const CaptionPreviewPage = () => {
   if (caption) {
     return (
       <div>
-        <div className="mx-auto w-180 space-y-2">
+        <div className="mx-auto w-180 pb-20 space-y-2">
           <h2 className="text-2xl mt-10">{caption.name}</h2>
           <div className="mt-10 ">
             {caption.paragraphs.map((caption) => {
-              const { text1, text2 } = caption;
+              const { line, text1, text2 } = caption;
               return (
-                <div>
+                <div key={line}>
                   <p className="text-xs m-0">{text1}</p>
                   <p className="text-lg font-serif">{text2}</p>
                 </div>
@@ -40,6 +46,9 @@ const CaptionPreviewPage = () => {
             })}
           </div>
         </div>
+        <button className="btn" onClick={saveCaption}>
+          保存
+        </button>
       </div>
     );
   }
@@ -60,3 +69,10 @@ const CaptionPreviewPage = () => {
 };
 
 export default CaptionPreviewPage;
+
+export async function getStaticProps({ preview = null }) {
+  const data = await fetchCaptionsService();
+  return {
+    props: { data },
+  };
+}

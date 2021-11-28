@@ -1,62 +1,51 @@
 /**
- * @file 首页
+ * @file 字幕上传
  */
-import Head from "next/head";
-import Link from "next/link";
-import { GetStaticProps } from "next";
 
-import Date from "../components/date";
-import Layout, { siteTitle } from "../components/layout";
-import { getSortedPostsData } from "../lib/posts";
+import React, { useCallback } from "react";
+import { useRouter } from "next/router";
 
-import utilStyles from "../styles/utils.module.css";
+import CaptionUpload from "@/components/CaptionFileUpload";
 
-export default function Home({
-  allPostsData,
-}: {
-  allPostsData: {
-    date: string;
-    title: string;
-    id: string;
-  }[];
-}) {
+const CaptionPreviewPage = (props) => {
+  const router = useRouter();
+
+  console.log("[PAGE]CaptionManagePage - render", props.data);
+
+  const handleUploadFile = useCallback(async (caption) => {
+    const { name, content, ext } = caption;
+    localStorage.setItem(
+      "tmp-caption",
+      JSON.stringify({
+        name,
+        content,
+        ext,
+      })
+    );
+    router.push({
+      pathname: "/captions/tmp",
+    });
+  }, []);
+
   return (
-    <Layout home>
-      <Head>
-        <title>{siteTitle}</title>
-      </Head>
-      <section className={utilStyles.headingMd}>
-        <p>[Your Self Introduction]</p>
-        <p>
-          (This is a sample website - you’ll be building a site like this in{" "}
-          <a href="https://nextjs.org/learn">our Next.js tutorial</a>.)
-        </p>
-      </section>
-      <section className={`${utilStyles.headingMd} ${utilStyles.padding1px}`}>
-        <h2 className={utilStyles.headingLg}>Blog</h2>
-        <ul className={utilStyles.list}>
-          {allPostsData.map(({ id, date, title }) => (
-            <li className={utilStyles.listItem} key={id}>
-              <Link href={`/posts/${id}`}>
-                <a>{title}</a>
-              </Link>
-              <br />
-              <small className={utilStyles.lightText}>
-                <Date dateString={date} />
-              </small>
-            </li>
-          ))}
-        </ul>
-      </section>
-    </Layout>
+    <div className="flex justify-center">
+      <div className="2xl:container 2xl:mx-auto px-5 sm:px-12 lg:w-240 md:w-80">
+        <h2 className="m-10 text-4xl text-center">CAPTION PARSER</h2>
+        <CaptionUpload onChange={handleUploadFile} />
+        <div className="mt-10">
+          <p
+            onClick={() => {
+              router.push({
+                pathname: "/auth/login",
+              });
+            }}
+          >
+            前往登录/注册
+          </p>
+        </div>
+      </div>
+    </div>
   );
-}
-
-export const getStaticProps: GetStaticProps = async () => {
-  const allPostsData = getSortedPostsData();
-  return {
-    props: {
-      allPostsData,
-    },
-  };
 };
+
+export default CaptionPreviewPage;
