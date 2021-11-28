@@ -30,7 +30,7 @@ export const register: Handler = async (req) => {
   const user = await User.addUserService({ email, password });
   if (!user) return utils.send(500, "Error creating account");
 
-  return User.respond(201, user);
+  return User.respond(201, null);
 };
 
 /**

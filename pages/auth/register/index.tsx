@@ -4,16 +4,21 @@
 import { useCallback } from "react";
 import { Button, Input, Form, message } from "antd";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 import { register } from "@/services/auth";
 
 const RegisterPage = () => {
   const [form] = Form.useForm();
+  const router = useRouter();
 
   const registerAccount = useCallback(async () => {
     const values = await form.validateFields();
     await register(values);
     message.success("注册成功");
+    // router.push({
+    //   pathname: "/auth/login",
+    // });
   }, []);
 
   return (

@@ -6,10 +6,12 @@
     "start": "next start"
   },
   "dependencies": {
+    "@peculiar/webcrypto": "^1.2.3",
     "@prisma/client": "^3.5.0",
     "@supabase/supabase-js": "^1.28.2",
     "antd": "^4.17.2",
     "axios": "^0.24.0",
+    "base-64": "^1.0.0",
     "date-fns": "^2.11.1",
     "gray-matter": "^4.0.2",
     "mysql2": "^2.3.3",

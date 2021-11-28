@@ -1,4 +1,6 @@
-import * as prisma from "@/lib/client";
+import "@/lib/utils/polyfill";
+
+import prisma from "@/lib/client";
 
 import type { User, UserID } from "./user";
 
@@ -21,10 +23,9 @@ export function saveEmailService(user: User) {
   return prisma.email.create({
     data: {
       email: user.email,
-      user: user.uid,
+      userId: user.id,
     },
   });
-  // return database.write<UserID>(key, user.uid);
 }
 
 /**

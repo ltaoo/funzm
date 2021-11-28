@@ -1,10 +1,10 @@
+import "@/lib/utils/polyfill";
+
 import { toHEX } from "worktop/buffer";
 import { PBKDF2 } from "worktop/crypto";
-// import * as database from "lib/utils/database";
 
 import * as utils from "@/lib/utils";
 import type { UID } from "@/lib/utils";
-import client from "@/lib/client";
 
 import type { User, UserID } from "@/lib/models/user";
 

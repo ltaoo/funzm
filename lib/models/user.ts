@@ -1,17 +1,14 @@
 /**
  * @file 用户服务
  */
+import "@/lib/utils/polyfill";
+
 import { HS256 } from "worktop/jwt";
 
 import prisma from "@/lib/client";
 import * as utils from "@/lib/utils";
 import { UID } from "@/lib/utils";
 
-import * as Customers from "@/lib/stripe/customers";
-import * as Subscriptions from "@/lib/stripe/subscriptions";
-import * as Prices from "@/lib/stripe/prices";
-import { Customer } from "@/lib/stripe/customers";
-import { Subscription } from "@/lib/stripe/subscriptions";
 import type { Handler } from "@/lib/context";
 
 import * as Password from "./password";
@@ -20,6 +17,7 @@ import { PASSWORD, SALT } from "./password";
 
 export type UserID = UID<16>;
 export interface User {
+  id?: number;
   uid: UserID;
   email: string;
   nickname: Nullable<string>;
@@ -28,13 +26,6 @@ export interface User {
   last_updated: Nullable<TIMESTAMP>;
   password: PASSWORD;
   salt: SALT;
-  /**
-   * 付款/交易信息
-   */
-  // stripe: {
-  //   customer: Customer["id"];
-  //   subscription: Subscription["id"];
-  // };
 }
 
 // Authentication attributes
@@ -92,39 +83,15 @@ export async function addUserService(values: Insert): Promise<User | void> {
   // Create new `UserID`s until available
   const nxtUID = await utils.until(toUID, findUserService);
 
-  // Create the Stripe Customer record
-  // const subscription = await Customers.create({
-  //   email: values.email,
-  //   metadata: {
-  //     userid: nxtUID,
-  //     users: 1,
-  //     documents: 0,
-  //     schemas: 0,
-  //     spaces: 0,
-  //   },
-  // }).then((customer) => {
-  //   if (customer) {
-  //     // Attach the FREE PLAN to the new customer
-  //     return Subscriptions.create(customer.id, [Prices.FREE.id]);
-  //   }
-  // });
-
-  // if (!subscription) return;
-
   const user: User = {
     uid: nxtUID,
     email: values.email,
-    nickname: values.nickname || null,
+    nickname: values.nickname || values.email,
     avatar: null,
     password,
     salt,
     created_at: utils.seconds(),
     last_updated: null,
-    // subscription: Prices.FREE.id,
-    // stripe: {
-    //   customer: subscription.customer,
-    //   subscription: subscription.id,
-    // },
   };
 
   // Create the new User record
@@ -132,9 +99,6 @@ export async function addUserService(values: Insert): Promise<User | void> {
 
   // Create public-facing "emails::" key for login
   if (!(await Email.saveEmailService(user))) return;
-
-  // Send "welcome" email
-  // await emails.welcome(user);
 
   return user;
 }
