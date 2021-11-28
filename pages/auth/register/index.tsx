@@ -16,9 +16,9 @@ const RegisterPage = () => {
     const values = await form.validateFields();
     await register(values);
     message.success("注册成功");
-    // router.push({
-    //   pathname: "/auth/login",
-    // });
+    router.push({
+      pathname: "/auth/login",
+    });
   }, []);
 
   return (

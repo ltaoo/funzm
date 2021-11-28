@@ -11,9 +11,13 @@ export const toKID = (email: string) => `emails::${email}`;
  * Find the `UserID` associated with an `User.email` value.
  * @NOTE A `User` only has one "emails::{email}" document associated.
  */
-export function findEmailService(email: string) {
-  const key = toKID(email);
-  // return database.read<UserID>(key);
+export async function findEmailService(email: string) {
+  const matched = await prisma.email.findUnique({
+    where: {
+      email,
+    },
+  });
+  return matched?.userUid;
 }
 
 /**
@@ -23,7 +27,7 @@ export function saveEmailService(user: User) {
   return prisma.email.create({
     data: {
       email: user.email,
-      userId: user.id,
+      userUid: user.uid,
     },
   });
 }

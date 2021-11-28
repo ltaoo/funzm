@@ -6,6 +6,14 @@ import "windi.css";
 
 import "../styles/global.css";
 
+//   window.addEventListener("unhandledrejection", (err) => {
+//     if (err.reason.code !== undefined) {
+//       console.log(err.reason.message);
+//       return;
+//     }
+//     throw err;
+//   });
+
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <div>

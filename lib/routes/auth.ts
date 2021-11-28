@@ -23,8 +23,9 @@ export const register: Handler = async (req) => {
 
   // Check for existing user email
   const { email, password } = input;
-  const userid = await Email.findEmailService(email);
-  if (userid)
+  const userUid = await Email.findEmailService(email);
+  console.log('check has existing', userUid);
+  if (userUid)
     return utils.send(400, "An account already exists for this address");
 
   const user = await User.addUserService({ email, password });
@@ -48,10 +49,10 @@ export const login: Handler = async (req) => {
 
   // Check for existing user email
   const { email, password } = input;
-  const userid = await Email.findEmailService(email);
-  if (!userid) return utils.send(401, ambiguous);
+  const userUid = await Email.findEmailService(email);
+  if (!userUid) return utils.send(401, ambiguous);
 
-  const user = await User.findUserService(userid);
+  const user = await User.findUserService(userUid);
   if (!user) return utils.send(401, ambiguous);
 
   const isMatch = await Password.compare(user, password);

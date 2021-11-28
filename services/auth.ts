@@ -16,6 +16,7 @@ export async function register({ email, password }) {
       console.log(response);
       if (response.data.code !== 0) {
         return Promise.reject({
+          code: response.data.code,
           message: response.data.msg,
         });
       }
@@ -26,4 +27,20 @@ export async function register({ email, password }) {
 /**
  * 用户登录
  */
-export async function login({ email, password }) {}
+export async function login({ email, password }) {
+  return axios
+    .post("/api/user/login", {
+      email,
+      password,
+    })
+    .then((response) => {
+      console.log(response);
+      if (response.data.code !== 0) {
+        return Promise.reject({
+          code: response.data.code,
+          message: response.data.msg,
+        });
+      }
+      return response;
+    });
+}

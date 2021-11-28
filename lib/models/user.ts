@@ -64,7 +64,7 @@ export function findUserService(uid: UserID) {
  * Save/Overwrite the `User` document.
  */
 export async function saveUserService(user: User): Promise<boolean> {
-  await prisma.user.create({
+  const res = await prisma.user.create({
     data: user,
   });
   return true;
@@ -95,7 +95,8 @@ export async function addUserService(values: Insert): Promise<User | void> {
   };
 
   // Create the new User record
-  if (!(await saveUserService(user))) return;
+  const createdUser = await saveUserService(user);
+  if (!createdUser) return;
 
   // Create public-facing "emails::" key for login
   if (!(await Email.saveEmailService(user))) return;
@@ -179,11 +180,15 @@ export function output(user: User) {
 /**
  * Format a `User` document for Auth response
  */
-export async function respond(code: number, user: User): Promise<Response> {
-  return utils.send(code, {
+export async function respond(user: User): Promise<{}> {
+  return {
     token: await JWT.sign(user),
     user: output(user),
-  });
+  };
+  // return utils.send(code, {
+  //   token: await JWT.sign(user),
+  //   user: output(user),
+  // });
 }
 
 /**

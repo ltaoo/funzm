@@ -21,7 +21,7 @@ model User {
 
 model Email {
   id            Int     @id @default(autoincrement())
-  userId        Int?
+  userUid       String
   email         String  @unique
 }
 
