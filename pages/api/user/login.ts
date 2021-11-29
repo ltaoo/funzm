@@ -1,4 +1,6 @@
 /**
+ * @file 登录
+ * 暂时废弃，使用 next-auth 提供的 /api/auth/callback/
  * Post `/user/login`
  */
 import * as Email from "@/lib/models/email";
@@ -21,7 +23,7 @@ export default async function login(req, res) {
   // Check for existing user email
   const { email, password } = input;
   const userUid = await Email.findEmailService(email);
-  console.log("finded user uid", userUid);
+  // console.log("finded user uid", userUid);
   if (!userUid) {
     res
       .status(200)
@@ -41,5 +43,7 @@ export default async function login(req, res) {
     return;
   }
 
-  return res.status(200).json({ code: 0, msg: "", data: User.respond(user) });
+  return res
+    .status(200)
+    .json({ code: 0, msg: "", data: await User.respond(user) });
 }

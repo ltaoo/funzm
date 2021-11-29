@@ -1,28 +1,26 @@
+/**
+ * @file 新用户注册
+ * POST `/api/user/register`
+ */
 import "@/lib/utils/polyfill";
 import * as User from "@/lib/models/user";
-import * as Email from "@/lib/models/email";
 
-/**
- * 新增用户
- */
-export default async function addUserAPI(req, res) {
-  // const input = await utils.body<Credentials>(req);
-  const { body: input } = req;
+export default async function addUserPoint(req, res) {
+  const { body } = req;
+  const { email, password } = body;
 
-  if (!input || !input.email || !input.password) {
+  if (!body || !body.email || !body.password) {
     res
       .status(200)
-      .json({ code: 100, msg: "port over validation lib", data: null });
+      .json({ code: 100, msg: "Missing required fields.", data: null });
     return;
   }
 
-  // Check for existing user email
-  const { email, password } = input;
-  const userUid = await Email.findEmailService(email);
-  if (userUid) {
+  const existing = await User.findUserByEmailService(email);
+  if (existing) {
     res.status(200).json({
       code: 100,
-      msg: "An account already exists for this address",
+      msg: "An account already exists for this email.",
       data: null,
     });
     return;

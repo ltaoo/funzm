@@ -1,46 +1,36 @@
 /**
  * @file 用户登录、授权相关
  */
-import axios from "axios";
+import request from "./request";
 
 /**
  * 注册用户
  */
 export async function register({ email, password }) {
-  return axios
-    .post("/api/user/register", {
-      email,
-      password,
-    })
-    .then((response) => {
-      console.log(response);
-      if (response.data.code !== 0) {
-        return Promise.reject({
-          code: response.data.code,
-          message: response.data.msg,
-        });
-      }
-      return response;
-    });
+  return request.post("/api/user/register", {
+    email,
+    password,
+  });
 }
 
 /**
  * 用户登录
  */
-export async function login({ email, password }) {
-  return axios
-    .post("/api/user/login", {
-      email,
-      password,
-    })
-    .then((response) => {
-      console.log(response);
-      if (response.data.code !== 0) {
-        return Promise.reject({
-          code: response.data.code,
-          message: response.data.msg,
-        });
-      }
-      return response;
-    });
+export async function login({ email, password, csrfToken }) {
+  return request.post("/api/auth/callback/credentials", {
+    email,
+    password,
+    csrfToken,
+  });
+}
+
+export function fetchCsrf() {
+  return request.get("/api/auth/csrf");
+}
+
+/**
+ * 获取用户信息
+ */
+export async function fetchUser() {
+  return request.post("/api/user");
 }

@@ -1,10 +1,12 @@
 import { AppProps } from "next/app";
-import Head from "next/head";
+
+import { getSession, Provider } from "@/next-auth/client";
 
 import "antd/dist/antd.min.css";
 import "windi.css";
 
 import "../styles/global.css";
+import { useEffect } from "react";
 
 //   window.addEventListener("unhandledrejection", (err) => {
 //     if (err.reason.code !== undefined) {
@@ -14,13 +16,26 @@ import "../styles/global.css";
 //     throw err;
 //   });
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({
+  Component,
+  pageProps: { session, ...pageProps },
+}: AppProps) {
+  useEffect(() => {
+    // @ts-ignore
+    window._user = session?.user;
+  }, []);
   return (
-    <div>
-      <Head>
-        <meta name="viewport" content="width=device-width"></meta>
-      </Head>
+    <Provider session={session} options={{}}>
       <Component {...pageProps} />
-    </div>
+    </Provider>
   );
 }
+
+App.getInitialProps = async (context) => {
+  const session = await getSession(context);
+  return {
+    pageProps: {
+      session,
+    },
+  };
+};

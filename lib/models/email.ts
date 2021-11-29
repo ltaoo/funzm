@@ -27,7 +27,7 @@ export function saveEmailService(user: User) {
   return prisma.email.create({
     data: {
       email: user.email,
-      userUid: user.uid,
+      userUid: user.id,
     },
   });
 }

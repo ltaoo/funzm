@@ -13,7 +13,7 @@ import { addCaption } from "@/services/caption";
 const CaptionPreviewPage = (props) => {
   const [caption, setCaption] = useState(null);
 
-  console.log("[PAGE]CaptionManagePage - render", props.data);
+  // console.log("[PAGE]CaptionManagePage - render", props.data);
 
   const saveCaption = useCallback(() => {
     addCaption(stringifyCaption(caption));

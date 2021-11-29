@@ -1,6 +1,8 @@
 /**
  * @file 用户服务
  */
+import { User } from ".prisma/client";
+
 import "@/lib/utils/polyfill";
 
 import { HS256 } from "worktop/jwt";
@@ -14,19 +16,9 @@ import type { Handler } from "@/lib/context";
 import * as Password from "./password";
 import * as Email from "./email";
 import { PASSWORD, SALT } from "./password";
+import { getSession } from "@/next-auth/client";
 
 export type UserID = UID<16>;
-export interface User {
-  id?: number;
-  uid: UserID;
-  email: string;
-  nickname: Nullable<string>;
-  avatar: Nullable<string>;
-  created_at: TIMESTAMP;
-  last_updated: Nullable<TIMESTAMP>;
-  password: PASSWORD;
-  salt: SALT;
-}
 
 // Authentication attributes
 export interface Credentials {
@@ -40,34 +32,39 @@ export const toKID = (uid: UserID) => `users::${uid}`;
 export const isUID = (x: string | UserID): x is UserID => x.length === 16;
 
 export interface TokenData {
-  uid: User["uid"];
+  uid: User["id"];
   salt: User["salt"];
 }
 
 // The JWT factory
 // NOTE: tokens expire in 24 hours
 export const JWT = HS256<TokenData>({
-  key: JWT_SECRET,
+  key: "jwt-211128",
   expires: 24 * 60 * 60, // 24 hours
 });
 
 /**
  * Find a `User` document by its `uid` value.
  */
-export function findUserService(uid: UserID) {
+export function findUserService(id: UserID) {
   return prisma.user.findUnique({
-    where: { uid },
+    where: { id },
+  });
+}
+export function findUserByEmailService(email) {
+  return prisma.user.findUnique({
+    where: { email },
   });
 }
 
 /**
  * Save/Overwrite the `User` document.
  */
-export async function saveUserService(user: User): Promise<boolean> {
-  const res = await prisma.user.create({
-    data: user,
+export async function saveUserService(partial: Partial<User>): Promise<User> {
+  const user = await prisma.user.create({
+    data: partial,
   });
-  return true;
+  return user;
 }
 
 /**
@@ -76,17 +73,18 @@ export async function saveUserService(user: User): Promise<boolean> {
  * @TODO throw w/ message instead of early returns?
  */
 type Insert = Omit<Partial<User>, "email" | "password"> & Credentials;
-export async function addUserService(values: Insert): Promise<User | void> {
+export async function addUserService(values: Insert): Promise<User> {
   // Generate a new salt & hash the original password
   const { password, salt } = await Password.prepare(values.password);
 
   // Create new `UserID`s until available
-  const nxtUID = await utils.until(toUID, findUserService);
+  // const nxtUID = await utils.until(toUID, findUserService);
 
-  const user: User = {
-    uid: nxtUID,
+  const user: Partial<User> = {
+    // id: nxtUID,
     email: values.email,
-    nickname: values.nickname || values.email,
+    emailVerified: values.emailVerified,
+    name: values.name || values.email,
     avatar: null,
     password,
     salt,
@@ -95,20 +93,22 @@ export async function addUserService(values: Insert): Promise<User | void> {
   };
 
   // Create the new User record
-  const createdUser = await saveUserService(user);
-  if (!createdUser) return;
+  const createdUser = await prisma.user.create({
+    data: user,
+  });
+  // if (!createdUser) return;
 
   // Create public-facing "emails::" key for login
-  if (!(await Email.saveEmailService(user))) return;
+  // if (!(await Email.saveEmailService(user))) return;
 
-  return user;
+  return createdUser;
 }
 
 /**
  * Format a User's full name
  */
 export function fullname(user: User): string {
-  let name = user.nickname || "";
+  let name = user.name || "";
   // if (user.lastname) name += " " + user.lastname;
   return name;
 }
@@ -119,17 +119,16 @@ export function fullname(user: User): string {
  * @TODO Implement email sender for email/password changes.
  */
 type UserChanges = Partial<Omit<User, "password"> & { password: string }>;
-export async function update(
+export async function updateUserService(
   user: User,
   changes: UserChanges
 ): Promise<User | void> {
   const hasPassword = changes.password && changes.password !== user.password;
-  const prevFullname = fullname(user);
   const prevEmail = user.email;
 
   // Explicitly choose properties to update
   // ~> AKA, do not allow `uid` or `created_at` updates
-  user.nickname = changes.nickname || user.nickname;
+  user.name = changes.name || user.name;
   // user.lastname = changes.lastname || user.lastname;
   user.email = changes.email || user.email;
   user.last_updated = utils.seconds();
@@ -169,54 +168,57 @@ export async function update(
 }
 
 /**
- * Format a `User` document for public display
- * @NOTE Ensures `password` & `salt` are never public!
- */
-export function output(user: User) {
-  const { uid, nickname, avatar, email, created_at, last_updated } = user;
-  return { uid, nickname, avatar, email, created_at, last_updated };
-}
-
-/**
  * Format a `User` document for Auth response
  */
 export async function respond(user: User): Promise<{}> {
-  return {
-    token: await JWT.sign(user),
-    user: output(user),
+  const {
+    id: uid,
+    name: nickname,
+    avatar,
+    email,
+    created_at,
+    last_updated,
+  } = user;
+  // console.log("response user after login", user);
+  const responseUser = {
+    uid,
+    nickname,
+    avatar,
+    email,
+    created_at,
   };
-  // return utils.send(code, {
+  return responseUser;
+  // return {
   //   token: await JWT.sign(user),
-  //   user: output(user),
-  // });
+  //   user: responseUser,
+  // };
 }
 
 /**
+ * 认证中间件
  * Authentication middleware
  * Identifies a User via incoming `Authorization` header.
  */
-export const authenticate: Handler = async function (req, context) {
-  let auth = req.headers.get("authorization");
-  if (!auth) return utils.send(401, "Missing Authorization header");
-
-  let [schema, token] = auth.split(/\s+/);
-  if (!token || schema.toLowerCase() !== "bearer") {
-    return utils.send(401, "Invalid Authorization format");
+export const authenticate = async function (req, res) {
+  // let auth = req.headers.get("authorization");
+  const session = await getSession({ req });
+  if (!session) {
+    return res
+      .status(200)
+      .json({ code: 401, msg: "Invalid Authorization header", data: null });
   }
 
-  try {
-    var payload = await JWT.verify(token);
-  } catch (err) {
-    return utils.send(401, (err as Error).message);
-  }
-
+  // console.log(session);
+  const { user } = session;
   // Does `user.uid` exist?
-  let user = await findUserService(payload.uid);
+  const wholeUser = await findUserService(user.id);
   // NOTE: user salt changes w/ password
   // AKA, mismatched salt is forgery or pre-reset token
-  if (!user || payload.salt !== user.salt) {
-    return utils.send(401, "Invalid token");
+  if (!user) {
+    return res
+      .status(200)
+      .json({ code: 401, msg: "Invalid token", data: null });
   }
 
-  context.user = user;
+  res.user = wholeUser;
 };

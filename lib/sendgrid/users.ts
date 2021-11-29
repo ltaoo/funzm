@@ -7,7 +7,7 @@ import type { User } from "lib/models/user";
  * @see https://mc.sendgrid.com/dynamic-templates
  */
 export function welcome(user: User) {
-  let firstname = user.nickname || "Guest";
+  let firstname = user.name || "Guest";
   return email(
     "welcome",
     "d-588add1d1843463d904c0d3e2bedadf8",

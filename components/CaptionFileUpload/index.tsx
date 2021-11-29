@@ -21,10 +21,11 @@ const CaptionUpload = (props) => {
   }, []);
   const handleUploadFile = useCallback(async (event) => {
     const { file } = event;
+    console.log('handle upload file', file.name)
     const content = await readTextFromFile(file);
     if (onChangeRef.current) {
       onChangeRef.current({
-        name: file.namek,
+        title: file.name,
         ext: getExt(file.name),
         content,
       });
