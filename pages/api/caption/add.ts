@@ -1,7 +1,7 @@
 /**
  * @file 新增字幕
  */
-import { getSession } from "@/next-auth/client";
+import { getSession } from "next-auth/client";
 
 import { addCaptionService } from "@/lib/caption";
 

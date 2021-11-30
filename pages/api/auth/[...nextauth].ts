@@ -1,5 +1,5 @@
-import NextAuth from "@/next-auth/server";
-import CredentialsProvider from "@/next-auth/providers/credentials";
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 
 import * as Password from "@/lib/models/password";

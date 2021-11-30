@@ -5,7 +5,7 @@ import { useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { message, Button, Form, Input } from "antd";
-import { getCsrfToken, signin } from "@/next-auth/client";
+import { getCsrfToken, signin } from "next-auth/client";
 import { login } from "@/services/auth";
 
 const LoginPage = (props) => {

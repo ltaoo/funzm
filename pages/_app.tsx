@@ -1,6 +1,6 @@
 import { AppProps } from "next/app";
 
-import { getSession, Provider } from "@/next-auth/client";
+import { getSession, Provider } from "next-auth/client";
 
 import "antd/dist/antd.min.css";
 import "windi.css";

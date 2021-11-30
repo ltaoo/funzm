@@ -1,7 +1,7 @@
-import jwt from "@/next-auth/lib/jwt";
-import adapters from "@/next-auth/adapters";
-import parseUrl from "@/next-auth/lib/parse-url";
-import logger, { setLogger } from "@/next-auth/lib/logger";
+import jwt from "next-auth/lib/jwt";
+import adapters from "next-auth/adapters";
+import parseUrl from "next-auth/lib/parse-url";
+import logger, { setLogger } from "next-auth/lib/logger";
 
 import * as cookie from "./lib/cookie";
 import * as defaultEvents from "./lib/default-events";

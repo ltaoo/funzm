@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { User } from ".prisma/client";
 
-import { getSession } from "@/next-auth/client";
+import { getSession } from "next-auth/client";
 
 import Header from "./header";
 

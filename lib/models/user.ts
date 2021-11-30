@@ -6,7 +6,7 @@ import { User } from ".prisma/client";
 import prisma from "@/lib/prisma";
 import * as utils from "@/lib/utils";
 
-import { getSession } from "@/next-auth/client";
+import { getSession } from "next-auth/client";
 
 import * as Password from "./password";
 
