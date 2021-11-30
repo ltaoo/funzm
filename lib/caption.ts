@@ -8,8 +8,16 @@ import prisma from "./client";
 /**
  * 获取字幕列表
  */
-export function fetchCaptionsService() {
-  return prisma.caption.findMany();
+export function fetchCaptionsService(params?: {
+  page: number;
+  pageSize: number;
+}) {
+  return prisma.caption.findMany({
+    where: {
+      // 属于该用户的
+    },
+    take: 5,
+  });
 }
 
 /**

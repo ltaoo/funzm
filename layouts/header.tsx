@@ -26,7 +26,7 @@ export default function Header(props) {
         <noscript>
           <style>{`.nojs-show { opacity: 1; top: 0; }`}</style>
         </noscript>
-        <div className="py-2 px-1 shadow-lg">
+        <div className="py-2 px-1 shadow-md">
           {!user && (
             <span className="text-base px-1 text-sm">
               {/* <Link href="/api/auth/signin">登录</Link> */}
