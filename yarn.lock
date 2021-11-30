@@ -631,6 +631,11 @@
   resolved "http://npm.wpt.la/@napi-rs%2ftriples/-/triples-1.0.3.tgz#76d6d0c3f4d16013c61e45dfca5ff1e6c31ae53c"
   integrity sha1-dtbQw/TRYBPGHkXfyl/x5sMa5Tw=
 
+"@next-auth/prisma-adapter@^0.5.4":
+  version "0.5.4"
+  resolved "http://npm.wpt.la/@next-auth%2fprisma-adapter/-/prisma-adapter-0.5.4.tgz#af787a6a49ee9b9e38cedec761c9b7ab4cd99153"
+  integrity sha1-r3h6aknum544zt7HYcm3q0zZkVM=
+
 "@next-auth/prisma-legacy-adapter@0.1.2":
   version "0.1.2"
   resolved "http://npm.wpt.la/@next-auth%2fprisma-legacy-adapter/-/prisma-legacy-adapter-0.1.2.tgz#d19b65696bf16bda5dbc88f85da98aee6f30e2f3"

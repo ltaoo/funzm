@@ -160,7 +160,7 @@ function _useSessionHook(session) {
 
 export async function getSession(ctx) {
   const session = await _fetchData("session", ctx);
-  console.log("[next-auth]getSession", session);
+  // console.log("[next-auth]getSession", session);
   if (ctx?.triggerEvent ?? true) {
     broadcast.post({ event: "session", data: { trigger: "getSession" } });
   }
@@ -185,6 +185,7 @@ export async function signIn(provider, options = {}, authorizationParams = {}) {
     return window.location.replace(`${baseUrl}/error`);
   }
 
+  console.log("[next-auth]sign in", providers, provider, provider in providers);
   if (!(provider in providers)) {
     return (window.location.href = `${baseUrl}/signin?callbackUrl=${encodeURIComponent(
       callbackUrl

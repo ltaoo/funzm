@@ -1,12 +1,11 @@
 /**
  * @file 用户登录
- * 暂时废弃，使用 next-auth 提供的登录页面
  */
 import { useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { message, Button, Form, Input } from "antd";
-import { getCsrfToken } from "@/next-auth/client";
+import { getCsrfToken, signin } from "@/next-auth/client";
 import { login } from "@/services/auth";
 
 const LoginPage = (props) => {
@@ -23,8 +22,14 @@ const LoginPage = (props) => {
 
   const loginAccount = useCallback(async () => {
     const values = await form.validateFields();
+    const { email, password } = values;
     console.log("[PAGE]loginAccount", values);
-    const { data } = await login(values);
+    signin("credentials", {
+      email,
+      password,
+      callbackUrl: "/abc",
+    });
+    // const { data } = await login(values);
     // localStorage.setItem("token", data.token);
     // message.success("登录成功");
     // router.push({

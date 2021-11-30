@@ -6,6 +6,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@next-auth/prisma-adapter": "^0.5.4",
     "@peculiar/webcrypto": "^1.2.3",
     "@prisma/client": "^3.5.0",
     "@supabase/supabase-js": "^1.28.2",

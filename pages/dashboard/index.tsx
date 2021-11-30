@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import Layout from "@/layouts";
 import CaptionUpload from "@/components/CaptionFileUpload";
 import CaptionPreview from "@/components/CaptionPreview";
+import request from "@/services/request";
 
 const Dashboard = (props) => {
   const { user } = props;
@@ -33,6 +34,11 @@ const Dashboard = (props) => {
       <div className="">
         <CaptionUpload />
       </div>
+      <button
+        onClick={() => {
+          request.post("/api/caption/add");
+        }}
+      >测试</button>
     </Layout>
   );
 };
