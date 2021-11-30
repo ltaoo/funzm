@@ -2,7 +2,7 @@
  * @file 字幕列表
  */
 
-import React, { useCallback, useState } from "react";
+import React from "react";
 
 import { fetchCaptionsService } from "@/lib/caption";
 
@@ -16,7 +16,7 @@ const CaptionsManagePage = (props) => {
           const { id, title } = caption;
           return (
             <div key={id}>
-              <a href={`/caption/${id}`}>
+              <a href={`/captions/${id}`}>
                 <p className="text-xl">{title}</p>
               </a>
             </div>
@@ -29,8 +29,8 @@ const CaptionsManagePage = (props) => {
 
 export default CaptionsManagePage;
 
-export async function getStaticProps({ preview = null }) {
-  const data = await fetchCaptionsService();
+export async function getStaticProps() {
+  const data = await fetchCaptionsService({ pageSize: 20 });
   return {
     props: { data },
   };

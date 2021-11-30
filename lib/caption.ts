@@ -1,5 +1,5 @@
 /**
- * @file 数据库连接
+ * @file 字幕分页
  */
 import * as utils from "@/lib/utils";
 
@@ -9,14 +9,14 @@ import prisma from "./prisma";
  * 获取字幕列表
  */
 export function fetchCaptionsService(params?: {
-  page: number;
-  pageSize: number;
+  page?: number;
+  pageSize?: number;
 }) {
   return prisma.caption.findMany({
     where: {
       // 属于该用户的
     },
-    take: 5,
+    take: params?.pageSize ?? 5,
   });
 }
 

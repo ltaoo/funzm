@@ -2,7 +2,15 @@
  * @file 用户注册
  */
 import { useCallback } from "react";
-import { Button, Input, Form, message } from "antd";
+import Button from "antd/lib/button";
+import "antd/lib/button/style/index.css";
+import Input from "antd/lib/input";
+import "antd/lib/input/style/index.css";
+import Form from "antd/lib/form";
+import "antd/lib/form/style/index.css";
+import message from "antd/lib/message";
+import "antd/lib/message/style/index.css";
+
 import Link from "next/link";
 import { useRouter } from "next/router";
 

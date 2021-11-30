@@ -4,7 +4,10 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import Head from "next/head";
-import { Avatar, Divider } from "antd";
+import Avatar from "antd/lib/avatar";
+import "antd/lib/avatar/style/index.css";
+import Divider from "antd/lib/divider";
+import "antd/lib/divider/style/index.css";
 
 import { signIn, signOut, useSession } from "next-auth/client";
 // import styles from "./header.module.css";

@@ -1,12 +1,11 @@
+import { useEffect } from "react";
 import { AppProps } from "next/app";
 
 import { getSession, Provider } from "next-auth/client";
 
-import "antd/dist/antd.min.css";
 import "windi.css";
 
 import "../styles/global.css";
-import { useEffect } from "react";
 
 //   window.addEventListener("unhandledrejection", (err) => {
 //     if (err.reason.code !== undefined) {

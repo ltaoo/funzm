@@ -6,8 +6,6 @@ import { User } from ".prisma/client";
 import prisma from "@/lib/prisma";
 import * as utils from "@/lib/utils";
 
-import { getSession } from "next-auth/client";
-
 import * as Password from "./password";
 
 // Authentication attributes
@@ -145,32 +143,3 @@ export async function respond(user: User): Promise<{}> {
   //   user: responseUser,
   // };
 }
-
-/**
- * 认证中间件
- * Authentication middleware
- * Identifies a User via incoming `Authorization` header.
- */
-export const authenticate = async function (req, res) {
-  // let auth = req.headers.get("authorization");
-  const session = await getSession({ req });
-  if (!session) {
-    return res
-      .status(200)
-      .json({ code: 401, msg: "Invalid Authorization header", data: null });
-  }
-
-  // console.log(session);
-  const { user } = session;
-  // Does `user.uid` exist?
-  const wholeUser = await findUserService(user.id);
-  // NOTE: user salt changes w/ password
-  // AKA, mismatched salt is forgery or pre-reset token
-  if (!user) {
-    return res
-      .status(200)
-      .json({ code: 401, msg: "Invalid token", data: null });
-  }
-
-  res.user = wholeUser;
-};

@@ -2,7 +2,10 @@
  * @file 字幕文件上传
  */
 import { useCallback, useEffect, useRef } from "react";
-import { Button, Upload } from "antd";
+import Button from "antd/lib/button";
+import "antd/lib/button/style/index.css";
+import Upload from "antd/lib/upload";
+import "antd/lib/upload/style/index.css";
 
 import { getExt, readTextFromFile } from "@/domains/caption";
 

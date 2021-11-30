@@ -4,7 +4,13 @@
 import { useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { message, Button, Form, Input } from "antd";
+import Button from "antd/lib/button";
+import "antd/lib/button/style/index.css";
+import Form from "antd/lib/form";
+import "antd/lib/form/style/index.css";
+import Input from "antd/lib/input";
+import "antd/lib/input/style/index.css";
+
 import { getCsrfToken, signin } from "next-auth/client";
 import { login } from "@/services/auth";
 
@@ -43,10 +49,7 @@ const LoginPage = (props) => {
       <div className="mt-4 p-4 rounded shadow-lg">
         <div>
           <p className="my-2 text-lg">登录您的账户</p>
-          <Form
-            form={form}
-            onFinish={loginAccount}
-          >
+          <Form form={form} onFinish={loginAccount}>
             <Form.Item name="csrfToken" initialValue={props.csrfToken} hidden>
               <div />
             </Form.Item>
