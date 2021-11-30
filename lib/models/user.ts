@@ -3,22 +3,12 @@
  */
 import { User } from ".prisma/client";
 
-import "@/lib/utils/polyfill";
-
-import { HS256 } from "worktop/jwt";
-
-import prisma from "@/lib/client";
+import prisma from "@/lib/prisma";
 import * as utils from "@/lib/utils";
-import { UID } from "@/lib/utils";
 
-import type { Handler } from "@/lib/context";
-
-import * as Password from "./password";
-import * as Email from "./email";
-import { PASSWORD, SALT } from "./password";
 import { getSession } from "@/next-auth/client";
 
-export type UserID = UID<16>;
+import * as Password from "./password";
 
 // Authentication attributes
 export interface Credentials {
@@ -26,27 +16,10 @@ export interface Credentials {
   password: string;
 }
 
-// ID helpers to normalize ID types/values
-export const toUID = () => utils.uid(16) as UserID;
-export const toKID = (uid: UserID) => `users::${uid}`;
-export const isUID = (x: string | UserID): x is UserID => x.length === 16;
-
-export interface TokenData {
-  uid: User["id"];
-  salt: User["salt"];
-}
-
-// The JWT factory
-// NOTE: tokens expire in 24 hours
-export const JWT = HS256<TokenData>({
-  key: "jwt-211128",
-  expires: 24 * 60 * 60, // 24 hours
-});
-
 /**
  * Find a `User` document by its `uid` value.
  */
-export function findUserService(id: UserID) {
+export function findUserService(id: string) {
   return prisma.user.findUnique({
     where: { id },
   });
@@ -58,30 +31,15 @@ export function findUserByEmailService(email) {
 }
 
 /**
- * Save/Overwrite the `User` document.
- */
-export async function saveUserService(partial: Partial<User>): Promise<User> {
-  const user = await prisma.user.create({
-    data: partial,
-  });
-  return user;
-}
-
-/**
  * Create a new `User` document from a `Credentials` set.
  * @NOTE Handles `password`, `salt`, and `uid` values.
  * @TODO throw w/ message instead of early returns?
  */
-type Insert = Omit<Partial<User>, "email" | "password"> & Credentials;
-export async function addUserService(values: Insert): Promise<User> {
-  // Generate a new salt & hash the original password
+type UserValues = Omit<Partial<User>, "email" | "password"> & Credentials;
+export async function addUserService(values: UserValues): Promise<User> {
   const { password, salt } = await Password.prepare(values.password);
 
-  // Create new `UserID`s until available
-  // const nxtUID = await utils.until(toUID, findUserService);
-
-  const user: Partial<User> = {
-    // id: nxtUID,
+  const user = {
     email: values.email,
     emailVerified: values.emailVerified,
     name: values.name || values.email,
@@ -97,9 +55,6 @@ export async function addUserService(values: Insert): Promise<User> {
     data: user,
   });
   // if (!createdUser) return;
-
-  // Create public-facing "emails::" key for login
-  // if (!(await Email.saveEmailService(user))) return;
 
   return createdUser;
 }
@@ -139,17 +94,14 @@ export async function updateUserService(
     user.salt = sanitized.salt;
   }
 
-  if (!(await saveUserService(user))) return;
+  // if (!(await saveUserService(user))) return;
 
-  if (user.email !== prevEmail) {
-    await Promise.all([
-      Email.removeEmailService(prevEmail),
-      Email.saveEmailService(user),
-    ]);
-
-    // Send "email changed" alert
-    // await emails.contact(prevEmail);
-  }
+  // if (user.email !== prevEmail) {
+  //   await Promise.all([
+  //     Email.removeEmailService(prevEmail),
+  //     Email.saveEmailService(user),
+  //   ]);
+  // }
 
   if (hasPassword) {
     // send "password changed" alert

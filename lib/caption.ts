@@ -3,7 +3,7 @@
  */
 import * as utils from "@/lib/utils";
 
-import prisma from "./client";
+import prisma from "./prisma";
 
 /**
  * 获取字幕列表

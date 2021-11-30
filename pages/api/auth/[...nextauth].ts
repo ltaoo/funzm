@@ -4,7 +4,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 
 import * as Password from "@/lib/models/password";
 import * as User from "@/lib/models/user";
-import prisma from "@/lib/client";
+import prisma from "@/lib/prisma";
 
 export default NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -28,7 +28,7 @@ export default NextAuth({
         const { email, password } = credentials;
 
         const user = await User.findUserByEmailService(email);
-        // console.log("User.findUserByEmailService", email, user, password);
+        console.log("User.findUserByEmailService", email, user, password);
         if (!user) return null;
 
         const isMatch = await Password.compare(user, password);

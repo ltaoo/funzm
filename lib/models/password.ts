@@ -1,12 +1,8 @@
-import "@/lib/utils/polyfill";
-
-import { toHEX } from "worktop/buffer";
-import { PBKDF2 } from "worktop/crypto";
+import { User } from ".prisma/client";
 
 import * as utils from "@/lib/utils";
+import { PBKDF2 } from "@/lib/utils/crypto";
 import type { UID } from "@/lib/utils";
-
-import type { User, UserID } from "@/lib/models/user";
 
 export type SALT = UID<128>;
 export type PASSWORD = UID<64>;
@@ -24,7 +20,7 @@ export const salt = () => utils.uid(128) as SALT;
  */
 export function hash(password: string, salt: SALT): Promise<PASSWORD> {
   return PBKDF2("SHA-256", password, salt, 1000, 64).then(
-    toHEX
+    utils.toHEX
   ) as Promise<PASSWORD>;
 }
 
@@ -35,7 +31,7 @@ export async function compare(
   user: User,
   password: PASSWORD | string
 ): Promise<boolean> {
-  return (await hash(password, user.salt)) === user.password;
+  return (await hash(password, user.salt as SALT)) === user.password;
 }
 
 /**
@@ -45,20 +41,6 @@ export async function prepare(password: string) {
   const token = salt();
   const hashed = await hash(password, token);
   return { salt: token, password: hashed };
-}
-
-// NOTE: "reset::{token}" keys point to `User.uid` values
-export const toUID = () => utils.uid(100) as TOKEN;
-export const toKID = (token: TOKEN) => `reset::${token}`;
-export const isUID = (x: TOKEN | string): x is TOKEN => x.length === 100;
-
-/**
- * Check if the `reset::{token}` document exists.
- * @NOTE Only exists if a "Password Reset" initiated within 7 days.
- */
-export function find(token: TOKEN) {
-  const key = toKID(token);
-  //   return database.read<UserID>(key);
 }
 
 /**

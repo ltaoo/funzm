@@ -2,7 +2,6 @@
  * @file 新用户注册
  * POST `/api/user/register`
  */
-import "@/lib/utils/polyfill";
 import * as User from "@/lib/models/user";
 
 export default async function addUserPoint(req, res) {
