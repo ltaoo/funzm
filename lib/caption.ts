@@ -8,13 +8,20 @@ import prisma from "./prisma";
 /**
  * 获取字幕列表
  */
-export function fetchCaptionsService(params?: {
-  page?: number;
-  pageSize?: number;
-}) {
+export async function fetchCaptionsService(
+  params?: {
+    page?: number;
+    pageSize?: number;
+  },
+  extra?
+) {
+  console.log("[SERVICE]fetchCaptionsService", extra);
+  if (!extra?.id) {
+    return null;
+  }
   return prisma.caption.findMany({
     where: {
-      // 属于该用户的
+      publisherId: extra?.id,
     },
     take: params?.pageSize ?? 5,
   });
@@ -23,13 +30,15 @@ export function fetchCaptionsService(params?: {
 /**
  * 新增字幕
  */
-export async function addCaptionService({ title, paragraphs }) {
+export async function addCaptionService({ title, paragraphs, publisherId }) {
+  // console.log("[]addCaptionService", publisherId);
   return prisma.caption.create({
     data: {
       title,
       paragraphs: {
         create: paragraphs,
       },
+      publisherId,
       created_at: utils.seconds(),
       last_updated: null,
     },
@@ -47,6 +56,19 @@ export async function fetchCaptionById({ id }) {
     },
     include: {
       paragraphs: true,
+    },
+  });
+}
+
+/**
+ * 根据 id 删除字幕
+ * @param param
+ * @returns
+ */
+export async function deleteCaptionById({ id }) {
+  return prisma.caption.delete({
+    where: {
+      id,
     },
   });
 }

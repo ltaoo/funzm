@@ -17,7 +17,14 @@ export default async function addCaption(req, res) {
     return;
   }
   try {
-    const { id } = await addCaptionService(body);
+    const {
+      // @ts-ignore
+      user: { id: publisherId },
+    } = session;
+    const { id } = await addCaptionService({
+      publisherId,
+      ...body,
+    });
     res.status(200).json({ code: 0, msg: "", data: { id } });
   } catch (err) {
     res.status(200).json({ code: 100, msg: err.message, data: null });

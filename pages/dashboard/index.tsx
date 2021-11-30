@@ -10,14 +10,17 @@ import CaptionUpload from "@/components/CaptionFileUpload";
 import tmpCaptionStorage from "@/domains/caption/utils";
 import router from "next/router";
 import { fetchCaptionsService } from "@/lib/caption";
+import { getSession } from "next-auth/client";
 
 const Dashboard = (props) => {
   const { user, dataSource = [] } = props;
 
-  // console.log(dataSource);
-
   if (user === null) {
-    return null;
+    return (
+      <div className="mx-auto w-40 mt-10">
+        <p className="text-center">No Permission</p>
+      </div>
+    );
   }
   return (
     <Layout>
@@ -49,10 +52,12 @@ const Dashboard = (props) => {
   );
 };
 
-export const getServerSideProps = async () => {
-  const captions = await fetchCaptionsService();
+export const getServerSideProps = async (context) => {
+  const session = await getSession(context);
+  const captions = await fetchCaptionsService({ pageSize: 5 }, session?.user);
   return {
     props: {
+      user: session?.user ?? null,
       dataSource: captions,
     },
   };

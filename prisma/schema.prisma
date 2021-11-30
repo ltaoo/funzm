@@ -37,6 +37,7 @@ model User {
   salt          String
   accounts      Account[]
   sessions      Session[]
+  captions      Caption[]
   created_at    Int
   last_updated  Int?
 
@@ -73,7 +74,8 @@ model Caption {
   title        String
   content      String?       @db.LongText
   published    Boolean       @default(false)
-  // authorId     Int?
+  publisher    User?         @relation(fields: [publisherId], references: [id])
+  publisherId  String?       @map("publisher_id")
   paragraphs   Paragraph[]
 
   movieId      String?       @map("movie_id")
