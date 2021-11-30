@@ -30,22 +30,13 @@ request.interceptors.request.use(
 
 request.interceptors.response.use(
   (response) => {
-    console.log(response);
-    if (
-      response.config.url === "/api/auth/callback/credentials" &&
-      response.request.status === 200
-    ) {
-      return {};
-    }
-    const { code, csrfToken } = response.data;
-    if (csrfToken) {
-      return {
-        csrfToken,
-      };
-    }
+    const { code } = response.data;
     if (code === 401) {
       console.log("登录状态已过期");
-      return response.data;
+      return Promise.reject({
+        code: response.data.code,
+        message: response.data.msg,
+      });
     }
     if (code !== 0) {
       return Promise.reject({
@@ -53,7 +44,7 @@ request.interceptors.response.use(
         message: response.data.msg,
       });
     }
-    return response.data;
+    return response.data.data;
   },
   (error) => {
     return Promise.reject(error);

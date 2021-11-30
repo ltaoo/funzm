@@ -74,7 +74,7 @@ const CAPTION_PARSER_MAP = {
       const removeTextModifier = line.replace(/{.*?}/g, "");
       const [, start, end, style, name, ml, mr, mv, effect, ...text] =
         removeTextModifier.split(",");
-      const [text1, text2] = text.join(",").split("\\N");
+      const [text1 = '', text2 = ''] = text.join(",").split("\\N");
       return {
         line: index,
         start,

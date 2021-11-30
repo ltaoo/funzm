@@ -45,8 +45,6 @@ const LoginPage = (props) => {
           <p className="my-2 text-lg">登录您的账户</p>
           <Form
             form={form}
-            // action="/api/auth/callback/credentials"
-            // method="post"
             onFinish={loginAccount}
           >
             <Form.Item name="csrfToken" initialValue={props.csrfToken} hidden>

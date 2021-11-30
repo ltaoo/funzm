@@ -5,6 +5,7 @@
 import React, { useCallback } from "react";
 import { useRouter } from "next/router";
 
+import captionTmpStorage from "@/domains/caption/utils";
 import CaptionUpload from "@/components/CaptionFileUpload";
 
 import Layout from "@/layouts";
@@ -15,7 +16,7 @@ const CaptionPreviewPage = (props) => {
   // console.log("[PAGE]CaptionManagePage - render", props.data);
 
   const handleUploadFile = useCallback(async (caption) => {
-    localStorage.setItem("tmp-caption", JSON.stringify(caption));
+    captionTmpStorage.save(caption);
     router.push({
       pathname: "/captions/editor",
     });

@@ -1,12 +1,13 @@
 /**
  * @file 字幕预览
  */
+import React from "react";
 
 const CaptionPreview = (props) => {
   const { title, paragraphs = [] } = props;
   return (
     <div className="2xl:mx-auto sm:w-180 pb-20 space-y-2">
-      <h2 className="mt-10 px-4 text-2xl break-all">{title}</h2>
+      <h2 className="mt-6 px-4 text-2xl break-all">{title}</h2>
       <div className="mt-10 px-4 space-y-6">
         {paragraphs.map((caption) => {
           const { line, text1, text2 } = caption;
@@ -22,4 +23,4 @@ const CaptionPreview = (props) => {
   );
 };
 
-export default CaptionPreview;
+export default React.memo(CaptionPreview);

@@ -68,11 +68,34 @@ model VerificationToken {
 //   email         String  @unique
 // }
 
-// model Caption {
-//   id        Int     @id @default(autoincrement())
-//   title     String
-//   content   String? @db.LongText
-//   published Boolean @default(false)
-//   authorId  Int?
-// }
+model Caption {
+  id           String        @id @default(cuid())
+  title        String
+  content      String?       @db.LongText
+  published    Boolean       @default(false)
+  // authorId     Int?
+  paragraphs   Paragraph[]
+
+  movieId      String?       @map("movie_id")
+
+  created_at    Int
+  last_updated  Int?
+
+  @@unique([title])
+}
+
+model Paragraph {
+  id           String   @id @default(cuid())
+  line         Int
+  text1        String
+  text2        String
+  start        String
+  end          String
+  language     String?
+
+  captionId    String   @map("caption_id")
+  caption      Caption  @relation(fields: [captionId], references: [id], onDelete: Cascade)
+
+  @@map("paragraphs")
+}
 

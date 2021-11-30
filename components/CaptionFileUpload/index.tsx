@@ -21,11 +21,12 @@ const CaptionUpload = (props) => {
   }, []);
   const handleUploadFile = useCallback(async (event) => {
     const { file } = event;
-    console.log('handle upload file', file.name)
+    // console.log('handle upload file', file.name)
     const content = await readTextFromFile(file);
     if (onChangeRef.current) {
+      const segments = file.name.split(".");
       onChangeRef.current({
-        title: file.name,
+        title: segments.slice(0, -1).join("."),
         ext: getExt(file.name),
         content,
       });
