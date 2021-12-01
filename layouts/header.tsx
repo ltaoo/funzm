@@ -1,7 +1,6 @@
 /**
  * @file 通用布局顶部
  */
-import { useMemo } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import Avatar from "antd/lib/avatar";

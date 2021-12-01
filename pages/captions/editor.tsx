@@ -51,6 +51,15 @@ const TempCaptionPreviewPage = (props) => {
     setError(true);
   }, []);
 
+  const updateTitle = useCallback((event) => {
+    setCaption((prev) => {
+      return {
+        ...prev,
+        title: event.target.innerHTML,
+      };
+    });
+  }, []);
+
   if (error) {
     return (
       <div>
@@ -71,14 +80,48 @@ const TempCaptionPreviewPage = (props) => {
     );
   }
 
+  const { title, paragraphs } = caption;
+
   return (
-    <div className="container">
+    <div className="">
       <div className="flex justify-end sticky top-0 py-2 px-4 shadow-md bg-white">
         <p className="text-base text-sm" onClick={saveCaption}>
           保存
         </p>
       </div>
-      <CaptionPreview {...caption} />
+      <div className="mx-auto sm:w-180 pb-20 space-y-2">
+        <h2
+          className="mt-6 ml-4 text-2xl break-all"
+          contentEditable
+          suppressContentEditableWarning
+          onBlur={updateTitle}
+        >
+          {title}
+        </h2>
+        <div className="mt-10 ml-4 space-y-6">
+          {paragraphs.map((caption) => {
+            const { line, text1, text2 } = caption;
+            return (
+              <div key={line}>
+                <p
+                  className="text-xs m-0 hover:shadow-lg"
+                  contentEditable
+                  suppressContentEditableWarning
+                >
+                  {text1}
+                </p>
+                <p
+                  className="break-all text-lg font-serif hover:shadow-lg"
+                  suppressContentEditableWarning
+                  contentEditable
+                >
+                  {text2}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };
