@@ -30,7 +30,7 @@ const CaptionsManagePage = (props) => {
 export default CaptionsManagePage;
 
 export async function getStaticProps() {
-  const data = await fetchCaptionsService({ pageSize: 20 });
+  const data = (await fetchCaptionsService({ pageSize: 20 })) || [];
   return {
     props: { data },
   };

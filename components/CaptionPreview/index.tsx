@@ -6,7 +6,8 @@ import { Disclosure, Menu, Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import { StarIcon } from "@heroicons/react/solid";
 
-import { splitText2 } from '@/domains/caption/utils';
+import { splitText2 } from "@/domains/caption/utils";
+import { translate } from "@/services/youdao";
 
 import Popover from "antd/lib/popover";
 import "antd/lib/popover/style/index.css";
@@ -21,11 +22,13 @@ const CaptionPreview = (props) => {
   const { title, paragraphs = [] } = props;
 
   const [open, setOpen] = useState(false);
-  const [curWord, setCurWord] = useState();
+  const [curWordTranslation, setCurWordTranslation] = useState();
 
-  const viewWord = useCallback((word) => {
+  const viewWord = useCallback(async (word) => {
     setOpen(true);
-    setCurWord(word);
+    const t = await translate(word);
+    // @ts-ignore
+    setCurWordTranslation(t);
   }, []);
 
   return (
@@ -115,10 +118,35 @@ const CaptionPreview = (props) => {
                     <span className="sr-only">Close</span>
                     <XIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
-                  <div className="w-full mt-8">
-                    <p className="text-base text-center text-3xl text-black dark:text-white">{curWord}</p>
-                    <div className="h-80"></div>
-                  </div>
+                  {(() => {
+                    if (!curWordTranslation) {
+                      return null;
+                    }
+                    const {
+                      word,
+                      explains = [],
+                      speeches = [],
+                    } = curWordTranslation;
+                    return (
+                      <div className="w-full mt-8">
+                        <p className="text-base text-center text-3xl text-black dark:text-white">
+                          {word}
+                        </p>
+                        {explains.map((explain) => (
+                          <span>{explain}</span>
+                        ))}
+                        {speeches.map((speech) => {
+                          return <div>{speech.text}</div>;
+                        })}
+                        <audio key={word} controls>
+                          <source
+                            src={`http://dict.youdao.com/dictvoice?type=0&audio=${word}`}
+                          />
+                        </audio>
+                        <div className="h-80"></div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             </Transition.Child>

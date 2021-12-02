@@ -52,66 +52,68 @@ function compareInputting(inputting, originalContent) {
     const inputtingParagraph = inputting[line];
     const content = originalContent[line];
 
-    // const diffNodes: DiffNode[] = diff.diffWords(
-    //   content.trimRight(),
-    //   inputtingParagraph.trimRight(),
-    //   {
-    //     newlineIsToken: true,
-    //     ignoreWhitespace: false,
-    //     ignoreCase: false,
-    //   }
-    // );
-
-    // const errorNodes = diffNodes.filter((node) => {
-    //   const { added, removed } = node;
-    //   return added === true || removed === true;
-    // });
-    // if (errorNodes.length !== 0) {
-    //   errors[line] = errors[line] || [];
-    //   errors[line] = diffNodes;
-    // }
-
-    const words = splitText2(inputtingParagraph);
-    const originalWords = splitText2(content);
-    const maxLengthWords = findMaxLengthArr(words, originalWords);
-    maxLengthWords.map(([, word1], i) => {
-      const [, word2] = words[i] || [];
-      errors[line] = errors[line] || [];
-
-      // 输入的比原文更长
-      if (word2 === undefined && maxLengthWords === words) {
-        // 此时 word2 是输入
-        errors[line].push({
-          added: true,
-          // inputting: word1,
-          word1,
-          word2,
-        });
+    const diffNodes: DiffNode[] = diff.diffWords(
+      content.trimRight(),
+      inputtingParagraph.trimRight(),
+      {
+        newlineIsToken: true,
+        ignoreWhitespace: false,
+        ignoreCase: false,
       }
-      // 输入的比原文更短
-      if (word2 === undefined && maxLengthWords === originalWords) {
-        // 此时 word2 是原文
-        errors[line].push({
-          removed: true,
-          word1,
-          word2,
-        });
-      }
+    );
 
-      // 和原文不同
-      if (word1 !== word2) {
-        errors[line].push({
-          updated: true,
-          word1,
-          word2,
-        });
-        return;
-      }
-      errors[line].push({
-        word1,
-        word2,
+    if (diffNodes !== null) {
+      const errorNodes = diffNodes.filter((node) => {
+        const { added, removed } = node;
+        return added === true || removed === true;
       });
-    });
+      if (errorNodes.length !== 0) {
+        errors[line] = errors[line] || [];
+        errors[line] = diffNodes;
+      }
+    }
+
+    // const words = splitText2(inputtingParagraph);
+    // const originalWords = splitText2(content);
+    // const maxLengthWords = findMaxLengthArr(words, originalWords);
+    // maxLengthWords.map(([, word1], i) => {
+    //   const [, word2] = words[i] || [];
+    //   errors[line] = errors[line] || [];
+
+    //   // 输入的比原文更长
+    //   if (word2 === undefined && maxLengthWords === words) {
+    //     // 此时 word2 是输入
+    //     errors[line].push({
+    //       added: true,
+    //       // inputting: word1,
+    //       word1,
+    //       word2,
+    //     });
+    //   }
+    //   // 输入的比原文更短
+    //   if (word2 === undefined && maxLengthWords === originalWords) {
+    //     // 此时 word2 是原文
+    //     errors[line].push({
+    //       removed: true,
+    //       word1,
+    //       word2,
+    //     });
+    //   }
+
+    //   // 和原文不同
+    //   if (word1 !== word2) {
+    //     errors[line].push({
+    //       updated: true,
+    //       word1,
+    //       word2,
+    //     });
+    //     return;
+    //   }
+    //   errors[line].push({
+    //     word1,
+    //     word2,
+    //   });
+    // });
   }
   return errors;
 }
@@ -260,29 +262,29 @@ const CaptionPreviewPage = () => {
                       if (curErrorLine === null) {
                         return null;
                       }
+                      if (errors[curErrorLine] === null) {
+                        return null;
+                      }
                       const errNodes = errors[curErrorLine];
                       const elms = [];
                       for (let i = 0; i < errNodes.length; i += 1) {
-                        const { added, updated, removed, word1, word2 } =
-                          errNodes[i];
+                        const { added, updated, removed, value } = errNodes[i];
                         elms.push(
                           <span
                             className={cx(
-                              "text-gray-500 text-base text-xl",
-                              updated === true ? "!text-blue-500" : "",
-                              removed === true ? "!text-red-500" : "",
-                              added === true
-                                ? "!text-green-500 relative top-10"
-                                : ""
+                              "text-base text-xl",
+                              added
+                                ? "!text-green-500"
+                                : removed
+                                ? "!text-red-500"
+                                : "!text-gray-500"
                             )}
                           >
-                            {word1}&nbsp;
-                            <br />
-                            {word2}&nbsp;
+                            {value}
                           </span>
                         );
                       }
-                      return <p className="flex">{elms}</p>;
+                      return <p className="">{elms}</p>;
                     })()}
                   </div>
                 </div>

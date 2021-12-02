@@ -15,12 +15,13 @@ export async function fetchCaptionsService(
   },
   extra?
 ) {
-  console.log("[SERVICE]fetchCaptionsService", extra);
+  // console.log("[SERVICE]fetchCaptionsService", extra);
   if (!extra?.id) {
     return null;
   }
   return prisma.caption.findMany({
     where: {
+      // @ts-ignore
       publisherId: extra?.id,
     },
     take: params?.pageSize ?? 5,
