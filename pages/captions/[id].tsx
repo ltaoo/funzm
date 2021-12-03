@@ -11,6 +11,7 @@ import { TrashIcon } from "@heroicons/react/outline";
 import { fetchCaptionById } from "@/lib/caption";
 import { fetchCaption } from "@/services/caption";
 import CaptionPreview from "@/components/CaptionPreview";
+import * as themeToggle from "@/utils/dark";
 
 const CaptionPreviewPage = () => {
   const router = useRouter();
@@ -18,13 +19,15 @@ const CaptionPreviewPage = () => {
   const [open, setOpen] = useState(false);
   const [caption, setCaption] = useState(null);
 
+  const { id } = router.query;
+
   const fetchCaptionAndSave = useCallback(async (id) => {
     const response = await fetchCaption({ id });
     setCaption(response);
   }, []);
 
   useEffect(() => {
-    fetchCaptionAndSave(router.query.id);
+    fetchCaptionAndSave(id);
   }, []);
 
   if (!caption) {
@@ -37,6 +40,16 @@ const CaptionPreviewPage = () => {
       </Head>
       <CaptionPreview {...caption} />
       <div className="flex justify-end sticky bottom-0 py-4 px-4 bg-white dark:bg-black space-x-2 border-t-1 dark:border-gray-800">
+        <p
+          className="text-base text-sm cursor-pointer text-black dark:text-white"
+          onClick={() => {
+            router.push({
+              pathname: `/captions/review/${id}`,
+            });
+          }}
+        >
+          Review
+        </p>
         <p
           className="text-base text-sm cursor-pointer text-black dark:text-white"
           onClick={() => {
@@ -85,10 +98,21 @@ const CaptionPreviewPage = () => {
               <div className="absolute bottom-0 md:relative text-base text-left transform transition w-full md:inline-block md:max-w-2xl md:px-4 md:my-8 md:align-middle lg:max-w-4xl">
                 <div className="w-full relative items-center rounded-t-xl pt-4 bg-white dark:bg-black pb-8 overflow-hidden sm:px-6 sm:pt-8 md:p-6 md:rounded-md lg:p-8">
                   <div className="w-full min-h-60">
-                    <div className="flex items-center py-4 px-6 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <div className="flex items-center py-4 px-6 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
                       <TrashIcon className="w-6 h-6 mr-2 text-black dark:text-white" />
                       <p className="text-base text-md text-black dark:text-white">
                         Delete
+                      </p>
+                    </div>
+                    <div
+                      className="flex items-center py-4 px-6 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                      onClick={() => {
+                        themeToggle.toggleTheme();
+                      }}
+                    >
+                      <TrashIcon className="w-6 h-6 mr-2 text-black dark:text-white" />
+                      <p className="text-base text-md text-black dark:text-white">
+                        Toggle Theme
                       </p>
                     </div>
                   </div>

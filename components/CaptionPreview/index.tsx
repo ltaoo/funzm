@@ -7,7 +7,7 @@ import { XIcon } from "@heroicons/react/outline";
 import { StarIcon } from "@heroicons/react/solid";
 
 import { splitText2 } from "@/domains/caption/utils";
-import { translate } from "@/services/youdao";
+import SoundPlay from "@/components/SoundPlay";
 
 import Popover from "antd/lib/popover";
 import "antd/lib/popover/style/index.css";
@@ -22,18 +22,17 @@ const CaptionPreview = (props) => {
   const { title, paragraphs = [] } = props;
 
   const [open, setOpen] = useState(false);
-  const [curWordTranslation, setCurWordTranslation] = useState();
+  const [curWordTranslation, setCurWordTranslation] =
+    useState<{ word: string }>();
 
   const viewWord = useCallback(async (word) => {
     setOpen(true);
-    const t = await translate(word);
-    // @ts-ignore
-    setCurWordTranslation(t);
+    setCurWordTranslation({ word });
   }, []);
 
   return (
     <div className="2xl:mx-auto 2xl:w-180 overflow-hidden pb-20 space-y-2">
-      <h2 className="mt-6 px-4 text-2xl break-all text-black dark:text-white break-all">
+      <h2 className="mt-6 px-4 text-2xl break-all text-black dark:text-white">
         {title}
       </h2>
       <div className="mt-10 px-4 space-y-6">
@@ -42,7 +41,7 @@ const CaptionPreview = (props) => {
           return (
             <div key={line}>
               <p className="text-xs text-black dark:text-white">{text1}</p>
-              <p className="break-all">
+              <p className="">
                 {(() => {
                   const words = splitText2(text2);
                   return words.map((word, i) => {
@@ -122,27 +121,18 @@ const CaptionPreview = (props) => {
                     if (!curWordTranslation) {
                       return null;
                     }
-                    const {
-                      word,
-                      explains = [],
-                      speeches = [],
-                    } = curWordTranslation;
+                    const { word } = curWordTranslation;
                     return (
                       <div className="w-full mt-8">
                         <p className="text-base text-center text-3xl text-black dark:text-white">
                           {word}
                         </p>
-                        {explains.map((explain) => (
-                          <span>{explain}</span>
-                        ))}
-                        {speeches.map((speech) => {
-                          return <div>{speech.text}</div>;
-                        })}
-                        <audio key={word} controls>
-                          <source
+                        <p className="cursor-pointer">
+                          <SoundPlay
+                            // type=0 表示美音 type=1 表示英音
                             src={`http://dict.youdao.com/dictvoice?type=0&audio=${word}`}
                           />
-                        </audio>
+                        </p>
                         <div className="h-80"></div>
                       </div>
                     );

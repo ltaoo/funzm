@@ -31,6 +31,28 @@ interface DiffNode {
   removed?: boolean;
   added?: boolean;
 }
+function compareLine(content, inputtingParagraph) {
+  const diffNodes: DiffNode[] = diff.diffWords(
+    content.trimRight(),
+    inputtingParagraph.trimRight(),
+    {
+      newlineIsToken: true,
+      ignoreWhitespace: false,
+      ignoreCase: false,
+    }
+  );
+
+  if (diffNodes !== null) {
+    const errorNodes = diffNodes.filter((node) => {
+      const { added, removed } = node;
+      return added === true || removed === true;
+    });
+    if (errorNodes.length !== 0) {
+      return diffNodes;
+    }
+  }
+  return null;
+}
 function compareInputting(inputting, originalContent) {
   const cleanInputting = Object.keys(inputting)
     .filter((line) => {
@@ -52,27 +74,11 @@ function compareInputting(inputting, originalContent) {
     const inputtingParagraph = inputting[line];
     const content = originalContent[line];
 
-    const diffNodes: DiffNode[] = diff.diffWords(
-      content.trimRight(),
-      inputtingParagraph.trimRight(),
-      {
-        newlineIsToken: true,
-        ignoreWhitespace: false,
-        ignoreCase: false,
-      }
-    );
-
-    if (diffNodes !== null) {
-      const errorNodes = diffNodes.filter((node) => {
-        const { added, removed } = node;
-        return added === true || removed === true;
-      });
-      if (errorNodes.length !== 0) {
-        errors[line] = errors[line] || [];
-        errors[line] = diffNodes;
-      }
+    const diffNodes = compareLine(content, inputtingParagraph);
+    if (diffNodes) {
+      errors[line] = errors[line] || [];
+      errors[line] = diffNodes;
     }
-
     // const words = splitText2(inputtingParagraph);
     // const originalWords = splitText2(content);
     // const maxLengthWords = findMaxLengthArr(words, originalWords);
@@ -126,6 +132,7 @@ const CaptionPreviewPage = () => {
   const [inputting, setInputting] = useState({});
   const [errors, setErrors] = useState({});
   const [curErrorLine, setCurErrorLine] = useState(null);
+  const [validatedLines, setValidatedLines] = useState({});
 
   const fetchCaptionAndSave = useCallback(async (id) => {
     const response = await fetchCaption({ id });
@@ -135,6 +142,46 @@ const CaptionPreviewPage = () => {
   useEffect(() => {
     fetchCaptionAndSave(router.query.id);
   }, []);
+
+  const compareOneLine = useCallback(
+    (clickedLine) => {
+      if (!inputting[clickedLine]) {
+        return;
+      }
+      const { paragraphs } = caption;
+      const originalContent = paragraphs
+        .filter((paragraph) => {
+          return !!paragraph.text2;
+        })
+        .reduce((total, cur) => {
+          const { line } = cur;
+          return {
+            ...total,
+            [line]: cur.text2,
+          };
+        });
+      const diffNodes = compareLine(
+        originalContent[clickedLine],
+        inputting[clickedLine]
+      );
+      if (diffNodes) {
+        errors[clickedLine] = errors[clickedLine] || [];
+        setOpen(true);
+        setCurErrorLine(clickedLine);
+      }
+      if (diffNodes === null) {
+        // 表示成功吗？
+        setValidatedLines((prevLines) => ({
+          ...prevLines,
+          [clickedLine]: true,
+        }));
+      }
+      errors[clickedLine] = diffNodes;
+      // console.log(diffNodes);
+      setErrors({ ...errors });
+    },
+    [inputting, caption]
+  );
 
   const compare = useCallback(() => {
     const { paragraphs } = caption;
@@ -150,9 +197,10 @@ const CaptionPreviewPage = () => {
         };
       });
     const errors = compareInputting(inputting, originalContent);
-    console.log(errors);
     setErrors(errors);
   }, [inputting, caption]);
+
+  // console.log(errors);
 
   if (!caption) {
     return null;
@@ -189,22 +237,34 @@ const CaptionPreviewPage = () => {
                       });
                     }}
                   />
-                  <div
-                    className={cx(
-                      errors[line] ? "block" : "hidden",
-                      "absolute top-0 right-0"
+                  <span className={cx("flex absolute top-0 right-0 space-x-2")}>
+                    {validatedLines[line] ? (
+                      <span className={cx("text-green-500 cursor-pointer")}>
+                        yes
+                      </span>
+                    ) : (
+                      <span
+                        className={cx("text-gray-400 cursor-pointer")}
+                        onClick={() => {
+                          compareOneLine(line);
+                        }}
+                      >
+                        check
+                      </span>
                     )}
-                  >
                     <span
-                      className="text-red-500 cursor-pointer"
+                      className={cx(
+                        "text-red-500 cursor-pointer",
+                        errors[line] ? "block" : "hidden"
+                      )}
                       onClick={() => {
-                        setOpen(true);
                         setCurErrorLine(line);
+                        setOpen(true);
                       }}
                     >
                       error
                     </span>
-                  </div>
+                  </span>
                 </p>
               </div>
             );
@@ -258,34 +318,37 @@ const CaptionPreviewPage = () => {
               <div className="absolute bottom-0 md:relative text-base text-left transform transition w-full md:inline-block md:max-w-2xl md:px-4 md:my-8 md:align-middle lg:max-w-4xl">
                 <div className="w-full relative items-center rounded-t-xl pt-4 bg-white dark:bg-black pb-8 overflow-hidden sm:px-6 sm:pt-8 md:p-6 md:rounded-md lg:p-8">
                   <div className="w-full min-h-60">
-                    {(() => {
-                      if (curErrorLine === null) {
-                        return null;
-                      }
-                      if (errors[curErrorLine] === null) {
-                        return null;
-                      }
-                      const errNodes = errors[curErrorLine];
-                      const elms = [];
-                      for (let i = 0; i < errNodes.length; i += 1) {
-                        const { added, updated, removed, value } = errNodes[i];
-                        elms.push(
-                          <span
-                            className={cx(
-                              "text-base text-xl",
-                              added
-                                ? "!text-green-500"
-                                : removed
-                                ? "!text-red-500"
-                                : "!text-gray-500"
-                            )}
-                          >
-                            {value}
-                          </span>
-                        );
-                      }
-                      return <p className="">{elms}</p>;
-                    })()}
+                    <div className="p-4">
+                      {(() => {
+                        if (curErrorLine === null) {
+                          return null;
+                        }
+                        if (errors[curErrorLine] === null) {
+                          return null;
+                        }
+                        const errNodes = errors[curErrorLine];
+                        const elms = [];
+                        for (let i = 0; i < errNodes.length; i += 1) {
+                          const { added, updated, removed, value } =
+                            errNodes[i];
+                          elms.push(
+                            <span
+                              className={cx(
+                                "text-base text-xl",
+                                added
+                                  ? "!text-green-500 bg-green-100"
+                                  : removed
+                                  ? "!text-red-500 bg-red-100"
+                                  : "!text-gray-500"
+                              )}
+                            >
+                              {value}
+                            </span>
+                          );
+                        }
+                        return <p className="">{elms}</p>;
+                      })()}
+                    </div>
                   </div>
                 </div>
               </div>
