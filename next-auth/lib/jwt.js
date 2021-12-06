@@ -114,7 +114,7 @@ export async function getToken(params) {
     ),
     cookieName = secureCookie
       ? "__Secure-next-auth.session-token"
-      : "next-auth.session-token",
+      : "@/next-auth.session-token",
     raw = false,
     decode: _decode = decode,
   } = params

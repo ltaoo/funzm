@@ -179,22 +179,24 @@ export async function signIn(provider, options = {}, authorizationParams = {}) {
   const { callbackUrl = window.location.href, redirect = true } = options;
 
   const baseUrl = _apiBaseUrl();
-  const providers = await getProviders();
+  // const providers = await getProviders();
 
-  if (!providers) {
-    return window.location.replace(`${baseUrl}/error`);
-  }
+  // if (!providers) {
+  //   return window.location.replace(`${baseUrl}/error`);
+  // }
 
-  console.log("[next-auth]sign in", providers, provider, provider in providers);
-  if (!(provider in providers)) {
-    return (window.location.href = `${baseUrl}/signin?callbackUrl=${encodeURIComponent(
-      callbackUrl
-    )}`);
-  }
+  // // console.log("[next-auth]sign in", providers, provider, provider in providers);
+  // if (!(provider in providers)) {
+  //   return (window.location.href = `${baseUrl}/signin?callbackUrl=${encodeURIComponent(
+  //     callbackUrl
+  //   )}`);
+  // }
 
-  const isCredentials = providers[provider].type === "credentials";
-  const isEmail = providers[provider].type === "email";
+  // const isCredentials = providers[provider].type === "credentials";
+  // const isEmail = providers[provider].type === "email";
   const isSupportingReturn = isCredentials || isEmail;
+  const isCredentials = true;
+  const isEmail = false;
 
   const signInUrl = isCredentials
     ? `${baseUrl}/callback/${provider}`
@@ -209,7 +211,7 @@ export async function signIn(provider, options = {}, authorizationParams = {}) {
     },
     body: new URLSearchParams({
       ...options,
-      csrfToken: await getCsrfToken(),
+      // csrfToken: await getCsrfToken(),
       callbackUrl,
       json: true,
     }),
@@ -217,13 +219,13 @@ export async function signIn(provider, options = {}, authorizationParams = {}) {
 
   const data = await res.json();
 
-  if (redirect || !isSupportingReturn) {
-    const url = data.url ?? callbackUrl;
-    window.location.replace(url);
-    // If url contains a hash, the browser does not reload the page. We reload manually
-    if (url.includes("#")) window.location.reload();
-    return;
-  }
+  // if (redirect || !isSupportingReturn) {
+  //   const url = data.url ?? callbackUrl;
+  //   window.location.replace(url);
+  //   // If url contains a hash, the browser does not reload the page. We reload manually
+  //   if (url.includes("#")) window.location.reload();
+  //   return;
+  // }
 
   const error = new URL(data.url).searchParams.get("error");
 
@@ -232,6 +234,7 @@ export async function signIn(provider, options = {}, authorizationParams = {}) {
   }
 
   return {
+    ...data,
     error,
     status: res.status,
     ok: res.ok,

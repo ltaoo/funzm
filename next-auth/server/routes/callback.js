@@ -352,13 +352,21 @@ export default async function callback(req, res) {
       //   userObjectReturnedFromAuthorizeHandler
       // );
       if (!userObjectReturnedFromAuthorizeHandler) {
-        return res
-          .status(401)
-          .redirect(
-            `${baseUrl}${basePath}/error?error=CredentialsSignin&provider=${encodeURIComponent(
-              provider.id
-            )}`
-          );
+        return res.status(200).json({
+          code: 104,
+          msg: "邮箱或密码错误",
+          data: null,
+          url: `${baseUrl}${basePath}/error?error=CredentialsSignin&provider=${encodeURIComponent(
+            provider.id
+          )}`,
+        });
+        // return res
+        //   .status(401)
+        //   .redirect(
+        //     `${baseUrl}${basePath}/error?error=CredentialsSignin&provider=${encodeURIComponent(
+        //       provider.id
+        //     )}`
+        //   );
       }
     } catch (error) {
       if (error instanceof Error) {

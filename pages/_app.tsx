@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { AppProps } from "next/app";
 import Script from "next/script";
 
-import { getSession, Provider } from "next-auth/client";
+import { getSession, Provider } from "@/next-auth/client";
 
 import "windi.css";
 

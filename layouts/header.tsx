@@ -3,21 +3,23 @@
  */
 import Link from "next/link";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import Avatar from "antd/lib/avatar";
 import "antd/lib/avatar/style/index.css";
 import Divider from "antd/lib/divider";
 import "antd/lib/divider/style/index.css";
 
-import { signIn, signOut, useSession } from "next-auth/client";
-// import styles from "./header.module.css";
+import { signIn, signOut, useSession } from "@/next-auth/client";
 
-// The approach used in this component shows how to built a sign in and sign out
-// component that works on pages which support both client and server side
-// rendering, and avoids any flash incorrect content on initial page load.
 export default function Header(props) {
   const [session, loading] = useSession();
+  const router = useRouter();
 
   const user = session?.user;
+
+  if (loading) {
+    return <div>Loading</div>;
+  }
 
   return (
     <>
@@ -31,11 +33,13 @@ export default function Header(props) {
         <div className="py-2 px-1 shadow-md">
           {!user && (
             <span className="text-base px-1 text-sm">
-              {/* <Link href="/api/auth/signin">登录</Link> */}
               <a
                 onClick={(e) => {
                   e.preventDefault();
-                  signIn();
+                  // signIn();
+                  router.push({
+                    pathname: "/user/login",
+                  });
                 }}
               >
                 登录

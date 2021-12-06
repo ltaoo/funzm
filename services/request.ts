@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getSession } from "next-auth/client";
+import { getSession } from "@/next-auth/client";
 
 const request = axios.create({
   timeout: 12000,

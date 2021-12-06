@@ -10,7 +10,7 @@ import CaptionUpload from "@/components/CaptionFileUpload";
 import tmpCaptionStorage from "@/domains/caption/utils";
 import router from "next/router";
 import { fetchCaptionsService } from "@/lib/caption";
-import { getSession } from "next-auth/client";
+import { getSession } from "@/next-auth/client";
 
 const Dashboard = (props) => {
   const { user, dataSource = [] } = props;

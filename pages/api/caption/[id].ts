@@ -1,7 +1,7 @@
 /**
  * @file 根据 id 获取指定字幕
  */
-import { getSession } from "next-auth/client";
+import { getSession } from "@/next-auth/client";
 
 import { fetchCaptionById } from "@/lib/caption";
 

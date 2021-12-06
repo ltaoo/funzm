@@ -1,7 +1,7 @@
 /**
  * @file 字幕展示
  */
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useRef, useCallback, useEffect, useState } from "react";
 import cx from "classnames";
 import Head from "next/head";
 import { GetStaticProps, GetStaticPaths } from "next";
@@ -32,6 +32,10 @@ interface DiffNode {
   added?: boolean;
 }
 function compareLine(content, inputtingParagraph) {
+  if (!content) {
+    //
+    return;
+  }
   const diffNodes: DiffNode[] = diff.diffWords(
     content.trimRight(),
     inputtingParagraph.trimRight(),
@@ -79,47 +83,6 @@ function compareInputting(inputting, originalContent) {
       errors[line] = errors[line] || [];
       errors[line] = diffNodes;
     }
-    // const words = splitText2(inputtingParagraph);
-    // const originalWords = splitText2(content);
-    // const maxLengthWords = findMaxLengthArr(words, originalWords);
-    // maxLengthWords.map(([, word1], i) => {
-    //   const [, word2] = words[i] || [];
-    //   errors[line] = errors[line] || [];
-
-    //   // 输入的比原文更长
-    //   if (word2 === undefined && maxLengthWords === words) {
-    //     // 此时 word2 是输入
-    //     errors[line].push({
-    //       added: true,
-    //       // inputting: word1,
-    //       word1,
-    //       word2,
-    //     });
-    //   }
-    //   // 输入的比原文更短
-    //   if (word2 === undefined && maxLengthWords === originalWords) {
-    //     // 此时 word2 是原文
-    //     errors[line].push({
-    //       removed: true,
-    //       word1,
-    //       word2,
-    //     });
-    //   }
-
-    //   // 和原文不同
-    //   if (word1 !== word2) {
-    //     errors[line].push({
-    //       updated: true,
-    //       word1,
-    //       word2,
-    //     });
-    //     return;
-    //   }
-    //   errors[line].push({
-    //     word1,
-    //     word2,
-    //   });
-    // });
   }
   return errors;
 }
@@ -133,6 +96,7 @@ const CaptionPreviewPage = () => {
   const [errors, setErrors] = useState({});
   const [curErrorLine, setCurErrorLine] = useState(null);
   const [validatedLines, setValidatedLines] = useState({});
+  const curInputRef = useRef<HTMLDivElement>(null);
 
   const fetchCaptionAndSave = useCallback(async (id) => {
     const response = await fetchCaption({ id });
@@ -148,6 +112,10 @@ const CaptionPreviewPage = () => {
       if (!inputting[clickedLine]) {
         return;
       }
+      setValidatedLines((prev) => {
+        prev[clickedLine] = null;
+        return prev;
+      });
       const { paragraphs } = caption;
       const originalContent = paragraphs
         .filter((paragraph) => {
@@ -177,7 +145,6 @@ const CaptionPreviewPage = () => {
         }));
       }
       errors[clickedLine] = diffNodes;
-      // console.log(diffNodes);
       setErrors({ ...errors });
     },
     [inputting, caption]
@@ -200,6 +167,10 @@ const CaptionPreviewPage = () => {
     setErrors(errors);
   }, [inputting, caption]);
 
+  const saveParagraph = useCallback(() => {
+    // save to database.
+  }, []);
+
   // console.log(errors);
 
   if (!caption) {
@@ -221,20 +192,32 @@ const CaptionPreviewPage = () => {
             return (
               <div key={line}>
                 <p className="text-xs text-black dark:text-white">{text1}</p>
-                <p className="relative mt-2 break-all text-lg font-serif text-black dark:text-white">
-                  <input
+                <div className="relative mt-2 break-all text-lg font-serif text-black dark:text-white">
+                  <div
                     className={cx(
                       "w-full border-b-1 outline-none bg-transparent",
-                      errors[line] ? "!border-red-500" : ""
+                      errors[line] ? "!border-red-500" : "",
+                      validatedLines[line] ? "!border-green-500" : ""
                     )}
-                    onChange={(event) => {
-                      const { value } = event.target;
+                    contentEditable
+                    suppressContentEditableWarning
+                    onInput={(event) => {
+                      // @ts-ignore
+                      const { innerText } = event.target;
                       setInputting((prev) => {
                         return {
                           ...prev,
-                          [line]: value,
+                          [line]: innerText,
                         };
                       });
+                    }}
+                    onKeyPress={(event) => {
+                      const { code } = event;
+                      if (code === "Enter") {
+                        curInputRef.current = event.target as HTMLDivElement;
+                        event.preventDefault();
+                        compareOneLine(line);
+                      }
                     }}
                   />
                   <span className={cx("flex absolute top-0 right-0 space-x-2")}>
@@ -265,25 +248,39 @@ const CaptionPreviewPage = () => {
                       error
                     </span>
                   </span>
-                </p>
+                </div>
               </div>
             );
           })}
         </div>
       </div>
       <div className="flex justify-end sticky bottom-0 py-4 px-4 bg-white dark:bg-black space-x-2 border-t-1 dark:border-gray-800">
+        <p className="text-base text-sm cursor-pointer text-black dark:text-white">
+          {Object.keys(inputting).pop() ?? 0}/{paragraphs.length}
+        </p>
         <p
           className="text-base text-sm cursor-pointer text-black dark:text-white"
           onClick={compare}
         >
-          Submit
+          Check
         </p>
       </div>
       <Transition.Root show={open} as={Fragment}>
         <Dialog
           as="div"
           className="fixed z-10 inset-0 overflow-y-auto"
-          onClose={setOpen}
+          onClose={() => {
+            if (curInputRef.current) {
+              const obj = curInputRef.current!;
+              if (window.getSelection) {
+                obj.focus();
+                const range = window.getSelection();
+                range.selectAllChildren(obj);
+                range.collapseToEnd();
+              }
+            }
+            setOpen(false);
+          }}
         >
           <div
             className="min-h-screen text-center md:block md:px-2 lg:px-4"
@@ -346,7 +343,17 @@ const CaptionPreviewPage = () => {
                             </span>
                           );
                         }
-                        return <p className="">{elms}</p>;
+                        return (
+                          <p className="">
+                            {elms}
+                            <div onClick={saveParagraph}>
+                              <p>保存该句</p>
+                            </div>
+                            <div onClick={saveParagraph}>
+                              <p>修改原句</p>
+                            </div>
+                          </p>
+                        );
                       })()}
                     </div>
                   </div>

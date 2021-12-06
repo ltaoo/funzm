@@ -10,9 +10,10 @@ import Form from "antd/lib/form";
 import "antd/lib/form/style/index.css";
 import Input from "antd/lib/input";
 import "antd/lib/input/style/index.css";
+import message from "antd/lib/message";
+import "antd/lib/message/style/index.css";
 
-import { getCsrfToken, signin } from "next-auth/client";
-import { login } from "@/services/auth";
+import { getCsrfToken, signin } from "@/next-auth/client";
 
 const LoginPage = (props) => {
   const [form] = Form.useForm();
@@ -26,21 +27,27 @@ const LoginPage = (props) => {
     init();
   }, []);
 
+  console.log("[PAGE]user.login", props);
+
   const loginAccount = useCallback(async () => {
     const values = await form.validateFields();
-    const { email, password } = values;
-    console.log("[PAGE]loginAccount", values);
-    signin("credentials", {
+    const { email, password, csrfToken } = values;
+    const res = await signin("credentials", {
       email,
       password,
-      callbackUrl: "/abc",
+      csrfToken,
+      redirect: false,
     });
-    // const { data } = await login(values);
-    // localStorage.setItem("token", data.token);
-    // message.success("登录成功");
-    // router.push({
-    //   pathname: "/dashboard",
-    // });
+    console.log("[PAGE]loginAccount", values, res);
+    if (!res.error) {
+      message.success("登录成功");
+      router.replace({
+        pathname: "/dashboard",
+      });
+      return;
+    }
+    const { msg } = res;
+    message.error(msg);
   }, []);
 
   return (
