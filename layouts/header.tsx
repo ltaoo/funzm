@@ -30,7 +30,8 @@ export default function Header(props) {
         <noscript>
           <style>{`.nojs-show { opacity: 1; top: 0; }`}</style>
         </noscript>
-        <div className="py-2 px-1 shadow-md">
+        <div className="flex items-center py-4 px-4 shadow-md justify-between">
+          <p>Caption</p>
           {!user && (
             <span className="text-base px-1 text-sm">
               <a
@@ -49,23 +50,15 @@ export default function Header(props) {
             </span>
           )}
           {user && (
-            <div className="flex items-center">
+            <div className="flex items-center cursor-pointer">
               <Link href="/dashboard">
                 <Avatar
-                  size={20}
+                  size={40}
                   src={user.image ? `url(${user.image})` : undefined}
-                />
+                >
+                  {user.name?.slice(0, 1)}
+                </Avatar>
               </Link>
-              <a
-                href={`/api/auth/signout`}
-                className="ml-2 text-sm"
-                onClick={(e) => {
-                  e.preventDefault();
-                  signOut();
-                }}
-              >
-                注销
-              </a>
             </div>
           )}
         </div>

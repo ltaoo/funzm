@@ -10,7 +10,7 @@ import "antd/lib/upload/style/index.css";
 import { getExt, readTextFromFile } from "@/domains/caption";
 
 const CaptionUpload = (props) => {
-  const { onChange } = props;
+  const { children, onChange } = props;
 
   const onChangeRef = useRef(onChange);
   useEffect(() => {
@@ -42,10 +42,14 @@ const CaptionUpload = (props) => {
       showUploadList={false}
       onChange={handleUploadFile}
     >
-      <p>拖动字幕文件到这里</p>
-      <Button type="primary" className="mt-10">
-        点击选择字幕
-      </Button>
+      {children || (
+        <>
+          <p>拖动字幕文件到这里</p>
+          <Button type="primary" className="mt-10">
+            点击选择字幕
+          </Button>
+        </>
+      )}
     </Upload.Dragger>
   );
 };

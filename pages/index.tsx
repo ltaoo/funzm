@@ -25,7 +25,7 @@ const CaptionPreviewPage = (props) => {
   return (
     <Layout>
       <div className="flex justify-center">
-        <div className="2xl:container 2xl:mx-auto px-5 sm:px-12 lg:w-240 md:w-80">
+        <div className="mx-auto px-5">
           <h2 className="m-10 text-4xl text-center">CAPTION PARSER</h2>
           <CaptionUpload onChange={handleUploadFile} />
         </div>

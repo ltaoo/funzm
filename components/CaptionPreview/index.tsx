@@ -31,7 +31,7 @@ const CaptionPreview = (props) => {
   }, []);
 
   return (
-    <div className="2xl:mx-auto 2xl:w-180 overflow-hidden pb-20 space-y-2">
+    <div className="overflow-hidden pb-20 space-y-2 md:mx-auto md:w-180 ">
       <h2 className="mt-6 px-4 text-2xl break-all text-black dark:text-white">
         {title}
       </h2>

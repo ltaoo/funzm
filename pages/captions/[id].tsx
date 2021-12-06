@@ -9,7 +9,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { TrashIcon } from "@heroicons/react/outline";
 
 import { fetchCaptionById } from "@/lib/caption";
-import { fetchCaption } from "@/services/caption";
+import { fetchCaption, deleteCaption } from "@/services/caption";
 import CaptionPreview from "@/components/CaptionPreview";
 import * as themeToggle from "@/utils/dark";
 
@@ -24,6 +24,13 @@ const CaptionPreviewPage = () => {
   const fetchCaptionAndSave = useCallback(async (id) => {
     const response = await fetchCaption({ id });
     setCaption(response);
+  }, []);
+
+  const removeCaption = useCallback(async () => {
+    await deleteCaption({ id });
+    router.replace({
+      pathname: "/tip/success",
+    });
   }, []);
 
   useEffect(() => {
@@ -98,7 +105,10 @@ const CaptionPreviewPage = () => {
               <div className="absolute bottom-0 md:relative text-base text-left transform transition w-full md:inline-block md:max-w-2xl md:px-4 md:my-8 md:align-middle lg:max-w-4xl">
                 <div className="w-full relative items-center rounded-t-xl pt-4 bg-white dark:bg-black pb-8 overflow-hidden sm:px-6 sm:pt-8 md:p-6 md:rounded-md lg:p-8">
                   <div className="w-full min-h-60">
-                    <div className="flex items-center py-4 px-6 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                    <div
+                      className="flex items-center py-4 px-6 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                      onClick={removeCaption}
+                    >
                       <TrashIcon className="w-6 h-6 mr-2 text-black dark:text-white" />
                       <p className="text-base text-md text-black dark:text-white">
                         Delete

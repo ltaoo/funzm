@@ -17,8 +17,18 @@ const Dashboard = (props) => {
 
   if (user === null) {
     return (
-      <div className="mx-auto w-40 mt-10">
-        <p className="text-center">No Permission</p>
+      <div className="mx-auto w-40 mt-10 text-center">
+        <p className="">No Permission</p>
+        <button
+          className="mt-2"
+          onClick={() => {
+            router.push({
+              pathname: "/user/login",
+            });
+          }}
+        >
+          前往登录
+        </button>
       </div>
     );
   }
@@ -38,14 +48,36 @@ const Dashboard = (props) => {
             );
           })}
         </div>
-        <p className="mt-2 text-center text-base text-sm">查看全部</p>
-        <div className="mt-8">
-          <CaptionUpload
-            onChange={(caption) => {
-              tmpCaptionStorage.save(caption);
-              router.push({ pathname: "/captions/editor" });
+        <p
+          className="mt-2 text-center text-sm cursor-pointer"
+          onClick={() => {
+            router.push({
+              pathname: "/dashboard/captions",
+            });
+          }}
+        >
+          查看全部
+        </p>
+        <div className="mt-8 divide-y-1">
+          <div className="p-4 py-2 text-sm">
+            <CaptionUpload
+              onChange={(caption) => {
+                tmpCaptionStorage.save(caption);
+                router.push({ pathname: "/captions/editor" });
+              }}
+            >
+              上传字幕
+            </CaptionUpload>
+          </div>
+          <div className="p-4 py-2 text-sm">个人信息</div>
+          <div
+            className="p-4 py-2 text-sm"
+            onClick={() => {
+              // signOut();
             }}
-          />
+          >
+            退出登录
+          </div>
         </div>
       </div>
     </Layout>
