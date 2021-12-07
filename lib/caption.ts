@@ -48,15 +48,16 @@ export async function addCaptionService({ title, paragraphs, publisherId }) {
 
 /**
  * 根据 id 获取指定字幕
- * @returns
+ * @param {string} id - 字幕 id
+ * @param {boolean} paragraph - 是否包含句子
  */
-export async function fetchCaptionById({ id }) {
+export async function fetchCaptionById({ id, paragraph }) {
   return prisma.caption.findUnique({
     where: {
       id,
     },
     include: {
-      paragraphs: true,
+      paragraphs: paragraph,
     },
   });
 }

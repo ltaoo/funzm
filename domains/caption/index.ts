@@ -103,8 +103,8 @@ export function parseCaptionContent(
   return [
     {
       line: 1,
-      start: 0,
-      end: 0,
+      start: '',
+      end: '',
       text1: content,
       text2: undefined,
     },

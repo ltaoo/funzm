@@ -17,7 +17,11 @@ export default async function addCaption(req, res) {
     return;
   }
   try {
-    const data = await fetchCaptionById({ id: query.id });
+    const { id, paragraph } = query as { id: string; paragraph?: string };
+    const data = await fetchCaptionById({
+      id,
+      paragraph: paragraph === "1",
+    });
     if (data === null) {
       res.status(200).json({ code: 130, msg: "Not Existing", data: null });
       return;

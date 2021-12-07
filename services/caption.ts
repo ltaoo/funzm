@@ -1,3 +1,6 @@
+
+import { IParagraph } from "@/domains/caption/types";
+
 import request from "./request";
 
 /**
@@ -8,11 +11,19 @@ export function addCaption(caption): Promise<{ id: string }> {
 }
 
 /**
+ * 获取字幕基本信息
+ * @param id
+ */
+export function fetchCaptionWithoutParagraphs({ id }) {
+  return request.get(`/api/caption/${id}`);
+}
+
+/**
  * 获取字幕详情
  * @param id
  */
 export function fetchCaption({ id }) {
-  return request.get(`/api/caption/${id}`);
+  return request.get(`/api/caption/${id}?paragraph=1`);
 }
 
 /**
@@ -29,4 +40,16 @@ export function editCaption({ id }) {
  */
 export function deleteCaption({ id }) {
   return request.get(`/api/caption/delete?id=${id}`);
+}
+
+/**
+ * 获取句子列表
+ */
+export function fetchParagraphsService(params: {
+  page?: number;
+  pageSize?: number;
+  captionId: string;
+}): Promise<{ page: number; pageSize: number; total: number; list: IParagraph[] }> {
+  // console.log('fetchParagraphsService', params);
+  return request.get("/api/paragraphs", { params });
 }

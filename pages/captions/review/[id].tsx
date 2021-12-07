@@ -1,96 +1,20 @@
 /**
  * @file 字幕展示
  */
-import { Fragment, useRef, useCallback, useEffect, useState } from "react";
+import { useRef, useCallback, useEffect, useState } from "react";
 import cx from "classnames";
 import Head from "next/head";
-import { GetStaticProps, GetStaticPaths } from "next";
+// import { GetStaticProps, GetStaticPaths } from "next";
 import { useRouter } from "next/router";
-import { Dialog, Transition } from "@headlessui/react";
-import { TrashIcon } from "@heroicons/react/outline";
-import * as diff from "diff";
 
-import { fetchCaptionById } from "@/lib/caption";
+import Modal from "@/components/Modal";
 import { fetchCaption } from "@/services/caption";
-import CaptionPreview from "@/components/CaptionPreview";
+import { compareLine, compareInputting } from "@/domains/caption/utils";
 
-import { splitText2 } from "@/domains/caption/utils";
-
-function findMaxLengthArr(arr1, arr2) {
-  const l1 = arr1.length;
-  const l2 = arr2.length;
-  if (l1 > l2) {
-    return arr1;
-  }
-  return arr2;
-}
-
-interface DiffNode {
-  count: number;
-  value: string;
-  removed?: boolean;
-  added?: boolean;
-}
-function compareLine(content, inputtingParagraph) {
-  if (!content) {
-    //
-    return;
-  }
-  const diffNodes: DiffNode[] = diff.diffWords(
-    content.trimRight(),
-    inputtingParagraph.trimRight(),
-    {
-      newlineIsToken: true,
-      ignoreWhitespace: false,
-      ignoreCase: false,
-    }
-  );
-
-  if (diffNodes !== null) {
-    const errorNodes = diffNodes.filter((node) => {
-      const { added, removed } = node;
-      return added === true || removed === true;
-    });
-    if (errorNodes.length !== 0) {
-      return diffNodes;
-    }
-  }
-  return null;
-}
-function compareInputting(inputting, originalContent) {
-  const cleanInputting = Object.keys(inputting)
-    .filter((line) => {
-      return !!inputting[line];
-    })
-    .map((line) => {
-      return {
-        [line]: inputting[line],
-      };
-    })
-    .reduce((total, cur) => ({ ...total, ...cur }), {});
-
-  const errors = {};
-
-  const lines = Object.keys(cleanInputting);
-  for (let i = 0; i < lines.length; i += 1) {
-    const line = lines[i];
-    errors[line] = null;
-    const inputtingParagraph = inputting[line];
-    const content = originalContent[line];
-
-    const diffNodes = compareLine(content, inputtingParagraph);
-    if (diffNodes) {
-      errors[line] = errors[line] || [];
-      errors[line] = diffNodes;
-    }
-  }
-  return errors;
-}
-
-const CaptionPreviewPage = () => {
+const CaptionExamPage = () => {
   const router = useRouter();
 
-  const [open, setOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
   const [caption, setCaption] = useState(null);
   const [inputting, setInputting] = useState({});
   const [errors, setErrors] = useState({});
@@ -134,7 +58,7 @@ const CaptionPreviewPage = () => {
       );
       if (diffNodes) {
         errors[clickedLine] = errors[clickedLine] || [];
-        setOpen(true);
+        setVisible(true);
         setCurErrorLine(clickedLine);
       }
       if (diffNodes === null) {
@@ -242,7 +166,7 @@ const CaptionPreviewPage = () => {
                       )}
                       onClick={() => {
                         setCurErrorLine(line);
-                        setOpen(true);
+                        setVisible(true);
                       }}
                     >
                       error
@@ -265,104 +189,62 @@ const CaptionPreviewPage = () => {
           Check
         </p>
       </div>
-      <Transition.Root show={open} as={Fragment}>
-        <Dialog
-          as="div"
-          className="fixed z-10 inset-0 overflow-y-auto"
-          onClose={() => {
-            if (curInputRef.current) {
-              const obj = curInputRef.current!;
-              if (window.getSelection) {
-                obj.focus();
-                const range = window.getSelection();
-                range.selectAllChildren(obj);
-                range.collapseToEnd();
-              }
+      <Modal
+        visible={visible}
+        onCancel={() => {
+          if (curInputRef.current) {
+            const obj = curInputRef.current!;
+            if (window.getSelection) {
+              obj.focus();
+              const range = window.getSelection();
+              range.selectAllChildren(obj);
+              range.collapseToEnd();
             }
-            setOpen(false);
-          }}
-        >
-          <div
-            className="min-h-screen text-center md:block md:px-2 lg:px-4"
-            style={{ fontSize: 0 }}
-          >
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <Dialog.Overlay className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-            </Transition.Child>
-            <span
-              className="hidden md:inline-block md:align-middle md:h-screen"
-              aria-hidden="true"
-            >
-              &#8203;
-            </span>
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 translate-y-4 md:translate-y-0 md:scale-95"
-              enterTo="opacity-100 translate-y-0 md:scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 translate-y-0 md:scale-100"
-              leaveTo="opacity-0 translate-y-4 md:translate-y-0 md:scale-95"
-            >
-              <div className="absolute bottom-0 md:relative text-base text-left transform transition w-full md:inline-block md:max-w-2xl md:px-4 md:my-8 md:align-middle lg:max-w-4xl">
-                <div className="w-full relative items-center rounded-t-xl pt-4 bg-white dark:bg-black pb-8 overflow-hidden sm:px-6 sm:pt-8 md:p-6 md:rounded-md lg:p-8">
-                  <div className="w-full min-h-60">
-                    <div className="p-4">
-                      {(() => {
-                        if (curErrorLine === null) {
-                          return null;
-                        }
-                        if (errors[curErrorLine] === null) {
-                          return null;
-                        }
-                        const errNodes = errors[curErrorLine];
-                        const elms = [];
-                        for (let i = 0; i < errNodes.length; i += 1) {
-                          const { added, updated, removed, value } =
-                            errNodes[i];
-                          elms.push(
-                            <span
-                              className={cx(
-                                "text-base text-xl",
-                                added
-                                  ? "!text-green-500 bg-green-100"
-                                  : removed
-                                  ? "!text-red-500 bg-red-100"
-                                  : "!text-gray-500"
-                              )}
-                            >
-                              {value}
-                            </span>
-                          );
-                        }
-                        return (
-                          <p className="">
-                            {elms}
-                            <div onClick={saveParagraph}>
-                              <p>保存该句</p>
-                            </div>
-                            <div onClick={saveParagraph}>
-                              <p>修改原句</p>
-                            </div>
-                          </p>
-                        );
-                      })()}
-                    </div>
-                  </div>
+          }
+          setVisible(false);
+        }}
+      >
+        <div className="p-4">
+          {(() => {
+            if (curErrorLine === null) {
+              return null;
+            }
+            if (errors[curErrorLine] === null) {
+              return null;
+            }
+            const errNodes = errors[curErrorLine];
+            const elms = [];
+            for (let i = 0; i < errNodes.length; i += 1) {
+              const { added, updated, removed, value } = errNodes[i];
+              elms.push(
+                <span
+                  className={cx(
+                    "text-base text-xl",
+                    added
+                      ? "!text-green-500 bg-green-100"
+                      : removed
+                      ? "!text-red-500 bg-red-100"
+                      : "!text-gray-500"
+                  )}
+                >
+                  {value}
+                </span>
+              );
+            }
+            return (
+              <p className="">
+                {elms}
+                <div onClick={saveParagraph}>
+                  <p>保存该句</p>
                 </div>
-              </div>
-            </Transition.Child>
-          </div>
-        </Dialog>
-      </Transition.Root>
+                <div onClick={saveParagraph}>
+                  <p>修改原句</p>
+                </div>
+              </p>
+            );
+          })()}
+        </div>
+      </Modal>
     </div>
   );
 };
@@ -385,4 +267,4 @@ const CaptionPreviewPage = () => {
 //   };
 // };
 
-export default CaptionPreviewPage;
+export default CaptionExamPage;

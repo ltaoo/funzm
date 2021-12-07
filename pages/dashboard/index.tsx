@@ -11,6 +11,7 @@ import tmpCaptionStorage from "@/domains/caption/utils";
 import router from "next/router";
 import { fetchCaptionsService } from "@/lib/caption";
 import { getSession } from "@/next-auth/client";
+import CaptionCard from "@/components/CaptionCard";
 
 const Dashboard = (props) => {
   const { user, dataSource = [] } = props;
@@ -37,15 +38,8 @@ const Dashboard = (props) => {
       <div className="text-base">
         <div className="space-y-2">
           {dataSource.map((caption) => {
-            const { id, title } = caption;
-            return (
-              <div
-                key={id}
-                className="p-2 rounded border break-all cursor-pointer"
-              >
-                <Link href={`/captions/${id}`}>{title}</Link>
-              </div>
-            );
+            const { id } = caption;
+            return <CaptionCard key={id} {...caption} />;
           })}
         </div>
         <p
