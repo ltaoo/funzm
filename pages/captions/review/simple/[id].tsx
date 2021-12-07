@@ -92,11 +92,11 @@ const SimpleCaptionExamPage = () => {
       curParagraphs.list.length
     );
     if (matchedIndex + 3 >= curParagraphs.list.length) {
+      pageRef.current += 1;
       fetchParagraphsService({
         captionId: idRef.current,
         page: pageRef.current,
       }).then((response) => {
-        pageRef.current += 1;
         setCurParagraphs((prev) => {
           return {
             ...response,

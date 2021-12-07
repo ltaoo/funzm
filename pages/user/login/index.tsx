@@ -1,7 +1,7 @@
 /**
  * @file 用户登录
  */
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Button from "antd/lib/button";
@@ -18,6 +18,7 @@ import { getCsrfToken, signin } from "@/next-auth/client";
 const LoginPage = (props) => {
   const [form] = Form.useForm();
   const router = useRouter();
+  const loadingRef = useRef(false);
 
   const init = useCallback(async () => {
     // form.setFieldsValue({ csrfToken });
@@ -30,6 +31,10 @@ const LoginPage = (props) => {
   console.log("[PAGE]user.login", props);
 
   const loginAccount = useCallback(async () => {
+    if (loadingRef.current) {
+      return;
+    }
+    loadingRef.current = true;
     const values = await form.validateFields();
     const { email, password, csrfToken } = values;
     const res = await signin("credentials", {
@@ -39,6 +44,7 @@ const LoginPage = (props) => {
       redirect: false,
     });
     console.log("[PAGE]loginAccount", values, res);
+    loadingRef.current = false;
     if (!res.error) {
       message.success("登录成功");
       router.replace({

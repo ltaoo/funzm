@@ -18,7 +18,7 @@ export default function Header(props) {
   const user = session?.user;
 
   if (loading) {
-    return <div>Loading</div>;
+    return null;
   }
 
   return (
@@ -34,7 +34,8 @@ export default function Header(props) {
           <p>Caption</p>
           {!user && (
             <span className="text-base px-1 text-sm">
-              <a
+              <div
+                className="cursor-pointer"
                 onClick={(e) => {
                   e.preventDefault();
                   // signIn();
@@ -44,9 +45,11 @@ export default function Header(props) {
                 }}
               >
                 登录
-              </a>
+              </div>
               <Divider type="vertical" />
-              <Link href="/user/register">注册</Link>
+              <Link href="/user/register">
+                <div className="cursor-pointer">注册</div>
+              </Link>
             </span>
           )}
           {user && (
