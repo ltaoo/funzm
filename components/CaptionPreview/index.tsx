@@ -6,7 +6,7 @@ import { Disclosure, Menu, Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import { StarIcon } from "@heroicons/react/solid";
 
-import { splitText2 } from "@/domains/caption/utils";
+import { splitText2Words } from "@/domains/caption/utils";
 import SoundPlay from "@/components/SoundPlay";
 
 import Popover from "antd/lib/popover";
@@ -43,7 +43,7 @@ const CaptionPreview = (props) => {
               <p className="text-xs text-black dark:text-white">{text1}</p>
               <p className="">
                 {(() => {
-                  const words = splitText2(text2);
+                  const words = splitText2Words(text2);
                   return words.map((word, i) => {
                     return (
                       <span

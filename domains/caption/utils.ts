@@ -30,7 +30,7 @@ export default new CaptionTempStorage();
  * 将一段英文分割成单词
  * @param text2
  */
-export function splitText2(text2: string): string[][] {
+export function splitText2Words(text2: string): string[][] {
   const words = text2.split(" ");
   const result = [];
   for (let i = 0; i < words.length; i += 1) {
