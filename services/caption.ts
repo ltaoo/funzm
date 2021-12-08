@@ -1,3 +1,4 @@
+import { Caption } from ".prisma/client";
 
 import { IParagraph } from "@/domains/caption/types";
 
@@ -14,7 +15,7 @@ export function addCaption(caption): Promise<{ id: string }> {
  * 获取字幕基本信息
  * @param id
  */
-export function fetchCaptionWithoutParagraphs({ id }) {
+export function fetchCaptionWithoutParagraphs({ id }): Promise<Caption> {
   return request.get(`/api/caption/${id}`);
 }
 
@@ -48,8 +49,14 @@ export function deleteCaption({ id }) {
 export function fetchParagraphsService(params: {
   page?: number;
   pageSize?: number;
+  start?: string;
   captionId: string;
-}): Promise<{ page: number; pageSize: number; total: number; list: IParagraph[] }> {
+}): Promise<{
+  page: number;
+  pageSize: number;
+  total: number;
+  list: IParagraph[];
+}> {
   // console.log('fetchParagraphsService', params);
   return request.get("/api/paragraphs", { params });
 }

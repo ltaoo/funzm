@@ -17,7 +17,7 @@ export default async function fetchParagraphsAPI(req, res) {
     return;
   }
   const {
-    query: { page = 1, pageSize = 10, captionId },
+    query: { page = 1, pageSize = 10, start, captionId },
   } = req;
   if (!captionId) {
     res
@@ -33,6 +33,9 @@ export default async function fetchParagraphsAPI(req, res) {
     }),
     prisma.paragraph.findMany({
       where: { captionId },
+      cursor: {
+        id: start,
+      },
       ...paginationParams({ page, pageSize }),
     }),
   ]);

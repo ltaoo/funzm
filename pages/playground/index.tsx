@@ -1,10 +1,14 @@
+import { Fragment, useEffect, useRef, useState } from "react";
+import { Dialog, Transition } from "@headlessui/react";
+import { ExclamationIcon } from "@heroicons/react/outline";
+
 import Exam from "@/domains/exam";
-import { useEffect, useRef, useState } from "react";
 
 const Playground = () => {
   const examRef = useRef<Exam>(null);
   const [text1, setText1] = useState("");
   const [words, setWords] = useState([]);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     examRef.current = new Exam({
@@ -48,8 +52,6 @@ const Playground = () => {
       ],
     });
     //     setText1(examRef.current.curParagraph.text1);
-    // @ts-ignore
-    window._exam = examRef.current;
   }, []);
 
   return (
@@ -68,20 +70,31 @@ const Playground = () => {
       </button>
       <button
         onClick={() => {
-          if (!examRef.current) {
-            return;
-          }
-          const error = examRef.current.skip();
-          console.log(error);
-          if (error) {
-            return;
-          }
-          setText1(examRef.current.curParagraph.text1);
-          setWords(examRef.current.curWords);
+          setVisible(true);
+          setTimeout(() => {
+            setVisible(false);
+          }, 1000);
         }}
       >
         skip
       </button>
+      <Transition.Root show={visible} as={Fragment}>
+        <div>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            enterTo="opacity-100 translate-y-0 sm:scale-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+            leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+          >
+            <p className="absolute right-10 top-10 text-4xl text-green-500 transform -rotate-6">
+              CORRECT!
+            </p>
+          </Transition.Child>
+        </div>
+      </Transition.Root>
     </div>
   );
 };

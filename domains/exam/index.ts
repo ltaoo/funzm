@@ -121,14 +121,40 @@ class Exam {
    * 展示给用户选择的单测，在原文单词基础上打乱顺序，增加干扰单词等
    */
   displayedWords: { uid: string; word: string }[];
+  /**
+   * 连续拼写正确次数
+   */
+  combo: number;
+  /**
+   * 最大连续拼写正确次数
+   */
+  maxCombo: number;
 
   onChange: (examJSON: Record<string, any>) => void;
+  onNext: (exam: Record<string, any>) => void;
+  onCorrect: (examJSON: Record<string, any>) => void;
+  onIncorrect: (examJSON: Record<string, any>) => void;
 
   constructor(params) {
-    const { level, title, paragraphs = [], onChange = noop } = params;
+    const {
+      level,
+      title,
+      status = ExamStatus.Prepare,
+      curParagraphId,
+      combo = 0,
+      maxCombo = 0,
+      paragraphs = [],
+      onChange = noop,
+      onCorrect = noop,
+      onIncorrect = noop,
+      onNext = noop,
+    } = params;
     this.onChange = onChange;
+    this.onCorrect = onCorrect;
+    this.onIncorrect = onIncorrect;
+    this.onNext = onNext;
 
-    this.status = ExamStatus.Prepare;
+    this.status = status;
     this.curParagraph = null;
     this.skippedParagraphs = [];
     this.correctParagraphs = [];
@@ -137,9 +163,27 @@ class Exam {
     this.title = title;
     this.paragraphs = filterEmptyTextParagraphs(paragraphs);
     this.paragraphMap = arr2map(this.paragraphs, "id");
+    this.curParagraphId = curParagraphId;
+    this.curWords = [];
+    this.displayedWords = [];
+
+    if (this.curParagraphId && this.paragraphs.length > 0) {
+      this.curParagraph = this.paragraphMap[this.curParagraphId];
+      this.curWords = splitText2Words(this.curParagraph.text2).map(
+        ([, word]) => word
+      );
+      this.displayedWords = shuffle([...this.curWords]).map((str) => {
+        return {
+          uid: uid(),
+          word: str,
+        };
+      });
+    }
 
     this.inputtingWords = [];
-    this.curWords = [];
+
+    this.combo = combo;
+    this.maxCombo = maxCombo;
   }
 
   start(paragraphs = []) {
@@ -166,7 +210,9 @@ class Exam {
       this.curParagraphId,
       this.curParagraph
     );
-    this.onChange(this.toJSON());
+    const response = this.toJSON();
+    this.onChange(response);
+    return response;
   }
 
   next() {
@@ -191,11 +237,12 @@ class Exam {
           word: str,
         };
       });
-      this.onChange(this.toJSON());
-      return;
+    } else {
+      this.status = ExamStatus.Completed;
     }
-    this.status = ExamStatus.Completed;
-    this.onChange(this.toJSON());
+    const res = this.toJSON();
+    this.onChange(res);
+    this.onNext(res);
   }
 
   skip() {
@@ -207,6 +254,7 @@ class Exam {
       console.log("[DOMAIN]exam - The exam hasn't start.");
       return new Error("The exam hasn't start.");
     }
+    this.inputtingWords = [];
     this.skippedParagraphs.push(this.curParagraph);
     this.next();
   }
@@ -216,7 +264,12 @@ class Exam {
       return;
     }
     this.inputtingWords.push(word);
-    console.log("[DOMAIN]exam - write", this.inputtingWords, word);
+    console.log(
+      "[DOMAIN]exam - write",
+      this.inputtingWords,
+      this.curWords,
+      word
+    );
 
     if (this.inputtingWords.length === this.curWords.length) {
       this.compare(this.inputtingWords, this.curWords);
@@ -239,11 +292,18 @@ class Exam {
     if (diffNodes === null) {
       this.correctParagraphs.push(this.curParagraph);
       console.log("Correct!");
+      this.combo += 1;
+      if (this.combo > this.maxCombo) {
+        this.maxCombo = this.combo;
+      }
+      this.onCorrect(this.toJSON());
       this.next();
       return;
     }
     this.incorrectParagraphs.push(this.curParagraph);
     console.log("Incorrect!");
+    this.combo = 0;
+    this.onIncorrect(this.toJSON());
     this.next();
   }
 
@@ -263,7 +323,10 @@ class Exam {
       paragraphs,
       status,
       displayedWords,
+      combo,
+      maxCombo,
       curParagraph,
+      curParagraphId,
       inputtingWords,
       correctParagraphs,
       incorrectParagraphs,
@@ -272,9 +335,12 @@ class Exam {
     return {
       status,
       paragraphs,
+      combo,
+      maxCombo,
       displayedWords,
       inputtingWords,
       curParagraph,
+      curParagraphId,
       correctParagraphs,
       incorrectParagraphs,
       skippedParagraphs,

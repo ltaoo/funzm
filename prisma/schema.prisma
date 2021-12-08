@@ -38,6 +38,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   captions      Caption[]
+  exams         Exam[]
   created_at    Int
   last_updated  Int?
 
@@ -78,6 +79,8 @@ model Caption {
   publisherId  String?       @map("publisher_id")
   paragraphs   Paragraph[]
 
+  exams        Exam[]
+
   movieId      String?       @map("movie_id")
 
   created_at    Int
@@ -97,5 +100,27 @@ model Paragraph {
   caption      Caption  @relation(fields: [captionId], references: [id], onDelete: Cascade)
 
   @@map("paragraphs")
+}
+
+model Exam {
+  id           String    @id @default(cuid())
+
+  status       Int       @default(1)
+
+  captionId    String    
+  caption      Caption   @relation(fields: [captionId], references: [id], onDelete: Cascade)
+
+  user         User?     @relation(fields: [userId], references: [id])
+  userId       String?   @map("publisher_id")
+
+  curParagraphId String? @map("cur_paragraph_id")
+  combo          Int     @default(0)
+  maxCombo       Int     @default(0) @map("max_combo")
+
+  skippedParagraphIds   String?       @map("skipped_paragraph_ids")
+  correctParagraphIds   String?       @map("correct_paragraph_ids")
+  incorrectParagraphIds String?       @map("incorrect_paragraph_ids")
+
+  @@map("exams")
 }
 

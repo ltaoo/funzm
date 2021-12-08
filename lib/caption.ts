@@ -1,6 +1,8 @@
 /**
  * @file 字幕分页
  */
+import { Caption, Paragraph } from ".prisma/client";
+
 import * as utils from "@/lib/utils";
 
 import prisma from "./prisma";
@@ -52,14 +54,38 @@ export async function addCaptionService({ title, paragraphs, publisherId }) {
  * @param {boolean} paragraph - 是否包含句子
  */
 export async function fetchCaptionById({ id, paragraph }) {
-  return prisma.caption.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      paragraphs: paragraph,
-    },
-  });
+  const countTask = !paragraph
+    ? prisma.paragraph.count({
+        where: {
+          captionId: id,
+        },
+      })
+    : undefined;
+  const result = await prisma.$transaction(
+    [
+      countTask,
+      prisma.caption.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          paragraphs: paragraph,
+          exams: true,
+        },
+      }),
+    ].filter(Boolean)
+  );
+  if (result.length === 1) {
+    const { paragraphs } = result[0] as Caption & { paragraphs: Paragraph[] };
+    return {
+      ...(result[0] as Caption),
+      count: paragraphs.length,
+    };
+  }
+  return {
+    ...(result[1] as Caption),
+    count: result[0],
+  };
 }
 
 /**
