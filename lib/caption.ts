@@ -70,6 +70,7 @@ export async function fetchCaptionById({ id, paragraph }) {
         },
         include: {
           paragraphs: paragraph,
+          // @ts-ignore
           exams: true,
         },
       }),
