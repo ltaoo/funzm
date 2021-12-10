@@ -4,12 +4,14 @@
 import { Fragment, useRef, useCallback, useEffect, useState } from "react";
 import cx from "classnames";
 import { useRouter } from "next/router";
+import { Transition } from "@headlessui/react";
+import { QuestionMarkCircleIcon } from "@heroicons/react/outline";
 
+import { fetchExamByCaptionId, updateExamService } from "@/services/exam";
 import { fetchParagraphsService } from "@/services/caption";
 import Exam, { ExamStatus } from "@/domains/exam";
-import { Transition } from "@headlessui/react";
-import { fetchExamByCaptionId, updateExamService } from "@/services/exam";
 import Loading from "@/components/Loading";
+import Modal from "@/components/Modal";
 
 const SimpleCaptionExamPage = () => {
   const router = useRouter();
@@ -24,6 +26,8 @@ const SimpleCaptionExamPage = () => {
   const [exam, setExam] = useState<Exam>(null);
   const [correctVisible, setCorrectVisible] = useState(false);
   const [incorrectVisible, setIncorrectVisible] = useState(false);
+  const [text2, setText2] = useState(null);
+  const [tipVisible, setTipVisible] = useState(false);
 
   const fetchParagraphs = useCallback(async () => {
     const response = await fetchParagraphsService({
@@ -98,7 +102,7 @@ const SimpleCaptionExamPage = () => {
           curParagraphId,
           skippedParagraphs,
           correctParagraphs,
-          incorrectParagraphs,
+          incorrectParagraphs: [],
         });
         if (remainingParagraphsCount === 3) {
           if (loadingRef.current) {
@@ -149,6 +153,13 @@ const SimpleCaptionExamPage = () => {
     init();
   }, []);
 
+  const showText2 = useCallback((paragraph) => {
+    return () => {
+      setText2(paragraph.text2);
+      setTipVisible(true);
+    };
+  }, []);
+
   // console.log("[PAGE]exam/simple/[id] - render", exam);
 
   if (exam === null) {
@@ -158,7 +169,13 @@ const SimpleCaptionExamPage = () => {
   return (
     <div className="h-screen bg-cool-gray-50 dark:bg-gray-800">
       {exam?.status === ExamStatus.Started && (
-        <div className="h-full overflow-hidden pb-20 xl:mx-auto xl:w-180">
+        <div className="relative h-full overflow-hidden pb-20 xl:mx-auto xl:w-180">
+          <div
+            className="absolute left-4 top-4"
+            onClick={showText2(exam.curParagraph)}
+          >
+            <QuestionMarkCircleIcon className="w-4 h-4 text-gray-500" />
+          </div>
           <div className="mt-26 text-center dark:text-white">
             {exam.curParagraph.text1}
           </div>
@@ -269,6 +286,14 @@ const SimpleCaptionExamPage = () => {
         </div>
       </Transition>
       <Loading visible={loading} />
+      <Modal
+        visible={tipVisible}
+        onCancel={() => {
+          setTipVisible(false);
+        }}
+      >
+        <div className="text-center">{text2}</div>
+      </Modal>
     </div>
   );
 };

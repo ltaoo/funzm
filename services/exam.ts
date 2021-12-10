@@ -25,3 +25,10 @@ export function createExamService(body): Promise<{ id: string }> {
 export function updateExamService(body): Promise<{ id: string }> {
   return request.post("/api/exam/update", body);
 }
+
+/**
+ * 创建测验拼写错误
+ */
+export function createExamSpellingErrorService(body) {
+  return request.post("/api/exam/error/add", body);
+}

@@ -35,10 +35,13 @@ model User {
   avatar        String?
   password      String
   salt          String
+
   accounts      Account[]
   sessions      Session[]
   captions      Caption[]
   exams         Exam[]
+  notebooks     Notebook[]
+
   created_at    Int
   last_updated  Int?
 
@@ -99,6 +102,11 @@ model Paragraph {
   captionId    String   @map("caption_id")
   caption      Caption  @relation(fields: [captionId], references: [id], onDelete: Cascade)
 
+  // 该段落被拼写错误过的记录
+  errors       Error[]
+  // 该段落有哪些单词被记录进单词本
+  words        Word[]
+
   @@map("paragraphs")
 }
 
@@ -121,6 +129,59 @@ model Exam {
   correctParagraphIds   String?       @map("correct_paragraph_ids") @db.LongText
   incorrectParagraphIds String?       @map("incorrect_paragraph_ids") @db.LongText
 
+  errors         Error[]
+
+  created_at    Int
+  last_updated  Int?
+
   @@map("exams")
+}
+
+model Error {
+  id           String     @id @default(cuid())
+
+  paragraphId  String     @map("paragraph_id")
+  paragraph    Paragraph  @relation(fields: [paragraphId], references: [id], onDelete: Cascade)
+
+  examId  String     @map("exam_id")
+  exam    Exam       @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  inputting    String    
+
+  created_at    Int
+
+  @@map("errors")
+}
+
+model Notebook {
+  id                String     @id @default(cuid())
+
+  title             String?
+
+  user              User?     @relation(fields: [userId], references: [id])
+  userId            String?   @map("publisher_id")
+
+  words             Word[]
+
+  created_at    Int
+  last_updated  Int?
+
+  @@map("notebooks")
+}
+
+model Word {
+  id                    String     @id @default(cuid())
+
+  text                  String
+
+  notebookId            String
+  notebook              Notebook?     @relation(fields: [notebookId], references: [id])
+
+  paragraphId           String                  
+  paragraph             Paragraph     @relation(fields: [paragraphId], references: [id])
+
+  created_at            Int
+
+  @@map("words")
 }
 
