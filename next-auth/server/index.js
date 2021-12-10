@@ -44,7 +44,7 @@ async function NextAuthHandler(req, res, userOptions) {
   return new Promise(async (resolve) => {
     extendRes(req, res, resolve);
 
-    console.log("[next-auth]entry promise constructor", req.query.nextauth);
+    // console.log("[next-auth]entry promise constructor", req.query.nextauth);
     if (!req.query.nextauth) {
       const error =
         "Cannot find [...nextauth].js in pages/api/auth. Make sure the filename is written correctly.";
@@ -64,7 +64,7 @@ async function NextAuthHandler(req, res, userOptions) {
     const { basePath, baseUrl } = parseUrl(
       process.env.NEXTAUTH_URL || process.env.VERCEL_URL
     );
-    console.log("[next-auth]base path and url", basePath, baseUrl);
+    // console.log("[next-auth]base path and url", basePath, baseUrl);
 
     const cookies = {
       ...cookie.defaultCookies(
@@ -75,7 +75,7 @@ async function NextAuthHandler(req, res, userOptions) {
     };
 
     const secret = createSecret({ userOptions, basePath, baseUrl });
-    console.log("[next-auth]secret", secret);
+    // console.log("[next-auth]secret", secret);
 
     const providers = parseProviders({
       providers: userOptions.providers,
@@ -83,7 +83,7 @@ async function NextAuthHandler(req, res, userOptions) {
       basePath,
     });
     const provider = providers.find(({ id }) => id === providerId);
-    console.log("[next-auth]provider", providers, providerId, provider);
+    // console.log("[next-auth]provider", providers, providerId, provider);
 
     // Protection only works on OAuth 2.x providers
     // TODO:
@@ -167,7 +167,7 @@ async function NextAuthHandler(req, res, userOptions) {
     const render = renderPage(req, res);
     const { pages } = req.options;
 
-    console.log("[next-auth]process req", req.method, action);
+    // console.log("[next-auth]process req", req.method, action);
     if (req.method === "GET") {
       switch (action) {
         case "providers":
@@ -237,19 +237,19 @@ async function NextAuthHandler(req, res, userOptions) {
       switch (action) {
         case "signin":
           // Verified CSRF Token required for all sign in routes
-          console.log(
-            "[next-auth]sign in",
-            req.options.csrfTokenVerified,
-            provider
-          );
+          // console.log(
+          //   "[next-auth]sign in",
+          //   req.options.csrfTokenVerified,
+          //   provider
+          // );
           if (req.options.csrfTokenVerified && provider) {
             if (await pkce.handleSignin(req, res)) return;
             if (await state.handleSignin(req, res)) return;
-            console.log(
-              "[next-auth]before invoke routes.signin",
-              req.options.csrfTokenVerified,
-              provider
-            );
+            // console.log(
+            //   "[next-auth]before invoke routes.signin",
+            //   req.options.csrfTokenVerified,
+            //   provider
+            // );
             return routes.signin(req, res);
           }
 
@@ -272,7 +272,7 @@ async function NextAuthHandler(req, res, userOptions) {
 
             if (await pkce.handleCallback(req, res)) return;
             if (await state.handleCallback(req, res)) return;
-            console.log("[next-auth]before invoke routes.callback");
+            // console.log("[next-auth]before invoke routes.callback");
             return routes.callback(req, res);
           }
           break;

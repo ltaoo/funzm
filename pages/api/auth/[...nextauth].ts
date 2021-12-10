@@ -8,7 +8,7 @@ import * as User from "@/lib/models/user";
 import prisma from "@/lib/prisma";
 
 export default NextAuth({
-  adapter: PrismaAdapter(prisma),
+  // adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: "Credentials",

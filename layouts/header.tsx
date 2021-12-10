@@ -33,7 +33,7 @@ export default function Header(props) {
         <div className="flex items-center py-4 px-4 shadow-md justify-between">
           <p>Caption</p>
           {!user && (
-            <span className="text-base px-1 text-sm">
+            <span className="flex items-center text-base px-1 text-sm">
               <div
                 className="cursor-pointer"
                 onClick={(e) => {

@@ -9,6 +9,7 @@ import { fetchParagraphsService } from "@/services/caption";
 import Exam, { ExamStatus } from "@/domains/exam";
 import { Transition } from "@headlessui/react";
 import { fetchExamByCaptionId, updateExamService } from "@/services/exam";
+import Loading from "@/components/Loading";
 
 const SimpleCaptionExamPage = () => {
   const router = useRouter();
@@ -16,12 +17,13 @@ const SimpleCaptionExamPage = () => {
   const examRef = useRef(null);
   const loadingRef = useRef(false);
   const startRef = useRef(null);
+  const idRef = useRef<string>(null);
+  const pageRef = useRef<number>(1);
+  const moreRef = useRef([]);
+  const [loading, setLoading] = useState(false);
   const [exam, setExam] = useState<Exam>(null);
   const [correctVisible, setCorrectVisible] = useState(false);
   const [incorrectVisible, setIncorrectVisible] = useState(false);
-
-  const idRef = useRef<string>(null);
-  const pageRef = useRef<number>(1);
 
   const fetchParagraphs = useCallback(async () => {
     const response = await fetchParagraphsService({
@@ -62,16 +64,22 @@ const SimpleCaptionExamPage = () => {
         .map((id) => ({ id })),
       paragraphs,
       onChange: async (nextExam) => {
-        const { curParagraph, paragraphs } = nextExam;
-        const index = paragraphs.findIndex((p) => p.id === curParagraph.id);
         setExam(nextExam);
-        if (index !== -1 && index + 3 >= paragraphs.length) {
-          loadingRef.current = true;
-          const moreParagraphs = await fetchParagraphs();
-          loadingRef.current = false;
-          examRef.current.appendParagraphs(moreParagraphs);
-        }
       },
+      // onBeforeNext({ remainingParagraphsCount }) {
+      //   console.log(remainingParagraphsCount, loadingRef.current);
+      //   if (remainingParagraphsCount === 1 && loadingRef.current) {
+      //     alert("1is loading data");
+      //     return false;
+      //   }
+      // },
+      // onBeforeSkip({ remainingParagraphsCount }) {
+      //   console.log(remainingParagraphsCount, loadingRef.current);
+      //   if (remainingParagraphsCount === 1 && loadingRef.current) {
+      //     console.log("2is loading data");
+      //     return false;
+      //   }
+      // },
       onNext: async (nextExam) => {
         const {
           combo,
@@ -80,7 +88,9 @@ const SimpleCaptionExamPage = () => {
           skippedParagraphs,
           correctParagraphs,
           incorrectParagraphs,
+          remainingParagraphsCount,
         } = nextExam;
+        // console.log("[]onNext", remainingParagraphsCount);
         await updateExamService({
           id,
           combo,
@@ -90,6 +100,28 @@ const SimpleCaptionExamPage = () => {
           correctParagraphs,
           incorrectParagraphs,
         });
+        if (remainingParagraphsCount === 3) {
+          if (loadingRef.current) {
+            console.log("has requested", loadingRef.current);
+            return;
+          }
+          loadingRef.current = true;
+          const moreParagraphs = await fetchParagraphs();
+          loadingRef.current = false;
+          moreRef.current = moreParagraphs;
+        }
+        if (remainingParagraphsCount === 1) {
+          if (loadingRef.current) {
+            // show loading to prevent user operate
+            alert("is request data, please wait a minutes.");
+            return;
+          }
+          if (moreRef.current.length !== 0) {
+            examRef.current.appendParagraphs(moreRef.current);
+            moreRef.current = [];
+            return;
+          }
+        }
       },
       onCorrect(exam) {
         const { combo } = exam;
@@ -177,9 +209,6 @@ const SimpleCaptionExamPage = () => {
                 if (!examRef.current) {
                   return;
                 }
-                if (loadingRef.current) {
-                  return;
-                }
                 examRef.current.skip();
               }}
             >
@@ -235,6 +264,7 @@ const SimpleCaptionExamPage = () => {
           <span className="ml-4 text-green-500">x0</span>
         </div>
       </Transition>
+      <Loading visible={loading} />
     </div>
   );
 };
