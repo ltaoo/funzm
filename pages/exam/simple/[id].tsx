@@ -69,14 +69,14 @@ const SimpleCaptionExamPage = () => {
       onBeforeNext({ remainingParagraphsCount }) {
         console.log(remainingParagraphsCount, loadingRef.current);
         if (remainingParagraphsCount === 1 && loadingRef.current) {
-          alert("1is loading data");
+          alert("1 is loading data");
           return false;
         }
       },
       onBeforeSkip({ remainingParagraphsCount }) {
         console.log(remainingParagraphsCount, loadingRef.current);
         if (remainingParagraphsCount === 1 && loadingRef.current) {
-          console.log("2is loading data");
+          alert("2 is loading data");
           return false;
         }
       },
@@ -106,9 +106,13 @@ const SimpleCaptionExamPage = () => {
             return;
           }
           loadingRef.current = true;
-          const moreParagraphs = await fetchParagraphs();
-          loadingRef.current = false;
-          moreRef.current = moreParagraphs;
+          fetchParagraphs()
+            .then((moreParagraphs) => {
+              moreRef.current = moreParagraphs;
+            })
+            .finally(() => {
+              loadingRef.current = false;
+            });
         }
         if (remainingParagraphsCount === 1) {
           if (loadingRef.current) {
