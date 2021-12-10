@@ -66,20 +66,20 @@ const SimpleCaptionExamPage = () => {
       onChange: async (nextExam) => {
         setExam(nextExam);
       },
-      // onBeforeNext({ remainingParagraphsCount }) {
-      //   console.log(remainingParagraphsCount, loadingRef.current);
-      //   if (remainingParagraphsCount === 1 && loadingRef.current) {
-      //     alert("1is loading data");
-      //     return false;
-      //   }
-      // },
-      // onBeforeSkip({ remainingParagraphsCount }) {
-      //   console.log(remainingParagraphsCount, loadingRef.current);
-      //   if (remainingParagraphsCount === 1 && loadingRef.current) {
-      //     console.log("2is loading data");
-      //     return false;
-      //   }
-      // },
+      onBeforeNext({ remainingParagraphsCount }) {
+        console.log(remainingParagraphsCount, loadingRef.current);
+        if (remainingParagraphsCount === 1 && loadingRef.current) {
+          alert("1is loading data");
+          return false;
+        }
+      },
+      onBeforeSkip({ remainingParagraphsCount }) {
+        console.log(remainingParagraphsCount, loadingRef.current);
+        if (remainingParagraphsCount === 1 && loadingRef.current) {
+          console.log("2is loading data");
+          return false;
+        }
+      },
       onNext: async (nextExam) => {
         const {
           combo,
