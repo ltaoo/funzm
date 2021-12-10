@@ -117,9 +117,9 @@ model Exam {
   combo          Int     @default(0)
   maxCombo       Int     @default(0) @map("max_combo")
 
-  skippedParagraphIds   String?       @map("skipped_paragraph_ids")
-  correctParagraphIds   String?       @map("correct_paragraph_ids")
-  incorrectParagraphIds String?       @map("incorrect_paragraph_ids")
+  skippedParagraphIds   String?       @map("skipped_paragraph_ids") @db.LongText
+  correctParagraphIds   String?       @map("correct_paragraph_ids") @db.LongText
+  incorrectParagraphIds String?       @map("incorrect_paragraph_ids") @db.LongText
 
   @@map("exams")
 }

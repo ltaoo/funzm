@@ -91,7 +91,7 @@ const SimpleCaptionExamPage = () => {
           remainingParagraphsCount,
         } = nextExam;
         // console.log("[]onNext", remainingParagraphsCount);
-        await updateExamService({
+        updateExamService({
           id,
           combo,
           maxCombo,
