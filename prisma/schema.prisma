@@ -41,6 +41,7 @@ model User {
   captions      Caption[]
   exams         Exam[]
   notebooks     Notebook[]
+  spellingResults SpellingResult[]
 
   created_at    Int
   last_updated  Int?
@@ -80,11 +81,11 @@ model Caption {
   published    Boolean       @default(false)
   publisher    User?         @relation(fields: [publisherId], references: [id])
   publisherId  String?       @map("publisher_id")
-  paragraphs   Paragraph[]
-
-  exams        Exam[]
 
   movieId      String?       @map("movie_id")
+
+  paragraphs   Paragraph[]
+  exams        Exam[]
 
   created_at    Int
   last_updated  Int?
@@ -92,9 +93,9 @@ model Caption {
 
 model Paragraph {
   id           String   @id @default(cuid())
-  line         Int
-  text1        String
-  text2        String
+  line         String
+  text1        String   @db.LongText
+  text2        String   @db.LongText
   start        String
   end          String
   language     String?
@@ -102,8 +103,8 @@ model Paragraph {
   captionId    String   @map("caption_id")
   caption      Caption  @relation(fields: [captionId], references: [id], onDelete: Cascade)
 
-  // 该段落被拼写错误过的记录
-  errors       Error[]
+  // 该段落被拼写（正确、错误、跳过）的记录
+  spellings       SpellingResult[]
   // 该段落有哪些单词被记录进单词本
   words        Word[]
 
@@ -125,11 +126,7 @@ model Exam {
   combo          Int     @default(0)
   maxCombo       Int     @default(0) @map("max_combo")
 
-  skippedParagraphIds   String?       @map("skipped_paragraph_ids") @db.LongText
-  correctParagraphIds   String?       @map("correct_paragraph_ids") @db.LongText
-  incorrectParagraphIds String?       @map("incorrect_paragraph_ids") @db.LongText
-
-  errors         Error[]
+  spellings       SpellingResult[]
 
   created_at    Int
   last_updated  Int?
@@ -137,20 +134,24 @@ model Exam {
   @@map("exams")
 }
 
-model Error {
+model SpellingResult {
   id           String     @id @default(cuid())
+  type         Int
+
+  userId       String?   @map("user_id")
+  user         User?     @relation(fields: [userId], references: [id])
 
   paragraphId  String     @map("paragraph_id")
   paragraph    Paragraph  @relation(fields: [paragraphId], references: [id], onDelete: Cascade)
 
-  examId  String     @map("exam_id")
-  exam    Exam       @relation(fields: [examId], references: [id], onDelete: Cascade)
+  examId  String?     @map("exam_id")
+  exam    Exam?       @relation(fields: [examId], references: [id], onDelete: Cascade)
 
-  inputting    String    
+  input   String?
 
   created_at    Int
 
-  @@map("errors")
+  @@map("spelling_results")
 }
 
 model Notebook {

@@ -4,6 +4,9 @@
 import prisma from "@/lib/prisma";
 import { getSession } from "@/next-auth/client";
 
+import * as utils from "@/lib/utils";
+import { SpellingResultType } from "@/domains/exam/constants";
+
 export default async function addExamSpellingErrorAPI(req, res) {
   const session = await getSession({ req });
   if (!session) {
@@ -15,31 +18,21 @@ export default async function addExamSpellingErrorAPI(req, res) {
     return;
   }
   const { body } = req;
-  const {
-    captionId,
-    curParagraphId,
-    skippedParagraphs,
-    correctParagraphs,
-    incorrectParagraphs,
-    combo,
-    maxCombo,
-  } = body;
+  const { paragraphId, examId, input } = body;
   try {
     const {
       // @ts-ignore
       user: { id: userId },
     } = session;
     console.log(prisma.exam);
-    const { id } = await prisma.exam.create({
+    const { id } = await prisma.spellingResult.create({
       data: {
-        captionId,
         userId,
-        curParagraphId,
-        combo,
-        maxCombo,
-        skippedParagraphIds: skippedParagraphs.map((p) => p.id).join(","),
-        correctParagraphIds: correctParagraphs.map((p) => p.id).join(","),
-        incorrectParagraphIds: incorrectParagraphs.map((p) => p.id).join(","),
+        type: SpellingResultType.Incorrect,
+        input,
+        paragraphId,
+        examId,
+        created_at: utils.seconds(),
       },
     });
     res.status(200).json({ code: 0, msg: "", data: { id } });

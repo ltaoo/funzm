@@ -9,7 +9,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { TrashIcon } from "@heroicons/react/outline";
 
 import { fetchCaptionById } from "@/lib/caption";
-import { fetchCaption, deleteCaption } from "@/services/caption";
+import { fetchCaptionService, deleteCaptionService } from "@/services/caption";
 import CaptionPreview from "@/components/CaptionPreview";
 import * as themeToggle from "@/utils/dark";
 
@@ -22,12 +22,12 @@ const CaptionPreviewPage = () => {
   const { id } = router.query;
 
   const fetchCaptionAndSave = useCallback(async (id) => {
-    const response = await fetchCaption({ id });
+    const response = await fetchCaptionService({ id });
     setCaption(response);
   }, []);
 
   const removeCaption = useCallback(async () => {
-    await deleteCaption({ id });
+    await deleteCaptionService({ id });
     router.replace({
       pathname: "/tip/success",
     });
@@ -41,7 +41,7 @@ const CaptionPreviewPage = () => {
     return null;
   }
   return (
-    <div className="bg-cool-gray-50 dark:bg-gray-800">
+    <div className="h-full">
       <Head>
         <title>{caption.title}</title>
       </Head>

@@ -2,16 +2,14 @@
  * @file 个人中心
  */
 import React from "react";
-import Link from "next/link";
+import router from "next/router";
 
 import Layout from "@/layouts";
-import CaptionUpload from "@/components/CaptionFileUpload";
-
-import tmpCaptionStorage from "@/domains/caption/utils";
-import router from "next/router";
+import { getSession, signOut } from "@/next-auth/client";
+import tmpCaptionStorage from "@/domains/caption/storage";
 import { fetchCaptionsService } from "@/lib/caption";
-import { getSession } from "@/next-auth/client";
 import CaptionCard from "@/components/CaptionCard";
+import CaptionUpload from "@/components/CaptionFileUpload";
 
 const Dashboard = (props) => {
   const { user, dataSource = [] } = props;
@@ -67,7 +65,10 @@ const Dashboard = (props) => {
           <div
             className="p-4 py-2 text-sm"
             onClick={() => {
-              // signOut();
+              signOut({});
+              router.push({
+                pathname: "/user/login",
+              });
             }}
           >
             退出登录

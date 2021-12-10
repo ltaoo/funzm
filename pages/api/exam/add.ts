@@ -1,8 +1,9 @@
 /**
  * @file 新增测验
  */
-import prisma from "@/lib/prisma";
 import { getSession } from "@/next-auth/client";
+import prisma from "@/lib/prisma";
+import * as utils from "@/lib/utils";
 
 export default async function addExamAPI(req, res) {
   const session = await getSession({ req });
@@ -15,15 +16,7 @@ export default async function addExamAPI(req, res) {
     return;
   }
   const { body } = req;
-  const {
-    captionId,
-    curParagraphId,
-    skippedParagraphs,
-    correctParagraphs,
-    incorrectParagraphs,
-    combo,
-    maxCombo,
-  } = body;
+  const { captionId, curParagraphId, combo, maxCombo } = body;
   try {
     const {
       // @ts-ignore
@@ -32,14 +25,13 @@ export default async function addExamAPI(req, res) {
     console.log(prisma.exam);
     const { id } = await prisma.exam.create({
       data: {
-        captionId,
-        userId,
+        captionId: captionId,
+        userId: userId,
         curParagraphId,
         combo,
         maxCombo,
-        skippedParagraphIds: skippedParagraphs.map((p) => p.id).join(','),
-        correctParagraphIds: correctParagraphs.map((p) => p.id).join(','),
-        incorrectParagraphIds: incorrectParagraphs.map((p) => p.id).join(','),
+        created_at: utils.seconds(),
+        last_updated: null,
       },
     });
     res.status(200).json({ code: 0, msg: "", data: { id } });

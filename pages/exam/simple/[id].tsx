@@ -48,9 +48,9 @@ const SimpleCaptionExamPage = () => {
       combo,
       maxCombo,
       curParagraphId,
-      skippedParagraphIds,
-      correctParagraphIds,
-      incorrectParagraphIds,
+      // skippedParagraphIds,
+      // correctParagraphIds,
+      // incorrectParagraphIds,
     } = res;
     idRef.current = captionId;
     startRef.current = curParagraphId;
@@ -61,11 +61,11 @@ const SimpleCaptionExamPage = () => {
       maxCombo,
       status: ExamStatus.Started,
       curParagraphId,
-      skippedParagraphs: skippedParagraphIds.split(",").map((id) => ({ id })),
-      correctParagraphIds: correctParagraphIds.split(",").map((id) => ({ id })),
-      incorrectParagraphIds: incorrectParagraphIds
-        .split(",")
-        .map((id) => ({ id })),
+      // skippedParagraphs: skippedParagraphIds.split(",").map((id) => ({ id })),
+      // correctParagraphIds: correctParagraphIds.split(",").map((id) => ({ id })),
+      // incorrectParagraphIds: incorrectParagraphIds
+      //   .split(",")
+      //   .map((id) => ({ id })),
       paragraphs,
       onChange: async (nextExam) => {
         setExam(nextExam);
@@ -95,15 +95,15 @@ const SimpleCaptionExamPage = () => {
           remainingParagraphsCount,
         } = nextExam;
         // console.log("[]onNext", remainingParagraphsCount);
-        updateExamService({
-          id,
-          combo,
-          maxCombo,
-          curParagraphId,
-          skippedParagraphs,
-          correctParagraphs,
-          incorrectParagraphs: [],
-        });
+        // updateExamService({
+        //   id,
+        //   combo,
+        //   maxCombo,
+        //   curParagraphId,
+        //   skippedParagraphs,
+        //   correctParagraphs,
+        //   incorrectParagraphs: [],
+        // });
         if (remainingParagraphsCount === 3) {
           if (loadingRef.current) {
             console.log("has requested", loadingRef.current);
@@ -174,7 +174,7 @@ const SimpleCaptionExamPage = () => {
             className="absolute left-4 top-4"
             onClick={showText2(exam.curParagraph)}
           >
-            <QuestionMarkCircleIcon className="w-4 h-4 text-gray-500" />
+            <QuestionMarkCircleIcon className="w-4 h-4 text-gray-500 cursor-pointer" />
           </div>
           <div className="mt-26 text-center dark:text-white">
             {exam.curParagraph.text1}

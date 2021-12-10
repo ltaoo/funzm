@@ -2,30 +2,6 @@ import * as diff from "diff";
 
 import { DiffNode } from "./types";
 
-const key = "tmp-caption";
-class CaptionTempStorage {
-  constructor() {}
-
-  save(caption) {
-    localStorage.setItem(key, JSON.stringify(caption));
-  }
-  read() {
-    try {
-      const caption = JSON.parse(localStorage.getItem(key) || "null");
-      //       localStorage.removeItem(key);
-      return caption;
-    } catch (err) {
-      return null;
-    }
-  }
-
-  clear() {
-    localStorage.removeItem(key);
-  }
-}
-
-export default new CaptionTempStorage();
-
 /**
  * 将一段英文分割成单词
  * @param text2
@@ -142,4 +118,57 @@ export function splitAndRandomTextSegments(text2) {
       text: str,
     };
   });
+}
+
+/**
+ * 优化段落，将多句合并成一句
+ * @param paragraphs
+ * @returns
+ */
+export function optimizeParagraphs(paragraphs) {
+  const nextParagraphs = paragraphs.reduce((result, cur) => {
+    const prevParagraph = result[result.length - 1];
+    if (prevParagraph) {
+      const {
+        line: prevLine,
+        text1: prevText1,
+        text2: prevText2,
+      } = prevParagraph;
+      const { line, start, end, text1, text2 } = cur;
+      const lastChar = prevText2.charAt(prevText2.length - 1);
+      if ([","].includes(lastChar) || /[a-z]/.test(lastChar)) {
+        const copy = { ...prevParagraph };
+        copy.line = `${prevLine}+${line}`;
+        copy.end = end;
+        copy.text1 = prevText1 + ` ${text1}`;
+        copy.text2 = prevText2 + ` ${text2}`;
+        result[result.length - 1] = copy;
+        return result;
+      }
+    }
+    return result.concat(cur);
+  }, []);
+  return nextParagraphs;
+}
+
+/**
+ * 将合并的段落拆分出来
+ * @param paragraphs
+ * @param mergedLine
+ * @returns
+ */
+export function splitMergedParagraphs(paragraphs, mergedLine) {
+  const matchedLineIndex = paragraphs.findIndex((paragraph) => {
+    return paragraph.line === mergedLine;
+  });
+  if (matchedLineIndex !== -1) {
+    const originalLines = mergedLine.split("+").map(Number);
+    const originalParagraphs = paragraphs.filter((paragraph) => {
+      return originalLines.includes(paragraph.line);
+    });
+    const nextOptimizedParagraphs = [...paragraphs];
+    nextOptimizedParagraphs.splice(matchedLineIndex, 1, ...originalParagraphs);
+    return nextOptimizedParagraphs;
+  }
+  return paragraphs;
 }

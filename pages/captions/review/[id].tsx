@@ -8,7 +8,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 
 import Modal from "@/components/Modal";
-import { fetchCaption } from "@/services/caption";
+import { fetchCaptionService } from "@/services/caption";
 import { compareLine, compareInputting } from "@/domains/caption/utils";
 
 const CaptionExamPage = () => {
@@ -23,7 +23,7 @@ const CaptionExamPage = () => {
   const curInputRef = useRef<HTMLDivElement>(null);
 
   const fetchCaptionAndSave = useCallback(async (id) => {
-    const response = await fetchCaption({ id });
+    const response = await fetchCaptionService({ id });
     setCaption(response);
   }, []);
 

@@ -1,5 +1,6 @@
 import { getSession } from "@/next-auth/client";
 import prisma from "@/lib/prisma";
+import { Prisma } from ".prisma/client";
 
 function paginationParams(params) {
   const { page, pageSize } = params;
@@ -25,19 +26,22 @@ export default async function fetchParagraphsAPI(req, res) {
       .json({ code: 100, msg: "必须指定要获取的句子所属字幕", data: null });
     return;
   }
+  const findManyParams = {
+    where: { captionId },
+    ...paginationParams({ page, pageSize }),
+  } as Prisma.ParagraphFindManyArgs;
+  if (start) {
+    findManyParams.cursor = {
+      id: start,
+    };
+  }
   const [total, result] = await prisma.$transaction([
     prisma.paragraph.count({
       where: {
         captionId,
       },
     }),
-    prisma.paragraph.findMany({
-      where: { captionId },
-      cursor: {
-        id: start,
-      },
-      ...paginationParams({ page, pageSize }),
-    }),
+    prisma.paragraph.findMany(findManyParams),
   ]);
   res.status(200).json({
     code: 0,

@@ -6,7 +6,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 
 import {
-  fetchCaptionWithoutParagraphs,
+  fetchCaptionWithoutParagraphsService,
   fetchParagraphsService,
 } from "@/services/caption";
 import Exam from "@/domains/exam";
@@ -23,7 +23,7 @@ const SimpleCaptionExamPage = () => {
   const pageRef = useRef<number>(1);
 
   const fetchCaptionAndSave = useCallback(async (id) => {
-    const response = await fetchCaptionWithoutParagraphs({ id });
+    const response = await fetchCaptionWithoutParagraphsService({ id });
     // @ts-ignore
     const { exams } = response;
     if (Array.isArray(exams) && exams.length > 0) {
@@ -53,24 +53,14 @@ const SimpleCaptionExamPage = () => {
   const startExam = useCallback(async () => {
     const instance = new Exam({});
     const paragraphs = await fetchParagraphs();
-    const {
-      status,
-      combo,
-      maxCombo,
-      curParagraphId,
-      correctParagraphs,
-      incorrectParagraphs,
-      skippedParagraphs,
-    } = instance.start(paragraphs);
+    const { status, combo, maxCombo, curParagraphId } =
+      instance.start(paragraphs);
     const { id } = await createExamService({
       captionId: idRef.current,
       status,
       combo,
       maxCombo,
       curParagraphId,
-      correctParagraphs,
-      incorrectParagraphs,
-      skippedParagraphs,
     });
     router.replace({
       pathname: `/exam/simple/${id}`,

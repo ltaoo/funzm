@@ -31,11 +31,13 @@ const CaptionPreview = (props) => {
   }, []);
 
   return (
-    <div className="overflow-hidden pb-20 space-y-2 md:mx-auto md:w-180 ">
-      <h2 className="mt-6 px-4 text-2xl break-all text-black dark:text-white">
-        {title}
-      </h2>
-      <div className="mt-10 px-4 space-y-6">
+    <div className="relative">
+      <div className="py-10 px-4 bg-gray-100 border-b">
+        <div className="mx-auto sm:w-180">
+          <h2 className="text-2xl break-all">{title}</h2>
+        </div>
+      </div>
+      <div className="mt-10 px-4 pb-20 space-y-6 sm:mx-auto sm:w-180">
         {paragraphs.map((caption) => {
           const { line, text1, text2 } = caption;
           return (

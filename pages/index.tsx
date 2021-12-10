@@ -5,7 +5,7 @@
 import React, { useCallback } from "react";
 import { useRouter } from "next/router";
 
-import captionTmpStorage from "@/domains/caption/utils";
+import captionTmpStorage from "@/domains/caption/storage";
 import CaptionUpload from "@/components/CaptionFileUpload";
 
 import Layout from "@/layouts";

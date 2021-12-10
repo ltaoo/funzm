@@ -25,9 +25,9 @@ export default async function updateExamAPI(req, res) {
         maxCombo,
         status,
         curParagraphId,
-        skippedParagraphIds: skippedParagraphs.map((p) => p.id).join(","),
-        correctParagraphIds: correctParagraphs.map((p) => p.id).join(","),
-        incorrectParagraphIds: incorrectParagraphs.map((p) => p.id).join(","),
+        // skippedParagraphIds: skippedParagraphs.map((p) => p.id).join(","),
+        // correctParagraphIds: correctParagraphs.map((p) => p.id).join(","),
+        // incorrectParagraphIds: incorrectParagraphs.map((p) => p.id).join(","),
       },
     });
 
