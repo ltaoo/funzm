@@ -7,8 +7,13 @@ import { useRouter } from "next/router";
 import { Transition } from "@headlessui/react";
 import { QuestionMarkCircleIcon } from "@heroicons/react/outline";
 
-import { fetchExamByCaptionId, updateExamService } from "@/services/exam";
+import {
+  createExamSpellingService,
+  fetchExamService,
+  updateExamService,
+} from "@/services/exam";
 import { fetchParagraphsService } from "@/services/caption";
+import { SpellingResultType } from "@/domains/exam/constants";
 import Exam, { ExamStatus } from "@/domains/exam";
 import Loading from "@/components/Loading";
 import Modal from "@/components/Modal";
@@ -23,11 +28,16 @@ const SimpleCaptionExamPage = () => {
   const pageRef = useRef<number>(1);
   const moreRef = useRef([]);
   const [loading, setLoading] = useState(false);
+  const [curCombo, setCurCombo] = useState(0);
   const [exam, setExam] = useState<Exam>(null);
   const [correctVisible, setCorrectVisible] = useState(false);
   const [incorrectVisible, setIncorrectVisible] = useState(false);
   const [text2, setText2] = useState(null);
   const [tipVisible, setTipVisible] = useState(false);
+
+  useEffect(() => {
+    pageRef.current = 1;
+  }, []);
 
   const fetchParagraphs = useCallback(async () => {
     const response = await fetchParagraphsService({
@@ -41,31 +51,17 @@ const SimpleCaptionExamPage = () => {
 
   const init = useCallback(async () => {
     const { id } = router.query;
-    const res = await fetchExamByCaptionId({ id: id as string });
-    const {
-      captionId,
-      status,
-      combo,
-      maxCombo,
-      curParagraphId,
-      // skippedParagraphIds,
-      // correctParagraphIds,
-      // incorrectParagraphIds,
-    } = res;
+    const res = await fetchExamService({ id: id as string });
+    const { captionId, status, combo, maxCombo, curParagraphId } = res;
     idRef.current = captionId;
     startRef.current = curParagraphId;
     const paragraphs = await fetchParagraphs();
     examRef.current = new Exam({
       title: "",
+      status: ExamStatus.Started,
       combo,
       maxCombo,
-      status: ExamStatus.Started,
       curParagraphId,
-      // skippedParagraphs: skippedParagraphIds.split(",").map((id) => ({ id })),
-      // correctParagraphIds: correctParagraphIds.split(",").map((id) => ({ id })),
-      // incorrectParagraphIds: incorrectParagraphIds
-      //   .split(",")
-      //   .map((id) => ({ id })),
       paragraphs,
       onChange: async (nextExam) => {
         setExam(nextExam);
@@ -85,25 +81,14 @@ const SimpleCaptionExamPage = () => {
         }
       },
       onNext: async (nextExam) => {
-        const {
+        const { combo, maxCombo, curParagraphId, remainingParagraphsCount } =
+          nextExam;
+        updateExamService({
+          id,
           combo,
           maxCombo,
           curParagraphId,
-          skippedParagraphs,
-          correctParagraphs,
-          incorrectParagraphs,
-          remainingParagraphsCount,
-        } = nextExam;
-        // console.log("[]onNext", remainingParagraphsCount);
-        // updateExamService({
-        //   id,
-        //   combo,
-        //   maxCombo,
-        //   curParagraphId,
-        //   skippedParagraphs,
-        //   correctParagraphs,
-        //   incorrectParagraphs: [],
-        // });
+        });
         if (remainingParagraphsCount === 3) {
           if (loadingRef.current) {
             console.log("has requested", loadingRef.current);
@@ -131,19 +116,36 @@ const SimpleCaptionExamPage = () => {
           }
         }
       },
-      onCorrect(exam) {
-        const { combo } = exam;
-        console.log(`x${combo}`);
+      onCorrect({ combo, curParagraphId }) {
         setCorrectVisible(true);
+        setCurCombo(combo);
+        createExamSpellingService({
+          examId: id,
+          paragraphId: curParagraphId,
+          type: SpellingResultType.Correct,
+        });
         setTimeout(() => {
           setCorrectVisible(false);
         }, 800);
       },
-      onIncorrect() {
+      onIncorrect({ curParagraphId, inputtingWords }) {
         setIncorrectVisible(true);
+        createExamSpellingService({
+          examId: id,
+          paragraphId: curParagraphId,
+          type: SpellingResultType.Incorrect,
+          input: inputtingWords.map((w) => w.word).join(" "),
+        });
         setTimeout(() => {
           setIncorrectVisible(false);
         }, 800);
+      },
+      onSkip({ curParagraphId }) {
+        createExamSpellingService({
+          examId: id,
+          paragraphId: curParagraphId,
+          type: SpellingResultType.Skipped,
+        });
       },
     });
     setExam(examRef.current.toJSON());
@@ -160,7 +162,7 @@ const SimpleCaptionExamPage = () => {
     };
   }, []);
 
-  // console.log("[PAGE]exam/simple/[id] - render", exam);
+  console.log("[PAGE]exam/simple/[id] - render", exam);
 
   if (exam === null) {
     return null;
@@ -169,18 +171,36 @@ const SimpleCaptionExamPage = () => {
   return (
     <div className="h-screen bg-cool-gray-50 dark:bg-gray-800">
       {exam?.status === ExamStatus.Started && (
-        <div className="relative h-full overflow-hidden pb-20 xl:mx-auto xl:w-180">
+        <div className="relative h-full pt-10">
           <div
             className="absolute left-4 top-4"
             onClick={showText2(exam.curParagraph)}
           >
             <QuestionMarkCircleIcon className="w-4 h-4 text-gray-500 cursor-pointer" />
           </div>
-          <div className="mt-26 text-center dark:text-white">
+          <div className="px-4 text-xl dark:text-white sm:mx-auto sm:w-100">
             {exam.curParagraph.text1}
           </div>
-          <div className="m-4 mx-2 min-h-30 dark:text-white">
-            {exam.inputtingWords.map((p) => p.word).join(" ")}
+          <div className="my-4 px-4 min-h-24 dark:text-white">
+            {(() => {
+              const result = [];
+              const elms = [...exam.inputtingWords];
+              for (let i = 0; i < exam.curWords.length; i += 1) {
+                const [prefix, word, suffix] = exam.curWords[i];
+                let w = word;
+                if (word) {
+                  w = elms.shift()?.word;
+                }
+                result.push(
+                  <span key={i}>
+                    {prefix}
+                    {w}
+                    {suffix}{" "}
+                  </span>
+                );
+              }
+              return result;
+            })()}
           </div>
           <div className="min-h-36">
             <div className="flex flex-wrap h-full px-4 pt-2 overflow-auto">
@@ -212,20 +232,21 @@ const SimpleCaptionExamPage = () => {
               })}
             </div>
           </div>
-          <div className="space-y-2">
+          <div className="mt-10 px-4 space-y-2">
             <div
-              className="btn text-center !bg-gray-500 !block"
+              className="btn text-center"
               onClick={() => {
-                if (!examRef.current) {
-                  return;
-                }
-                examRef.current.clear();
+                // console.log(exam);
+                setCorrectVisible(true);
+                setTimeout(() => {
+                  setCorrectVisible(false);
+                }, 800);
               }}
             >
-              清空
+              结束
             </div>
             <div
-              className="btn text-center !block"
+              className="btn text-center"
               onClick={() => {
                 if (!examRef.current) {
                   return;
@@ -236,16 +257,15 @@ const SimpleCaptionExamPage = () => {
               跳过
             </div>
             <div
-              className="btn text-center !block"
+              className="btn text-center !bg-gray-500"
               onClick={() => {
-                // console.log(exam);
-                setCorrectVisible(true);
-                setTimeout(() => {
-                  setCorrectVisible(false);
-                }, 800);
+                if (!examRef.current) {
+                  return;
+                }
+                examRef.current.clear();
               }}
             >
-              结束
+              清空
             </div>
           </div>
         </div>
@@ -261,13 +281,11 @@ const SimpleCaptionExamPage = () => {
         leaveFrom="opacity-100 translate-y-0 sm:scale-100"
         leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
       >
-        <div className="absolute right-10 top-10 transform -rotate-6">
+        <div className="absolute right-10 top-16 transform -rotate-6">
           <p className="text-4xl text-green-500">CORRECT!</p>
-          {exam?.combo && (
-            <p className="pr-4 text-right text-2xl text-yellow-500">
-              x{exam?.combo}
-            </p>
-          )}
+          <p className="pr-4 text-right text-2xl text-yellow-500">
+            x{curCombo}
+          </p>
         </div>
       </Transition>
       <Transition
@@ -280,9 +298,9 @@ const SimpleCaptionExamPage = () => {
         leaveFrom="opacity-100 translate-y-0 sm:scale-100"
         leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
       >
-        <div className="absolute right-10 top-10 transform -rotate-6">
+        <div className="absolute right-10 top-16 transform -rotate-6">
           <p className="text-4xl text-red-300">INCORRECT!</p>
-          <span className="ml-4 text-green-500">x0</span>
+          <span className="ml-4 text-red-300">x0</span>
         </div>
       </Transition>
       <Loading visible={loading} />

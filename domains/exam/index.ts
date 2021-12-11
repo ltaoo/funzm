@@ -4,7 +4,10 @@
  * 2、已结束状态由外部决定
  */
 import { Paragraph } from "@prisma/client";
+
 import { compareLine, splitText2Words } from "../caption/utils";
+
+import { shuffle, arr2map, uid } from "./utils";
 
 enum ExamLevel {
   Simple = 1,
@@ -20,57 +23,10 @@ export enum ExamStatus {
 
 function noop() {}
 
-function arr2map<T extends Record<string, any> = {}>(
-  arr: T[],
-  key: string
-): Record<any, T> {
-  return arr
-    .map((paragraph) => {
-      const id = paragraph[key];
-      return {
-        [id]: paragraph,
-      };
-    })
-    .reduce((result, cur) => {
-      return {
-        ...result,
-        ...cur,
-      };
-    }, {});
-}
 function filterEmptyTextParagraphs(paragraphs) {
   return paragraphs.filter((paragraph) => {
     const { text1, text2 } = paragraph;
     return text1 && text2;
-  });
-}
-
-function shuffle(arr) {
-  let m = arr.length;
-  while (m > 1) {
-    let index = Math.floor(Math.random() * m--);
-    [arr[m], arr[index]] = [arr[index], arr[m]];
-  }
-  return arr;
-}
-
-let _uid = 0;
-function uid() {
-  _uid += 1;
-  return _uid;
-}
-
-export function splitAndRandomTextSegments(text2) {
-  if (!text2) {
-    return [];
-  }
-  const segments = text2.split(" ");
-  // 打乱顺序
-  return shuffle(segments).map((str) => {
-    return {
-      uid: uid(),
-      text: str,
-    };
   });
 }
 
@@ -121,9 +77,9 @@ class Exam {
    */
   inputtingWords: { uid: number; word: string }[];
   /**
-   * 当前原文单词
+   * 当前原文单词[['', 'In', ''], ['', 'fact', '']]
    */
-  curWords: string[];
+  curWords: string[][];
   /**
    * 展示给用户选择的单测，在原文单词基础上打乱顺序，增加干扰单词等
    */
@@ -150,6 +106,7 @@ class Exam {
   onNext: (exam: Record<string, any>) => void;
   onBeforeSkip?: (exam: Record<string, any>) => boolean;
   onCorrect: (examJSON: Record<string, any>) => void;
+  onSkip?: (examJSON: Record<string, any>) => void;
   onIncorrect: (examJSON: Record<string, any>) => void;
 
   /**
@@ -168,6 +125,7 @@ class Exam {
       maxCombo = 0,
       paragraphs = [],
       onChange = noop,
+      onSkip,
       onCorrect = noop,
       onIncorrect = noop,
       onBeforeSkip,
@@ -177,6 +135,7 @@ class Exam {
     this.onChange = onChange;
     this.onCorrect = onCorrect;
     this.onIncorrect = onIncorrect;
+    this.onSkip = onSkip;
     this.onBeforeSkip = onBeforeSkip;
     this.onBeforeNext = onBeforeNext;
     this.onNext = onNext;
@@ -199,16 +158,26 @@ class Exam {
     this.displayedWords = [];
 
     if (this.curParagraphId && this.paragraphs.length > 0) {
+      // console.log(
+      //   "[]constructor - assign cur paragraph",
+      //   this.curParagraphId,
+      //   this.paragraphMap
+      // );
       this.curParagraph = this.paragraphMap[this.curParagraphId];
-      this.curWords = splitText2Words(this.curParagraph.text2).map(
-        ([, word]) => word
-      );
-      this.displayedWords = shuffle([...this.curWords]).map((str) => {
+      this.curWords = splitText2Words(this.curParagraph.text2);
+      this.displayedWords = shuffle([
+        ...this.curWords.map(([, word]) => word).filter(Boolean),
+      ]).map((str) => {
         return {
           uid: uid(),
           word: str,
         };
       });
+      console.log(
+        "[]constructor - split paragraph",
+        this.curWords,
+        this.displayedWords
+      );
     }
 
     this.inputtingWords = [];
@@ -224,16 +193,16 @@ class Exam {
     this.status = ExamStatus.Started;
     this.curParagraphId = this.paragraphs[0].id;
     this.curParagraph = this.paragraphMap[this.curParagraphId];
-    this.curWords = splitText2Words(this.curParagraph.text2).map(
-      ([, word]) => word
-    );
+    this.curWords = splitText2Words(this.curParagraph.text2);
     // console.log("[DOMAIN]exam - start", this.curWords);
-    this.displayedWords = shuffle(this.curWords).map((str) => {
-      return {
-        uid: uid(),
-        word: str,
-      };
-    });
+    this.displayedWords = shuffle(this.curWords.map(([, word]) => word))
+      .filter(Boolean)
+      .map((str) => {
+        return {
+          uid: uid(),
+          word: str,
+        };
+      });
     // console.log(
     //   "[DOMAIN]exam - start",
     //   this.paragraphs,
@@ -245,7 +214,7 @@ class Exam {
     return response;
   }
 
-  next() {
+  next(isSkip?: boolean) {
     if (this.onBeforeNext) {
       const canContinue = this.onBeforeNext(this.toJSON());
       if (canContinue === false) {
@@ -272,13 +241,18 @@ class Exam {
     const nextParagraph = this.paragraphs[matchedIndex + 1];
     console.log("[]next", matchedIndex, nextParagraph);
     if (nextParagraph) {
+      if (isSkip) {
+        if (this.onSkip) {
+          this.onSkip(this.toJSON());
+        }
+      }
       this.curParagraphId = nextParagraph.id;
       this.curParagraph = nextParagraph;
       this.remainingParagraphsCount = remainingParagraphsCount;
-      this.curWords = splitText2Words(this.curParagraph.text2)
-        .map(([, word]) => word)
-        .filter(Boolean);
-      this.displayedWords = shuffle([...this.curWords]).map((str) => {
+      this.curWords = splitText2Words(this.curParagraph.text2);
+      this.displayedWords = shuffle([
+        ...this.curWords.map(([, word]) => word).filter(Boolean),
+      ]).map((str) => {
         return {
           uid: uid(),
           word: str,
@@ -301,7 +275,7 @@ class Exam {
     if (this.onBeforeSkip) {
       const res = this.onBeforeSkip(this.toJSON());
       if (res === false) {
-        console.log('interrupt skip');
+        console.log("interrupt skip");
         return;
       }
     }
@@ -315,7 +289,7 @@ class Exam {
     }
     this.inputtingWords = [];
     this.skippedParagraphs.push(this.curParagraph);
-    this.next();
+    this.next(true);
   }
 
   write(word) {
@@ -330,8 +304,9 @@ class Exam {
     //   word
     // );
 
-    if (this.inputtingWords.length === this.curWords.length) {
-      this.compare(this.inputtingWords, this.curWords);
+    const curWords = this.curWords.map(([, word]) => word).filter(Boolean);
+    if (this.inputtingWords.length === curWords.length) {
+      this.compare(this.inputtingWords, curWords);
       return;
     }
     this.onChange(this.toJSON());
@@ -348,7 +323,6 @@ class Exam {
     const diffNodes = compareLine(words.join(" "), inputting);
 
     const errorInputting = this.inputtingWords.map((w) => w.word).join(" ");
-    this.inputtingWords = [];
     if (diffNodes === null) {
       this.correctParagraphs.push(this.curParagraph);
       // console.log("Correct!");
@@ -357,7 +331,9 @@ class Exam {
         this.maxCombo = this.combo;
       }
       this.onCorrect(this.toJSON());
-      this.next();
+      setTimeout(() => {
+        this.next();
+      }, 600);
       return;
     }
     this.incorrectParagraphs.push({
@@ -367,6 +343,7 @@ class Exam {
     // console.log("Incorrect!");
     this.combo = 0;
     this.onIncorrect(this.toJSON());
+    this.inputtingWords = [];
     this.next();
   }
 
@@ -401,6 +378,7 @@ class Exam {
       paragraphs,
       status,
       displayedWords,
+      curWords,
       combo,
       maxCombo,
       curParagraph,
@@ -416,6 +394,7 @@ class Exam {
       paragraphs,
       combo,
       maxCombo,
+      curWords,
       displayedWords,
       inputtingWords,
       curParagraph,

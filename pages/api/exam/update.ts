@@ -8,16 +8,7 @@ export default async function updateExamAPI(req, res) {
     return;
   }
   try {
-    const {
-      id,
-      status,
-      curParagraphId,
-      skippedParagraphs,
-      correctParagraphs,
-      incorrectParagraphs,
-      combo,
-      maxCombo,
-    } = req.body;
+    const { id, status, curParagraphId, combo, maxCombo } = req.body;
     await prisma.exam.update({
       where: { id },
       data: {
@@ -25,9 +16,6 @@ export default async function updateExamAPI(req, res) {
         maxCombo,
         status,
         curParagraphId,
-        // skippedParagraphIds: skippedParagraphs.map((p) => p.id).join(","),
-        // correctParagraphIds: correctParagraphs.map((p) => p.id).join(","),
-        // incorrectParagraphIds: incorrectParagraphs.map((p) => p.id).join(","),
       },
     });
 

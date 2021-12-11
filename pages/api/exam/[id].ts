@@ -4,7 +4,7 @@
 import prisma from "@/lib/prisma";
 import { getSession } from "@/next-auth/client";
 
-export default async function findExamAPI(req, res) {
+export default async function fetchExamAPI(req, res) {
   const session = await getSession({ req });
   if (!session) {
     res.status(200).json({
@@ -20,6 +20,9 @@ export default async function findExamAPI(req, res) {
     const data = await prisma.exam.findUnique({
       where: {
         id,
+      },
+      include: {
+        caption: true,
       },
     });
     if (data === null) {
