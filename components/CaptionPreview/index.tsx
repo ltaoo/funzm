@@ -9,9 +9,6 @@ import { StarIcon } from "@heroicons/react/solid";
 import { splitText2Words } from "@/domains/caption/utils";
 import SoundPlay from "@/components/SoundPlay";
 
-import Popover from "antd/lib/popover";
-import "antd/lib/popover/style/index.css";
-
 /**
  * 清洗单词，移除两边符号等无用字符
  */

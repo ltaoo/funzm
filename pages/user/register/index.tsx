@@ -2,14 +2,8 @@
  * @file 用户注册
  */
 import { useCallback } from "react";
-import Button from "antd/lib/button";
-import "antd/lib/button/style/index.css";
-import Input from "antd/lib/input";
-import "antd/lib/input/style/index.css";
-import Form from "antd/lib/form";
-import "antd/lib/form/style/index.css";
-import message from "antd/lib/message";
-import "antd/lib/message/style/index.css";
+import Form from 'rc-field-form';
+import { LockClosedIcon } from "@heroicons/react/solid";
 
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -23,62 +17,123 @@ const RegisterPage = () => {
   const registerAccount = useCallback(async () => {
     const values = await form.validateFields();
     await register(values);
-    message.success("注册成功");
+    // message.success("注册成功");
     router.push({
       pathname: "/user/login",
     });
   }, []);
 
   return (
-    <div className="mx-auto w-80 sm:w-120 ">
-      <h2 className="pt-4 text-2xl">CAPTION</h2>
-      <div className="mt-4 p-4 rounded shadow-lg">
-        <div>
-          <p className="my-2 text-lg">创建您的账户</p>
-          <Form form={form}>
-            <Form.Item
-              label="邮箱"
-              name="email"
-              rules={[
-                {
-                  required: true,
-                  message: "请输入邮箱",
-                },
-                {
-                  type: "email",
-                  message: "请输入合法的邮箱地址",
-                },
-              ]}
-            >
-              <Input placeholder="请输入邮箱" />
-            </Form.Item>
-            <Form.Item
-              label="密码"
-              name="password"
-              rules={[
-                {
-                  required: true,
-                  message: "请输入密码",
-                },
-              ]}
-            >
-              <Input
-                placeholder="请输入密码"
-                type="password"
-                minLength={8}
-                maxLength={20}
-              />
-            </Form.Item>
-          </Form>
-          <Button type="primary" size="large" block onClick={registerAccount}>
-            注册
-          </Button>
+    <>
+      {/*
+        This example requires updating your template:
+
+        ```
+        <html class="h-full bg-gray-50">
+        <body class="h-full">
+        ```
+      */}
+      <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div>
+            <img
+              className="mx-auto h-12 w-auto"
+              src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
+              alt="Workflow"
+            />
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Sign in to your account
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              没有账号？
+              <a
+                href="#"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                点击这里注册
+              </a>
+            </p>
+          </div>
+          <form className="mt-8 space-y-6" action="#" method="POST">
+            <input type="hidden" name="remember" defaultValue="true" />
+            <div className="rounded-md shadow-sm -space-y-px">
+              <div>
+                <label htmlFor="email-address" className="sr-only">
+                  邮箱
+                </label>
+                <Form.Field name="email">
+                  <input
+                    id="email-address"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    placeholder="邮箱"
+                  />
+                </Form.Field>
+              </div>
+              <div>
+                <label htmlFor="password" className="sr-only">
+                  密码
+                </label>
+                <Form.Field name="password">
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    placeholder="密码"
+                  />
+                </Form.Field>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <label
+                  htmlFor="remember-me"
+                  className="ml-2 block text-sm text-gray-900"
+                >
+                  Remember me
+                </label>
+              </div>
+
+              <div className="text-sm">
+                <a
+                  href="#"
+                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                >
+                  忘记密码
+                </a>
+              </div>
+            </div>
+            <div>
+              <button
+                type="submit"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                onClick={registerAccount}
+              >
+                <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                  <LockClosedIcon
+                    className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
+                    aria-hidden="true"
+                  />
+                </span>
+                登录
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-      <p className="mt-8 text-xs">
-        已经有账号？<Link href="/auth/login">前往登录</Link>
-      </p>
-    </div>
+    </>
   );
 };
 

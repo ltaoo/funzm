@@ -14,8 +14,8 @@ import Layout from "@/layouts";
 
 const navigation = [
   { name: "功能", href: "#" },
-  { name: "关于", href: "#about" },
-  { name: "Marketplace", href: "#" },
+  { name: "关于我们", href: "#about" },
+  { name: "订阅", href: "#" },
   { name: "Company", href: "#" },
 ];
 
@@ -33,18 +33,18 @@ const CaptionPreviewPage = (props) => {
 
   return (
     <div className="relative bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto">
         <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:w-full lg:pb-28 xl:pb-32">
-          <Popover>
+          <Popover className="header">
             <div className="relative pt-6 px-4 sm:px-6 lg:px-8">
               <nav
-                className="relative flex items-center justify-between sm:h-10 lg:justify-start"
+                className="relative flex items-center justify-between sm:h-10"
                 aria-label="Global"
               >
-                <div className="flex items-center flex-grow flex-shrink-0 lg:flex-grow-0">
+                <div className="logo flex items-center flex-grow flex-shrink-0 lg:flex-grow-0">
                   <div className="flex items-center justify-between w-full md:w-auto">
                     <a href="#">
-                      <span className="sr-only">Workflow</span>
+                      <span className="sr-only">FunZM</span>
                       <img
                         className="h-8 w-auto sm:h-10"
                         src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"

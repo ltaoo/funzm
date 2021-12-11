@@ -4,10 +4,6 @@
 import Link from "next/link";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import Avatar from "antd/lib/avatar";
-import "antd/lib/avatar/style/index.css";
-import Divider from "antd/lib/divider";
-import "antd/lib/divider/style/index.css";
 
 import { useSession } from "@/next-auth/client";
 
@@ -46,7 +42,6 @@ export default function Header(props) {
               >
                 登录
               </div>
-              <Divider type="vertical" />
               <Link href="/user/register">
                 <div className="cursor-pointer">注册</div>
               </Link>
@@ -55,12 +50,10 @@ export default function Header(props) {
           {user && (
             <div className="flex items-center cursor-pointer">
               <Link href="/dashboard">
-                <Avatar
-                  size={40}
-                  src={user.image ? `url(${user.image})` : undefined}
+                <div
                 >
                   {user.name?.slice(0, 1)}
-                </Avatar>
+                </div>
               </Link>
             </div>
           )}
