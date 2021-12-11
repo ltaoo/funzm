@@ -2,13 +2,22 @@
  * @file 官网首页
  */
 
-import React, { useCallback } from "react";
+import React, { Fragment, useCallback } from "react";
 import { useRouter } from "next/router";
+import { Popover, Transition } from "@headlessui/react";
+import { MenuIcon, XIcon } from "@heroicons/react/outline";
 
 import captionTmpStorage from "@/domains/caption/storage";
 import CaptionUpload from "@/components/CaptionFileUpload";
 
 import Layout from "@/layouts";
+
+const navigation = [
+  { name: "功能", href: "#" },
+  { name: "关于", href: "#about" },
+  { name: "Marketplace", href: "#" },
+  { name: "Company", href: "#" },
+];
 
 const CaptionPreviewPage = (props) => {
   const router = useRouter();
@@ -23,14 +32,264 @@ const CaptionPreviewPage = (props) => {
   }, []);
 
   return (
-    <Layout>
-      <div className="flex justify-center">
-        <div className="mx-auto px-5">
-          <h2 className="m-10 text-4xl text-center">CAPTION PARSER</h2>
-          <CaptionUpload onChange={handleUploadFile} />
+    <div className="relative bg-white overflow-hidden">
+      <div className="max-w-7xl mx-auto">
+        <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:w-full lg:pb-28 xl:pb-32">
+          <Popover>
+            <div className="relative pt-6 px-4 sm:px-6 lg:px-8">
+              <nav
+                className="relative flex items-center justify-between sm:h-10 lg:justify-start"
+                aria-label="Global"
+              >
+                <div className="flex items-center flex-grow flex-shrink-0 lg:flex-grow-0">
+                  <div className="flex items-center justify-between w-full md:w-auto">
+                    <a href="#">
+                      <span className="sr-only">Workflow</span>
+                      <img
+                        className="h-8 w-auto sm:h-10"
+                        src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
+                      />
+                    </a>
+                    <div className="-mr-2 flex items-center md:hidden">
+                      <Popover.Button className="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                        <span className="sr-only">Open main menu</span>
+                        <MenuIcon className="h-6 w-6" aria-hidden="true" />
+                      </Popover.Button>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden md:block md:ml-10 md:pr-4 md:space-x-8">
+                  {navigation.map((item) => (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      className="font-medium text-gray-500 hover:text-gray-900"
+                    >
+                      {item.name}
+                    </a>
+                  ))}
+                  <a
+                    href="#"
+                    className="font-medium text-green-600 hover:text-indigo-500"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      router.push({
+                        pathname: "/user/login",
+                      });
+                    }}
+                  >
+                    登录
+                  </a>
+                </div>
+              </nav>
+            </div>
+            <Transition
+              as={Fragment}
+              enter="duration-150 ease-out"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="duration-100 ease-in"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Popover.Panel
+                focus
+                className="absolute z-10 top-0 inset-x-0 p-2 transition transform origin-top-right md:hidden"
+              >
+                <div className="rounded-lg shadow-md bg-white ring-1 ring-black ring-opacity-5 overflow-hidden">
+                  <div>
+                    <div className="px-5 pt-4 flex items-center justify-between">
+                      <div>
+                        <img
+                          className="h-8 w-auto"
+                          src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
+                          alt=""
+                        />
+                      </div>
+                      <div className="-mr-2">
+                        <Popover.Button className="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                          <span className="sr-only">Close main menu</span>
+                          <XIcon className="h-6 w-6" aria-hidden="true" />
+                        </Popover.Button>
+                      </div>
+                    </div>
+                    <div className="px-2 pt-2 pb-3 space-y-1">
+                      {navigation.map((item) => (
+                        <a
+                          key={item.name}
+                          href={item.href}
+                          className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                        >
+                          {item.name}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                  <a
+                    href="#"
+                    className="block w-full px-5 py-3 text-center font-medium text-green-600 bg-gray-50 hover:bg-gray-100"
+                  >
+                    登录
+                  </a>
+                </div>
+              </Popover.Panel>
+            </Transition>
+          </Popover>
+          {/* wall */}
+          <main className="mt-10 mx-auto px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+            <div className="text-center">
+              <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                <span className="block xl:inline">趣字幕</span>{" "}
+                <span className="block mt-2 text-green-600 xl:inline">
+                  从有趣的字幕中学习英语
+                </span>
+              </h1>
+              <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                支持上传字幕解析、下载。在线查看字幕内容，分语言自定义字幕文字样式、大小。PC
+                端、移动端同步。
+              </p>
+              <p className="text-base text-gray-500 sm:text-lg sm:mx-auto md:text-xl lg:mx-0">
+                复习测验功能，帮助深入记忆字幕内容，提高学习效率
+              </p>
+              <div className="mt-5 sm:mt-8 sm:flex justify-center">
+                <div className="rounded-md shadow">
+                  <a
+                    href="#"
+                    className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-10"
+                  >
+                    上传字幕文件
+                  </a>
+                </div>
+                <div className="mt-3 sm:mt-0 sm:ml-3">
+                  <a
+                    href="#"
+                    className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 md:py-4 md:text-lg md:px-10"
+                  >
+                    实际体验
+                  </a>
+                </div>
+              </div>
+            </div>
+          </main>
         </div>
       </div>
-    </Layout>
+      <div className="mt-4 overflow-hidden sm:mt-6 lg:mt-10">
+        {/* 关于 */}
+        <section className="p-4 py-10 bg-gray-100">
+          <div className="mx-auto lg:w-240">
+            <h2 className="text-xl text-center sm:text-2xl md:text-2xl lg:text-2xl">
+              我怎么理解「学好」英语？
+            </h2>
+            <div className="mt-4 space-y-1">
+              <p className="text-gray-600">
+                想和大家聊一聊，怎么才能学好英语。
+              </p>
+              <p className="text-gray-600">
+                首先我们要搞清楚，你的「学好」是指什么，流利地日常沟通？看懂英语文档？还是能胜任专业的英语翻译。不同的目的，需要有不同的学习方式，来达到我们希望的「学好」。
+              </p>
+              <p className="text-gray-600">
+                我作为一个前端开发，之前希望的「学好」就是能看懂英文技术文档，这其实不难，遇到不会的单词查一查，长句子就直接丢进翻译软件，磕磕绊绊地也能看懂，而且熟练之后，大部分单词和句型也能记住，不借助翻译软件也是能完整看完一篇技术文档、技术博客之类的。
+              </p>
+              <p className="text-gray-600">
+                我也一直满足于这种程度，直到我遇到一个技术问题，需要在
+                Github（一个代码托管平台，在这里可以和全世界的程序员交流）上和别人沟通，虽然我能看懂他们的日常沟通，但需要自己写时，写出的「句子」自己能看懂，别人能不能看懂就不知道了。
+              </p>
+              <p className="text-gray-600">
+                这时我希望的「学好」英语，就变成能够写出自然的英语句子，也就是从开始的「读」，到现在的「读、写」。
+              </p>
+              <p className="text-gray-600">
+                经过一些搜索，我意识到通过「语料」是一个比较好的方式，于是我每天背一些句子。但效果并不明显，我总是背完就忘记了。
+              </p>
+              <p className="text-gray-600">
+                我觉得我需要一个「情景化」、「生活化」的场景，我把目标看向了美剧。
+              </p>
+              <p className="text-gray-600">
+                各种情景、真实世界、母语发音、中英对照，还有什么比这更有效的吗？
+              </p>
+              <p className="text-gray-600">
+                我下载了我的第一部美剧，《小谢尔顿》，因为觉得也许小孩说英语会更简单，毕竟他们词汇量还没有成人的大。
+              </p>
+              <p className="text-gray-600">
+                当然，有一点是我从始至终都坚持的，不「痛苦」的学习是无效的，看美剧很快乐，看完后还能记得多少呢，情节或许还能记住，具体的对话内容呢，还能记住多少？
+              </p>
+              <p className="text-gray-600">
+                所以我在看完美剧后，要求能够将中文台词翻译成英文，毕竟我的最终目的就是能够将自己的想法（中文）翻译成英文。
+              </p>
+              <p className="text-gray-600">
+                这个网站就是为了完成这件事的，我可以将原始中英字幕导入，在方便我随时背句子的同时，它提供了「测验」功能，分为简单和困难两种模式。
+              </p>
+              <p className="text-gray-600">
+                简单模式下，会按顺序显示中文字幕，下面提供单词选项，点击单词组成句子，与原句进行对比。
+              </p>
+              <p className="text-gray-600">
+                专业模式就是单纯的「默写」了，给出所有的中文字幕，在中文下填入翻译内容，同样与原句进行对比。
+              </p>
+              <p className="text-gray-600">
+                本来只有专业模式的，但实在是太困难了，简单句子还好，复杂句子即使我看过原文，还是翻译不出来。以及移动端输入内容不方便，所以又增加了简单模式，方便我在碎片时间也能翻译上几句。
+              </p>
+              <p className="text-gray-600">
+                最后说说效果，这有自卖自夸的嫌疑，但通过这种「预习」、「考试」的模式，的确能记住大部分字幕，还能知道一些口语化的表达，比如「关你屁事」，可以用
+                `None of your business.`
+              </p>
+              <p className="text-gray-600"></p>
+            </div>
+          </div>
+        </section>
+        {/* 网站功能 */}
+        <div className="p-4 py-8 xl:py-10">
+          {/* 字幕解析、下载 */}
+          <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
+            <div className="">
+              <h3 className="text-lg sm:text-xl lg:text-2xl">字幕解析与下载</h3>
+              <div className="mt-4">
+                <p className="text-gray-500">支持 ass、 等多种格式</p>
+                <p className="text-gray-500">
+                  导出为 text、word、pdf 等多种格式
+                </p>
+              </div>
+            </div>
+            <div></div>
+          </section>
+        </div>
+        <div className="p-4 py-8 bg-gray-100 xl:py-10">
+          {/* PC、移动端同步 */}
+          <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
+            <div></div>
+            <div className="">
+              <h3 className="text-lg sm:text-xl lg:text-2xl">随时查看字幕</h3>
+              <div className="mt-4">
+                <p className="text-gray-500">支持 PC 和移动端</p>
+                <p className="text-gray-500">自定义字幕字体样式、大小</p>
+                <p className="text-gray-500">支持暗黑模式</p>
+                <p className="text-gray-500">原句句子发音</p>
+                <p className="text-gray-500">点击单词即可查询释义</p>
+                <p className="text-gray-500">加入、导出生词本</p>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div className="p-4 py-8 xl:py-10">
+          {/* PC、移动端同步 */}
+          <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
+            <div className="">
+              <h3 className="text-lg sm:text-xl lg:text-2xl">
+                独创测验模式加强字幕记忆
+              </h3>
+              <div className="mt-4">
+                <p className="text-gray-500">简单模式模式有趣，随时随地</p>
+                <p className="text-gray-500">专业模式专注、高效，静心学习</p>
+                <p className="text-gray-500">
+                  完成测验可回顾、收录错题，加强记忆
+                </p>
+                <p className="text-gray-500"></p>
+              </div>
+            </div>
+            <div></div>
+          </section>
+        </div>
+      </div>
+      <div className="bg-gray-900 min-h-80"></div>
+    </div>
   );
 };
 

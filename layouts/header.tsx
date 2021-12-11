@@ -9,7 +9,7 @@ import "antd/lib/avatar/style/index.css";
 import Divider from "antd/lib/divider";
 import "antd/lib/divider/style/index.css";
 
-import { signIn, signOut, useSession } from "@/next-auth/client";
+import { useSession } from "@/next-auth/client";
 
 export default function Header(props) {
   const [session, loading] = useSession();
@@ -31,7 +31,7 @@ export default function Header(props) {
           <style>{`.nojs-show { opacity: 1; top: 0; }`}</style>
         </noscript>
         <div className="flex items-center py-4 px-4 shadow-md justify-between">
-          <p>Caption</p>
+          <p>FUNzm</p>
           {!user && (
             <span className="flex items-center text-base px-1 text-sm">
               <div
