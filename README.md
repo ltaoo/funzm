@@ -389,3 +389,102 @@ const {
 句子前面正常的符号被移除
 【吃啥炸薯球啊】
 'ought 
+
+## 服务器
+
+47.103.40.8
+120.26.201.239
+
+### 配置 RDS 与服务器
+
+内网 `ip` 172.19.44.203，点击修改，出现 加载ECS内网IP，可选择的就是 172.19.44.203，这是在同一内网机器下自动出现的。
+虽然另外有一台服务器，但由于地区在上海，所以没有出现在这里。
+逗号分割多个 `ip`，172.19.44.203,47.103.40.8
+
+一个内网一个公网。
+
+点击账号管理，新增一个 `root` 账号，账号类型选择高权限账号，并配置密码。
+
+数据库地址
+rm-bp19r1z17mp58btqu.mysql.rds.aliyuncs.com:3306
+
+实例ID rm-bp19r1z17mp58btqu
+
+mysql://litao:Li1218040201@地址
+
+### 安装 git
+https://cloud.tencent.com/developer/article/1590046
+
+先安装相关依赖
+
+```bash
+yum install curl-devel expat-devel gettext-devel openssl-devel zlib-devel gcc perl-ExtUtils-MakeMaker
+```
+
+```base
+wget https://github.com/git/git/archive/refs/tags/v2.34.1.tar.gz
+# curl -L https://github.com/yarnpkg/yarn/releases/download/v0.23.4/ya‌​rn-v0.23.4.tar.gz > yarn.tar.gz
+```
+
+```bash
+tar xf v2.34.1.tar.gz
+```
+
+指定安装目录
+
+```bash
+./configure prefix=/usr/local/git/
+```
+
+安装即可
+
+```bash
+make && make install
+```
+
+完成后，会在 `/usr/local` 新增 `git` 文件夹，里面有 `bin` 目录，存放的就是二进制文件，可以直接到这个目录
+
+```bash
+./git --version
+# git version 2.34.1
+```
+
+为了能在任意目录使用，需要将 `/usr/local/git/bin` 加入到环境变量
+
+```bash
+PATH="$PATH":/usr/local/git/bin
+echo $PATH
+# /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:/usr/local/git/bin
+```
+http://cn.linux.vbird.org/linux_basic/0320bash_2.php
+
+但是无法 `clone` 项目，提示
+git：'remote-https' 不是一个 git 命令
+
+
+### 安装 nodejs
+
+依赖
+```bash
+yum install gcc gcc-c++
+```
+
+下载源码
+
+```bash
+wget https://nodejs.org/dist/v16.13.1/node-v16.13.1.tar.gz
+
+tar xf node-v16.13.1.tar.gz
+
+./configure prefix=/usr/local/node/
+
+make && make install
+```
+
+太慢了，直接下载二进制文件好了
+
+```bash
+wget https://nodejs.org/dist/v16.13.1/node-v16.13.1-linux-x64.tar.xz
+```
+
+然后拷贝到 `/usr/local/nodejs` 目录，设置环境变量，直接 `node -v` 没问题，安装成果。

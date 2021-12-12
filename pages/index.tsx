@@ -5,7 +5,22 @@
 import React, { Fragment, useCallback } from "react";
 import { useRouter } from "next/router";
 import { Popover, Transition } from "@headlessui/react";
-import { MenuIcon, XIcon } from "@heroicons/react/outline";
+import {
+  AdjustmentsIcon,
+  BookOpenIcon,
+  ChartSquareBarIcon,
+  DeviceMobileIcon,
+  DocumentTextIcon,
+  DownloadIcon,
+  EmojiHappyIcon,
+  MenuIcon,
+  MoonIcon,
+  SunIcon,
+  TranslateIcon,
+  UploadIcon,
+  VolumeUpIcon,
+  XIcon,
+} from "@heroicons/react/outline";
 
 import captionTmpStorage from "@/domains/caption/storage";
 import CaptionUpload from "@/components/CaptionFileUpload";
@@ -232,11 +247,19 @@ const CaptionPreviewPage = (props) => {
           {/* 字幕解析、下载 */}
           <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
             <div className="">
-              <h3 className="text-lg sm:text-xl lg:text-2xl">字幕解析与下载</h3>
-              <div className="mt-4">
-                <p className="text-gray-500">支持 ass、 等多种格式</p>
-                <p className="text-gray-500">
-                  导出为 text、word、pdf 等多种格式
+              <h3 className="text-xl sm:text-2xl">字幕解析与下载</h3>
+              <div className="mt-8 space-y-4">
+                <p className="flex items-center text-gray-500 text-lg">
+                  <UploadIcon className="w-6 h-6 mr-4" />
+                  支持 ass、srt 等格式
+                </p>
+                <p className="flex items-center text-lg text-gray-500">
+                  <TranslateIcon className="w-6 h-6 mr-4" />
+                  智能分析中英文
+                </p>
+                <p className="flex items-center text-lg text-gray-500">
+                  <DownloadIcon className="w-6 h-6 mr-4" />
+                  导出为 text、word、pdf 等格式
                 </p>
               </div>
             </div>
@@ -248,14 +271,24 @@ const CaptionPreviewPage = (props) => {
           <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
             <div></div>
             <div className="">
-              <h3 className="text-lg sm:text-xl lg:text-2xl">随时查看字幕</h3>
-              <div className="mt-4">
-                <p className="text-gray-500">支持 PC 和移动端</p>
-                <p className="text-gray-500">自定义字幕字体样式、大小</p>
-                <p className="text-gray-500">支持暗黑模式</p>
-                <p className="text-gray-500">原句句子发音</p>
-                <p className="text-gray-500">点击单词即可查询释义</p>
-                <p className="text-gray-500">加入、导出生词本</p>
+              <h3 className="text-xl sm:text-2xl">随时查看字幕</h3>
+              <div className="mt-4 space-y-4">
+                <p className="flex items-center text-lg text-gray-500">
+                  <DeviceMobileIcon className="w-6 h-6 mr-4" />
+                  支持 PC 和移动端
+                </p>
+                <p className="flex items-center text-lg text-gray-500">
+                  <AdjustmentsIcon className="w-6 h-6 mr-4" />
+                  自定义字幕字体样式、大小
+                </p>
+                <p className="flex items-center text-lg text-gray-500">
+                  <MoonIcon className="w-6 h-6 mr-4" />
+                  支持暗黑模式
+                </p>
+                <p className="flex items-center text-lg text-gray-500">
+                  <VolumeUpIcon className="w-6 h-6 mr-4" />
+                  原句句子发音
+                </p>
               </div>
             </div>
           </section>
@@ -263,20 +296,44 @@ const CaptionPreviewPage = (props) => {
         <div className="p-4 py-8 xl:py-10">
           {/* PC、移动端同步 */}
           <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
-            <div className="">
-              <h3 className="text-lg sm:text-xl lg:text-2xl">
-                独创测验模式加强字幕记忆
-              </h3>
-              <div className="mt-4">
-                <p className="text-gray-500">简单模式模式有趣，随时随地</p>
-                <p className="text-gray-500">专业模式专注、高效，静心学习</p>
-                <p className="text-gray-500">
-                  完成测验可回顾、收录错题，加强记忆
+            <div>
+              <h3 className="text-xl sm:text-2xl">生词本、错题本</h3>
+              <div className="mt-4 space-y-4">
+                <p className="flex items-center text-lg text-gray-500">
+                  <TranslateIcon className="w-6 h-6 mr-4" />
+                  点击单词即可查询释义
                 </p>
-                <p className="text-gray-500"></p>
+                <p className="flex items-center text-lg text-gray-500">
+                  <DocumentTextIcon className="w-6 h-6 mr-4" />
+                  一键加入生词本
+                </p>
               </div>
             </div>
             <div></div>
+          </section>
+        </div>
+        <div className="p-4 py-8 bg-gray-100 xl:py-10">
+          <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
+            <div></div>
+            <div className="features">
+              <h3 className="text-xl sm:text-2xl">
+                测验模式加强字幕记忆
+              </h3>
+              <div className="mt-4 space-y-4">
+                <p className="flex items-center text-lg text-gray-500">
+                  <EmojiHappyIcon className="w-6 h-6 mr-4" />
+                  简单模式模式有趣，随时随地
+                </p>
+                <p className="flex items-center text-lg text-gray-500">
+                  <BookOpenIcon className="w-6 h-6 mr-4" />
+                  专业模式专注、高效，静心学习
+                </p>
+                <p className="flex items-center text-lg text-gray-500">
+                  <ChartSquareBarIcon className="w-6 h-6 mr-4" />
+                  统计测验结果
+                </p>
+              </div>
+            </div>
           </section>
         </div>
       </div>
