@@ -138,12 +138,16 @@ const CaptionPreviewPage = (props) => {
                       ))}
                     </div>
                   </div>
-                  <a
-                    href="#"
-                    className="block w-full px-5 py-3 text-center font-medium text-green-600 bg-gray-50 hover:bg-gray-100"
+                  <div
+                    className="block w-full px-5 py-3 text-center font-medium text-green-600 bg-gray-50 cursor-pointer hover:bg-gray-100"
+                    onClick={() => {
+                      router.push({
+                        pathname: "/user/login",
+                      });
+                    }}
                   >
                     登录
-                  </a>
+                  </div>
                 </div>
               </Popover.Panel>
             </Transition>
@@ -316,9 +320,7 @@ const CaptionPreviewPage = (props) => {
           <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
             <div></div>
             <div className="features">
-              <h3 className="text-xl sm:text-2xl">
-                测验模式加强字幕记忆
-              </h3>
+              <h3 className="text-xl sm:text-2xl">测验模式加强字幕记忆</h3>
               <div className="mt-4 space-y-4">
                 <p className="flex items-center text-lg text-gray-500">
                   <EmojiHappyIcon className="w-6 h-6 mr-4" />
