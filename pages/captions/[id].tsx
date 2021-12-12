@@ -6,24 +6,46 @@ import Head from "next/head";
 import { GetStaticProps, GetStaticPaths } from "next";
 import { useRouter } from "next/router";
 import { Dialog, Transition } from "@headlessui/react";
-import { TrashIcon } from "@heroicons/react/outline";
+import {
+  CogIcon,
+  DotsHorizontalIcon,
+  DotsVerticalIcon,
+  TrashIcon,
+  XIcon,
+} from "@heroicons/react/outline";
+import { Paragraph } from ".prisma/client";
 
-import { fetchCaptionById } from "@/lib/caption";
-import { fetchCaptionService, deleteCaptionService } from "@/services/caption";
-import CaptionPreview from "@/components/CaptionPreview";
 import * as themeToggle from "@/utils/dark";
+import { fetchCaptionById } from "@/lib/caption";
+import {
+  fetchCaptionService,
+  deleteCaptionService,
+  fetchCaptionWithoutParagraphsService,
+  fetchParagraphsService,
+} from "@/services/caption";
+import CaptionPreview from "@/components/CaptionPreview";
+import Drawer from "@/components/Drawer";
 
 const CaptionPreviewPage = () => {
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
+  const [settingVisible, setSettingVisible] = useState<boolean>(false);
   const [caption, setCaption] = useState(null);
+  const [paragraphs, setParagraphs] = useState([]);
 
   const { id } = router.query;
 
   const fetchCaptionAndSave = useCallback(async (id) => {
-    const response = await fetchCaptionService({ id });
+    const response = await fetchCaptionWithoutParagraphsService({ id });
     setCaption(response);
+    const { list: paragraphs } = await fetchParagraphsService({
+      captionId: id,
+    });
+    setParagraphs(paragraphs);
+    // setCaption({
+
+    // });
   }, []);
 
   const removeCaption = useCallback(async () => {
@@ -35,6 +57,15 @@ const CaptionPreviewPage = () => {
 
   useEffect(() => {
     fetchCaptionAndSave(id);
+    const handler = (event) => {
+      console.log(document.documentElement.scrollTop);
+      console.log(document.documentElement.clientHeight);
+      console.log(document.body.clientHeight);
+    };
+    document.addEventListener("scroll", handler);
+    return () => {
+      document.removeEventListener("scroll", handler);
+    };
   }, []);
 
   if (!caption) {
@@ -45,27 +76,36 @@ const CaptionPreviewPage = () => {
       <Head>
         <title>{caption.title}</title>
       </Head>
-      <CaptionPreview {...caption} />
-      <div className="flex justify-end sticky bottom-0 py-4 px-4 bg-white dark:bg-black space-x-2 border-t-1 dark:border-gray-800">
-        <p
-          className="text-base text-sm cursor-pointer text-black dark:text-white"
-          onClick={() => {
-            router.push({
-              pathname: `/captions/review/${id}`,
-            });
-          }}
-        >
-          Review
-        </p>
-        <p
-          className="text-base text-sm cursor-pointer text-black dark:text-white"
-          onClick={() => {
-            setOpen(true);
-          }}
-        >
-          More
-        </p>
+      <div className="relative">
+        <CaptionPreview {...caption} paragraphs={paragraphs} />
+        <div className="fixed bottom-40 right-0 hidden space-y-4 md:block">
+          <div
+            className="group flex items-center py-2 px-4 rounded-l-lg bg-gray-100 cursor-pointer hover:bg-gray-200"
+            onClick={() => {
+              setSettingVisible(true);
+            }}
+          >
+            {settingVisible ? (
+              <XIcon className="w-6 h-6 text-gray-400 group-hover:text-gray-800" />
+            ) : (
+              <CogIcon className="w-6 h-6 text-gray-400 group-hover:text-gray-800" />
+            )}
+          </div>
+          {/* <div className="cursor-pointer">
+            <DotsHorizontalIcon className="w-6 h-6 text-gray-400 hover:text-gray-800" />
+          </div> */}
+        </div>
       </div>
+      <Drawer
+        visible={settingVisible}
+        onCancel={() => {
+          setSettingVisible(false);
+        }}
+      >
+        <div>
+          <div className="section"></div>
+        </div>
+      </Drawer>
       <Transition.Root show={open} as={Fragment}>
         <Dialog
           as="div"
@@ -135,23 +175,5 @@ const CaptionPreviewPage = () => {
     </div>
   );
 };
-
-// export const getStaticPaths: GetStaticPaths = async () => {
-//   const paths = getAllPostIds();
-//   return {
-//     paths,
-//     fallback: false,
-//   };
-// };
-
-// export const getStaticProps: GetStaticProps = async ({ params }) => {
-//   console.log('getStaticProps', params);
-//   const caption = await fetchCaptionById({ id: params.id as string });
-//   return {
-//     props: {
-//       data: caption,
-//     },
-//   };
-// };
 
 export default CaptionPreviewPage;

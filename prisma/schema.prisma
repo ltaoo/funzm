@@ -111,6 +111,13 @@ model Paragraph {
   @@map("paragraphs")
 }
 
+// 阅读记录
+model Reading {
+  id           String    @id @default(cuid())
+
+  @@map("readings")
+}
+
 model Exam {
   id           String    @id @default(cuid())
 

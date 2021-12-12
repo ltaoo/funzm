@@ -1,8 +1,11 @@
 /**
  * @file 个人中心
  */
-import React from "react";
+import React, { Fragment } from "react";
+import cx from "classnames";
 import router from "next/router";
+import { Disclosure, Menu, Transition } from "@headlessui/react";
+import { BellIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
 
 import Layout from "@/layouts";
 import { getSession, signOut } from "@/next-auth/client";
@@ -33,47 +36,23 @@ const Dashboard = (props) => {
   }
   return (
     <Layout>
-      <div className="text-base">
-        <div className="space-y-2">
-          {dataSource.map((caption) => {
-            const { id } = caption;
-            return <CaptionCard key={id} {...caption} />;
-          })}
-        </div>
-        <p
-          className="mt-2 text-center text-sm cursor-pointer"
-          onClick={() => {
-            router.push({
-              pathname: "/dashboard/captions",
-            });
-          }}
-        >
-          查看全部
-        </p>
-        <div className="mt-8 divide-y-1">
-          <div className="p-4 py-2 text-sm">
-            <CaptionUpload
-              onChange={(caption) => {
-                tmpCaptionStorage.save(caption);
-                router.push({ pathname: "/captions/editor" });
-              }}
-            >
-              上传字幕
-            </CaptionUpload>
+      <div className="min-h-full">
+        <header className="bg-white shadow">
+          <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           </div>
-          <div className="p-4 py-2 text-sm">个人信息</div>
-          <div
-            className="p-4 py-2 text-sm"
-            onClick={() => {
-              signOut({});
-              router.push({
-                pathname: "/user/login",
-              });
-            }}
-          >
-            退出登录
+        </header>
+        <main>
+          <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            {/* content */}
+            <div className="space-y-4 sm:grid md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+              {dataSource.map((caption) => {
+                const { id } = caption;
+                return <CaptionCard key={id} {...caption} />;
+              })}
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     </Layout>
   );

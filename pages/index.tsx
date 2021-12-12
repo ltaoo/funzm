@@ -68,18 +68,16 @@ const CaptionPreviewPage = (props) => {
                       {item.name}
                     </a>
                   ))}
-                  <a
-                    href="#"
-                    className="font-medium text-green-600 hover:text-indigo-500"
-                    onClick={(e) => {
-                      e.preventDefault();
+                  <div
+                    className="inline font-medium text-green-600 cursor-pointer hover:text-indigo-500"
+                    onClick={() => {
                       router.push({
                         pathname: "/user/login",
                       });
                     }}
                   >
                     登录
-                  </a>
+                  </div>
                 </div>
               </nav>
             </div>
@@ -153,20 +151,14 @@ const CaptionPreviewPage = (props) => {
               </p>
               <div className="mt-5 sm:mt-8 sm:flex justify-center">
                 <div className="rounded-md shadow">
-                  <a
-                    href="#"
-                    className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-10"
-                  >
+                  <div className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-10">
                     上传字幕文件
-                  </a>
+                  </div>
                 </div>
                 <div className="mt-3 sm:mt-0 sm:ml-3">
-                  <a
-                    href="#"
-                    className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 md:py-4 md:text-lg md:px-10"
-                  >
+                  <div className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 md:py-4 md:text-lg md:px-10">
                     实际体验
-                  </a>
+                  </div>
                 </div>
               </div>
             </div>
