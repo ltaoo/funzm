@@ -19,8 +19,9 @@ const CaptionUpload = (props) => {
     return false;
   }, []);
   const handleUploadFile = useCallback(async (event) => {
-    const { file } = event;
-    // console.log('handle upload file', file.name)
+    const { files } = event.target;
+    // console.log('handle upload file', files)
+    const file = files[0];
     const content = await readTextFromFile(file);
     if (onChangeRef.current) {
       const segments = file.name.split(".");
@@ -32,7 +33,7 @@ const CaptionUpload = (props) => {
     }
   }, []);
   return (
-    <div>upload</div>
+    <div className=""><input className="w-12" type="file" onChange={handleUploadFile} /></div>
   );
 };
 

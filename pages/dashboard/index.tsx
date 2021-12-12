@@ -10,6 +10,7 @@ import { BellIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
 import Layout from "@/layouts";
 import { getSession, signOut } from "@/next-auth/client";
 import tmpCaptionStorage from "@/domains/caption/storage";
+import { parseCaptionContent } from "@/domains/caption";
 import { fetchCaptionsService } from "@/lib/caption";
 import CaptionCard from "@/components/CaptionCard";
 import CaptionUpload from "@/components/CaptionFileUpload";
@@ -38,8 +39,22 @@ const Dashboard = (props) => {
     <Layout>
       <div className="min-h-full">
         <header className="bg-white shadow">
-          <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <CaptionUpload
+              onChange={async (caption) => {
+                const { title, content, ext } = caption;
+                const p = await parseCaptionContent(content, ext);
+                const captionResult = {
+                  title,
+                  paragraphs: p,
+                };
+                tmpCaptionStorage.save(captionResult);
+                router.push({ pathname: "/captions/editor" });
+              }}
+            >
+              上传
+            </CaptionUpload>
           </div>
         </header>
         <main>

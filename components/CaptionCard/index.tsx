@@ -29,9 +29,9 @@ const CaptionCard = (props) => {
       </p>
       <div className="flex justify-space-between mt-4 space-x-4">
         <button className="text-sm">
-          <Link href={`/captions/review/simple/${id}`}>
+          <a href={`/captions/review/simple/${id}`}>
             <AcademicCapIcon className="w-6 h-6 text-gray-500 hover:text-gray-800" />
-          </Link>
+          </a>
         </button>
         <button className="text-sm">
           <PencilAltIcon className="w-6 h-6 text-gray-500 hover:text-gray-800" />

@@ -5,7 +5,15 @@ import { Fragment, useRef, useCallback, useEffect, useState } from "react";
 import cx from "classnames";
 import { useRouter } from "next/router";
 import { Transition } from "@headlessui/react";
-import { QuestionMarkCircleIcon } from "@heroicons/react/outline";
+import {
+  ArrowRightIcon,
+  ChartBarIcon,
+  FireIcon,
+  LightBulbIcon,
+  QuestionMarkCircleIcon,
+  ReplyIcon,
+  ScissorsIcon,
+} from "@heroicons/react/outline";
 
 import {
   createExamSpellingService,
@@ -27,6 +35,7 @@ const SimpleCaptionExamPage = () => {
   const idRef = useRef<string>(null);
   const pageRef = useRef<number>(1);
   const moreRef = useRef([]);
+  const totalRef = useRef(0);
   const [loading, setLoading] = useState(false);
   const [curCombo, setCurCombo] = useState(0);
   const [exam, setExam] = useState<Exam>(null);
@@ -46,6 +55,7 @@ const SimpleCaptionExamPage = () => {
       page: pageRef.current,
     });
     pageRef.current += 1;
+    totalRef.current = response.total;
     return response.list;
   }, []);
 
@@ -169,41 +179,43 @@ const SimpleCaptionExamPage = () => {
   }
 
   return (
-    <div className="h-screen bg-cool-gray-50 dark:bg-gray-800">
+    <div className="h-screen">
       {exam?.status === ExamStatus.Started && (
-        <div className="relative h-full pt-10">
-          <div
+        <div className="relative h-full">
+          {/* <div
             className="absolute left-4 top-4"
             onClick={showText2(exam.curParagraph)}
           >
-            <QuestionMarkCircleIcon className="w-4 h-4 text-gray-500 cursor-pointer" />
+            <QuestionMarkCircleIcon className="w-6 h-6 text-gray-500 cursor-pointer" />
+          </div> */}
+          <div className="py-8 px-4 text-xl text-gray-800 bg-gray-100 dark:text-white sm:px-0">
+            <div className="sm:mx-auto sm:w-180">{exam.curParagraph.text1}</div>
           </div>
-          <div className="px-4 text-xl dark:text-white sm:mx-auto sm:w-100">
-            {exam.curParagraph.text1}
-          </div>
-          <div className="my-4 px-4 min-h-24 dark:text-white">
-            {(() => {
-              const result = [];
-              const elms = [...exam.inputtingWords];
-              for (let i = 0; i < exam.curWords.length; i += 1) {
-                const [prefix, word, suffix] = exam.curWords[i];
-                let w = word;
-                if (word) {
-                  w = elms.shift()?.word;
+          <div className="py-6 px-4 sm:mx-auto sm:w-180 sm:px-0">
+            <div className="text-3xl font-serif text-black dark:text-white min-h-36 dark:text-white">
+              {(() => {
+                const result = [];
+                const elms = [...exam.inputtingWords];
+                for (let i = 0; i < exam.curWords.length; i += 1) {
+                  const [prefix, word, suffix] = exam.curWords[i];
+                  let w = word;
+                  if (word) {
+                    w = elms.shift()?.word;
+                  }
+                  result.push(
+                    <span key={i}>
+                      {w ? prefix : ""}
+                      {w}
+                      {w ? suffix : ""}{" "}
+                    </span>
+                  );
                 }
-                result.push(
-                  <span key={i}>
-                    {prefix}
-                    {w}
-                    {suffix}{" "}
-                  </span>
-                );
-              }
-              return result;
-            })()}
+                return result;
+              })()}
+            </div>
           </div>
-          <div className="min-h-36">
-            <div className="flex flex-wrap h-full px-4 pt-2 overflow-auto">
+          <div className="min-h-48 px-4 sm:mx-auto sm:w-180 sm:px-0">
+            <div className="flex flex-wrap h-full overflow-auto">
               {exam.displayedWords.map((segment) => {
                 const { uid, word } = segment;
                 const existing = exam.inputtingWords
@@ -213,8 +225,8 @@ const SimpleCaptionExamPage = () => {
                   <div
                     key={uid}
                     className={cx(
-                      "inline mr-2 mb-2 px-4 py-1 text-white rounded-md bg-blue-500 cursor-pointer hover:shadow",
-                      existing ? "!bg-blue-100 !hover:shadow-none" : ""
+                      "inline mr-2 mb-2 px-4 py-1 text-white rounded-md bg-green-500 cursor-pointer hover:shadow",
+                      existing ? "!bg-green-100 !hover:shadow-none" : ""
                     )}
                     onClick={() => {
                       if (!examRef.current) {
@@ -232,40 +244,38 @@ const SimpleCaptionExamPage = () => {
               })}
             </div>
           </div>
-          <div className="mt-10 px-4 space-y-2">
-            <div
-              className="btn text-center"
-              onClick={() => {
-                // console.log(exam);
-                setCorrectVisible(true);
-                setTimeout(() => {
-                  setCorrectVisible(false);
-                }, 800);
-              }}
-            >
-              结束
-            </div>
-            <div
-              className="btn text-center"
-              onClick={() => {
-                if (!examRef.current) {
-                  return;
-                }
-                examRef.current.skip();
-              }}
-            >
-              跳过
-            </div>
-            <div
-              className="btn text-center !bg-gray-500"
-              onClick={() => {
-                if (!examRef.current) {
-                  return;
-                }
-                examRef.current.clear();
-              }}
-            >
-              清空
+          <hr />
+          <div className="flex items-center justify-between mt-6 px-4 sm:mx-auto sm:w-180 sm:px-0">
+            <div className="text-xl text-gray-400">13/{totalRef.current}</div>
+            <div className="flex space-x-4">
+              <ChartBarIcon
+                className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100"
+                onClick={() => {
+                  if (!examRef.current) {
+                    return;
+                  }
+                  examRef.current.clear();
+                }}
+              />
+              <LightBulbIcon className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100" />
+              <ScissorsIcon
+                className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100"
+                onClick={() => {
+                  if (!examRef.current) {
+                    return;
+                  }
+                  examRef.current.skip();
+                }}
+              />
+              <FireIcon
+                className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100"
+                onClick={() => {
+                  if (!examRef.current) {
+                    return;
+                  }
+                  examRef.current.clear();
+                }}
+              />
             </div>
           </div>
         </div>
@@ -300,7 +310,6 @@ const SimpleCaptionExamPage = () => {
       >
         <div className="absolute right-10 top-16 transform -rotate-6">
           <p className="text-4xl text-red-300">INCORRECT!</p>
-          <span className="ml-4 text-red-300">x0</span>
         </div>
       </Transition>
       <Loading visible={loading} />

@@ -60,13 +60,18 @@ function invertText(text, invert) {
 
 const CAPTION_PARSER_MAP = {
   srt: (content) => {
-    const result = content
-      .replace(/\d+\s*(\d+:?){3},\d* --> (\d+:?){3},\d*/g, "")
-      .replace(/{\\an.*}/g, "")
-      .replace(/{\\pos.*}/g, "")
-      .replace(/(\s*\n){3,}/g, "\n\n")
-      .trim();
-    return result;
+    const oriParagraphs = content.split("\r\n\r\n").filter(Boolean);
+    return oriParagraphs.map((paragraph) => {
+      const [line, startAndEnd, text1, text2] = paragraph.split("\r\n");
+      const [start, end] = startAndEnd.split(' --> ');
+      return {
+        line,
+        start: start.split(',')[0],
+        end: end.split(',')[0],
+        text1,
+        text2,
+      };
+    });
   },
   ass: (content) => {
     const lines = content.match(/Dialogue:.*\n?/g);
@@ -74,7 +79,7 @@ const CAPTION_PARSER_MAP = {
       const removeTextModifier = line.replace(/{.*?}/g, "");
       const [, start, end, style, name, ml, mr, mv, effect, ...text] =
         removeTextModifier.split(",");
-      const [text1 = '', text2 = ''] = text.join(",").split("\\N");
+      const [text1 = "", text2 = ""] = text.join(",").split("\\N");
       return {
         line: index,
         start,
@@ -95,7 +100,6 @@ export function parseCaptionContent(
   content: string,
   format?: "srt" | "ass" | "txt"
 ): Caption["paragraphs"] {
-  //   console.log("[]parseCaptionContent", format);
   const parser = CAPTION_PARSER_MAP[format];
   if (parser) {
     return parser(content);
@@ -103,8 +107,8 @@ export function parseCaptionContent(
   return [
     {
       line: 1,
-      start: '',
-      end: '',
+      start: "",
+      end: "",
       text1: content,
       text2: undefined,
     },

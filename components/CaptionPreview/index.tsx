@@ -38,7 +38,7 @@ const CaptionPreview = (props) => {
           </div>
         </div>
       </div>
-      <div className="mt-10 px-4 pb-20 space-y-6 sm:mx-auto sm:w-180">
+      <div className="mt-10 px-4 pb-20 space-y-6 sm:mx-auto sm:w-180 sm:px-0">
         {paragraphs.map((caption) => {
           const { line, text1, text2 } = caption;
           return (

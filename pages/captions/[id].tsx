@@ -1,7 +1,7 @@
 /**
  * @file 字幕展示
  */
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import { GetStaticProps, GetStaticPaths } from "next";
 import { useRouter } from "next/router";
@@ -14,6 +14,7 @@ import {
   XIcon,
 } from "@heroicons/react/outline";
 import { Paragraph } from ".prisma/client";
+import debounce from 'lodash.debounce';
 
 import * as themeToggle from "@/utils/dark";
 import { fetchCaptionById } from "@/lib/caption";
@@ -33,19 +34,22 @@ const CaptionPreviewPage = () => {
   const [settingVisible, setSettingVisible] = useState<boolean>(false);
   const [caption, setCaption] = useState(null);
   const [paragraphs, setParagraphs] = useState([]);
+  const pageRef = useRef(1);
+  const loadingRef = useRef(false);
 
-  const { id } = router.query;
+  const id = router.query.id as string;
 
   const fetchCaptionAndSave = useCallback(async (id) => {
     const response = await fetchCaptionWithoutParagraphsService({ id });
     setCaption(response);
+    loadingRef.current = true;
     const { list: paragraphs } = await fetchParagraphsService({
       captionId: id,
+      page: pageRef.current,
     });
+    loadingRef.current = false;
+    pageRef.current += 1;
     setParagraphs(paragraphs);
-    // setCaption({
-
-    // });
   }, []);
 
   const removeCaption = useCallback(async () => {
@@ -57,11 +61,37 @@ const CaptionPreviewPage = () => {
 
   useEffect(() => {
     fetchCaptionAndSave(id);
-    const handler = (event) => {
+    const handler = debounce(async (event) => {
       console.log(document.documentElement.scrollTop);
       console.log(document.documentElement.clientHeight);
       console.log(document.body.clientHeight);
-    };
+      if (
+        document.documentElement.scrollTop +
+          document.documentElement.clientHeight +
+          200 >=
+        document.body.clientHeight
+      ) {
+        console.log("load more", loadingRef.current, pageRef.current);
+        if (loadingRef.current) {
+          return;
+        }
+        loadingRef.current = true;
+        const { isEnd, list: paragraphs } = await fetchParagraphsService({
+          captionId: id,
+          page: pageRef.current,
+        });
+        loadingRef.current = false;
+        pageRef.current += 1;
+        setParagraphs((prev) => {
+          return prev.concat(paragraphs);
+        });
+        if (isEnd) {
+          document.removeEventListener("scroll", handler);
+          return;
+        }
+      }
+    }, 400);
+    pageRef.current = 1;
     document.addEventListener("scroll", handler);
     return () => {
       document.removeEventListener("scroll", handler);

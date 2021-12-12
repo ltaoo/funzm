@@ -10,7 +10,7 @@ import request from "./request";
  * @param {Paragraph[]} body.paragraphs - 段落
  */
 export function addCaptionService(body): Promise<{ id: string }> {
-  console.log('[SERVICE]caption/addCaptionService', body);
+  console.log("[SERVICE]caption/addCaptionService", body);
   return request.post("/api/caption/add", body);
 }
 
@@ -58,6 +58,7 @@ export function fetchParagraphsService(params: {
   page: number;
   pageSize: number;
   total: number;
+  isEnd: boolean;
   list: IParagraph[];
 }> {
   // console.log('fetchParagraphsService', params);

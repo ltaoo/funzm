@@ -226,6 +226,7 @@ class Exam {
       console.log("[DOMAIN]exam - next", this.status === ExamStatus.Completed);
       return;
     }
+    this.inputtingWords = [];
     const matchedIndex = this.paragraphs.findIndex(
       (paragraph) => paragraph.id === this.curParagraphId
     );
