@@ -15,29 +15,35 @@ import {
   EmojiHappyIcon,
   MenuIcon,
   MoonIcon,
+  PencilIcon,
   SunIcon,
   TranslateIcon,
   UploadIcon,
+  UserIcon,
   VolumeUpIcon,
   XIcon,
 } from "@heroicons/react/outline";
 
 import captionTmpStorage from "@/domains/caption/storage";
 import CaptionUpload from "@/components/CaptionFileUpload";
+import { getSession, useSession } from "@/next-auth/client";
 
 import Layout from "@/layouts";
 
 const navigation = [
   { name: "功能", href: "#" },
-  { name: "关于我们", href: "#about" },
   { name: "订阅", href: "#" },
-  { name: "Company", href: "#" },
+  { name: "帮助中心", href: "#" },
+  { name: "关于我们", href: "#about" },
 ];
 
-const CaptionPreviewPage = (props) => {
+const Website = (props) => {
+  const { user } = props;
   const router = useRouter();
+  const session = useSession();
 
-  // console.log("[PAGE]CaptionManagePage - render", props.data);
+  // const user = session?.user;
+  // console.log("[PAGE]Website - render", user);
 
   const handleUploadFile = useCallback(async (caption) => {
     captionTmpStorage.save(caption);
@@ -73,26 +79,38 @@ const CaptionPreviewPage = (props) => {
                     </div>
                   </div>
                 </div>
-                <div className="hidden md:block md:ml-10 md:pr-4 md:space-x-8">
+                <div className="flex items-center hidden md:block md:ml-10 md:pr-4 md:space-x-8">
                   {navigation.map((item) => (
-                    <a
+                    <div
                       key={item.name}
-                      href={item.href}
-                      className="font-medium text-gray-500 hover:text-gray-900"
+                      className="inline font-medium text-gray-500 cursor-pointer hover:text-gray-900"
                     >
                       {item.name}
-                    </a>
+                    </div>
                   ))}
-                  <div
-                    className="inline font-medium text-green-600 cursor-pointer hover:text-indigo-500"
-                    onClick={() => {
-                      router.push({
-                        pathname: "/user/login",
-                      });
-                    }}
-                  >
-                    登录
-                  </div>
+                  {user ? (
+                    <div
+                      className="inline-flex rounded bg-gray-100 p-2 px-4 items-center font-medium text-green-600 cursor-pointer hover:text-green-500"
+                      onClick={() => {
+                        router.push({
+                          pathname: "/dashboard",
+                        });
+                      }}
+                    >
+                      个人中心
+                    </div>
+                  ) : (
+                    <div
+                      className="inline font-medium text-green-600 cursor-pointer hover:text-green-500"
+                      onClick={() => {
+                        router.push({
+                          pathname: "/user/login",
+                        });
+                      }}
+                    >
+                      登录
+                    </div>
+                  )}
                 </div>
               </nav>
             </div>
@@ -142,11 +160,11 @@ const CaptionPreviewPage = (props) => {
                     className="block w-full px-5 py-3 text-center font-medium text-green-600 bg-gray-50 cursor-pointer hover:bg-gray-100"
                     onClick={() => {
                       router.push({
-                        pathname: "/user/login",
+                        pathname: user ? "/dashboard" : "/user/login",
                       });
                     }}
                   >
-                    登录
+                    {user ? "个人中心" : "登录"}
                   </div>
                 </div>
               </Popover.Panel>
@@ -251,18 +269,14 @@ const CaptionPreviewPage = (props) => {
           {/* 字幕解析、下载 */}
           <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
             <div className="">
-              <h3 className="text-xl sm:text-2xl">字幕解析与下载</h3>
-              <div className="mt-8 space-y-4">
-                <p className="flex items-center text-gray-500 text-lg">
-                  <UploadIcon className="w-6 h-6 mr-4" />
+              <h3 className="text-2xl sm:text-3xl">字幕解析与下载</h3>
+              <div className="mt-8 ml-2 space-y-4">
+                <p className="flex items-center text-lg sm:text-xl text-gray-500">
+                  <UploadIcon className="w-6 h-6 mr-4 text-green-500" />
                   支持 ass、srt 等格式
                 </p>
-                <p className="flex items-center text-lg text-gray-500">
-                  <TranslateIcon className="w-6 h-6 mr-4" />
-                  智能分析中英文
-                </p>
-                <p className="flex items-center text-lg text-gray-500">
-                  <DownloadIcon className="w-6 h-6 mr-4" />
+                <p className="flex items-center text-lg sm:text-xl text-gray-500">
+                  <DownloadIcon className="w-6 h-6 mr-4 text-green-500" />
                   导出为 text、word、pdf 等格式
                 </p>
               </div>
@@ -273,41 +287,41 @@ const CaptionPreviewPage = (props) => {
         <div className="p-4 py-8 bg-gray-100 xl:py-10">
           {/* PC、移动端同步 */}
           <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
-            <div></div>
             <div className="">
-              <h3 className="text-xl sm:text-2xl">随时查看字幕</h3>
-              <div className="mt-4 space-y-4">
-                <p className="flex items-center text-lg text-gray-500">
+              <h3 className="text-2xl sm:text-3xl">随时查看字幕</h3>
+              <div className="mt-8 ml-2 space-y-4">
+                <p className="flex items-center text-lg sm:text-xl text-gray-500">
                   <DeviceMobileIcon className="w-6 h-6 mr-4" />
                   支持 PC 和移动端
                 </p>
-                <p className="flex items-center text-lg text-gray-500">
+                <p className="flex items-center text-lg sm:text-xl text-gray-500">
                   <AdjustmentsIcon className="w-6 h-6 mr-4" />
                   自定义字幕字体样式、大小
                 </p>
-                <p className="flex items-center text-lg text-gray-500">
+                <p className="flex items-center text-lg sm:text-xl text-gray-500">
                   <MoonIcon className="w-6 h-6 mr-4" />
                   支持暗黑模式
                 </p>
-                <p className="flex items-center text-lg text-gray-500">
-                  <VolumeUpIcon className="w-6 h-6 mr-4" />
-                  原句句子发音
-                </p>
               </div>
             </div>
+            <div></div>
           </section>
         </div>
         <div className="p-4 py-8 xl:py-10">
           {/* PC、移动端同步 */}
           <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
             <div>
-              <h3 className="text-xl sm:text-2xl">生词本、错题本</h3>
-              <div className="mt-4 space-y-4">
-                <p className="flex items-center text-lg text-gray-500">
+              <h3 className="text-2xl sm:text-3xl">生词本、错题本</h3>
+              <div className="mt-8 ml-2 space-y-4">
+                <p className="flex items-center text-lg sm:text-xl text-gray-500">
+                  <VolumeUpIcon className="w-6 h-6 mr-4" />
+                  原剧发音
+                </p>
+                <p className="flex items-center text-lg sm:text-xl text-gray-500">
                   <TranslateIcon className="w-6 h-6 mr-4" />
                   点击单词即可查询释义
                 </p>
-                <p className="flex items-center text-lg text-gray-500">
+                <p className="flex items-center text-lg sm:text-xl text-gray-500">
                   <DocumentTextIcon className="w-6 h-6 mr-4" />
                   一键加入生词本
                 </p>
@@ -318,25 +332,43 @@ const CaptionPreviewPage = (props) => {
         </div>
         <div className="p-4 py-8 bg-gray-100 xl:py-10">
           <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
-            <div></div>
             <div className="features">
-              <h3 className="text-xl sm:text-2xl">测验模式加强字幕记忆</h3>
-              <div className="mt-4 space-y-4">
-                <p className="flex items-center text-lg text-gray-500">
+              <h3 className="text-2xl sm:text-3xl">测验模式加强字幕记忆</h3>
+              <div className="mt-8 ml-2 space-y-4">
+                <p className="flex items-center text-lg sm:text-xl text-gray-500">
                   <EmojiHappyIcon className="w-6 h-6 mr-4" />
-                  简单模式模式有趣，随时随地
+                  简单模式有趣、轻松
                 </p>
-                <p className="flex items-center text-lg text-gray-500">
+                <p className="flex items-center text-lg sm:text-xl text-gray-500">
                   <BookOpenIcon className="w-6 h-6 mr-4" />
-                  专业模式专注、高效，静心学习
+                  专业模式高效、静心学习
                 </p>
-                <p className="flex items-center text-lg text-gray-500">
+                <p className="flex items-center text-lg text-gray-500 sm:text-xl">
                   <ChartSquareBarIcon className="w-6 h-6 mr-4" />
                   统计测验结果
                 </p>
               </div>
             </div>
+            <div></div>
           </section>
+        </div>
+      </div>
+      <div className="block my-8 mx-4 py-8 px-4 rounded sm:mx-auto sm:w-180 sm:flex sm:items-center sm:justify-between ">
+        <div className="mb-6 sm:mb-0">
+          <div className="text-center text-3xl text-green-500 sm:text-4xl sm:text-left">
+            更有趣的英语学习体验
+          </div>
+          <p className="mt-4 text-center text-gray-500 sm:text-left">
+            为什么游戏让人沉迷，而学习不会，有没有让人沉迷的学习方式呢？
+          </p>
+          <p className="text-center text-gray-500 sm:text-left">
+            抽卡、养成、Roguelike，只能是游戏吗？
+          </p>
+        </div>
+        <div className="flex justify-center">
+          <div className="inline py-2 px-4 text-green-500 rounded border-1 border-green-500 cursor-pointer">
+            开启新学习
+          </div>
         </div>
       </div>
       <div className="bg-gray-900 min-h-80"></div>
@@ -344,4 +376,13 @@ const CaptionPreviewPage = (props) => {
   );
 };
 
-export default CaptionPreviewPage;
+export const getServerSideProps = async (context) => {
+  const session = await getSession(context);
+  return {
+    props: {
+      user: session?.user ?? null,
+    },
+  };
+};
+
+export default Website;
