@@ -3,23 +3,15 @@
  */
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Head from "next/head";
-import { GetStaticProps, GetStaticPaths } from "next";
 import { useRouter } from "next/router";
 import { Dialog, Transition } from "@headlessui/react";
-import {
-  CogIcon,
-  DotsHorizontalIcon,
-  DotsVerticalIcon,
-  TrashIcon,
-  XIcon,
-} from "@heroicons/react/outline";
-import { Paragraph } from ".prisma/client";
-import debounce from 'lodash.debounce';
+import { CogIcon, TrashIcon, XIcon } from "@heroicons/react/outline";
+import debounce from "lodash.debounce";
+import { saveAs } from "file-saver";
+import { Packer, Document, Paragraph, TextRun } from "docx";
 
 import * as themeToggle from "@/utils/dark";
-import { fetchCaptionById } from "@/lib/caption";
 import {
-  fetchCaptionService,
   deleteCaptionService,
   fetchCaptionWithoutParagraphsService,
   fetchParagraphsService,
@@ -98,13 +90,76 @@ const CaptionPreviewPage = () => {
     };
   }, []);
 
+  const downloadDocx = useCallback((title, paragraphs) => {
+    const texts = paragraphs
+      .map((paragraph, index) => {
+        const { text1 = "", text2 = "" } = paragraph;
+        return [
+          // 中文
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: text1,
+                color: "#9da3ae",
+                size: 24,
+              }),
+            ],
+          }),
+          // 英文
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: text2,
+                size: 36,
+              }),
+            ],
+          }),
+          index === paragraphs.length - 1
+            ? null
+            : new Paragraph({
+                text: "\n",
+              }),
+        ];
+      })
+      .reduce((result, cur) => result.concat(cur), [])
+      .filter(Boolean);
+    console.log(texts);
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({
+              // 字幕标题
+              children: [
+                new TextRun({
+                  text: title,
+                  size: 48,
+                }),
+              ],
+            }),
+            // 换行
+            new Paragraph({
+              text: "\n",
+            }),
+            ...texts,
+          ],
+        },
+      ],
+    });
+    Packer.toBlob(doc).then((blob) => {
+      saveAs(blob, `${title}.docx`);
+    });
+  }, []);
+
   if (!caption) {
     return null;
   }
+  const { title } = caption;
   return (
     <div className="h-full">
       <Head>
-        <title>{caption.title}</title>
+        <title>{title}</title>
       </Head>
       <div className="relative">
         <CaptionPreview {...caption} paragraphs={paragraphs} />
@@ -121,9 +176,6 @@ const CaptionPreviewPage = () => {
               <CogIcon className="w-6 h-6 text-gray-400 group-hover:text-gray-800" />
             )}
           </div>
-          {/* <div className="cursor-pointer">
-            <DotsHorizontalIcon className="w-6 h-6 text-gray-400 hover:text-gray-800" />
-          </div> */}
         </div>
       </div>
       <Drawer
@@ -133,7 +185,24 @@ const CaptionPreviewPage = () => {
         }}
       >
         <div>
-          <div className="section"></div>
+          <div className="section">
+            <div
+              className="p-4 cursor-pointer"
+              onClick={() => {
+                downloadDocx(title, paragraphs);
+              }}
+            >
+              下载 word
+            </div>
+            <div
+              className="p-4 cursor-pointer"
+              onClick={() => {
+                downloadDocx(title, paragraphs);
+              }}
+            >
+              下载 PDF
+            </div>
+          </div>
         </div>
       </Drawer>
       <Transition.Root show={open} as={Fragment}>
