@@ -67,7 +67,7 @@ const LoginPage = (props) => {
             <p className="mt-2 text-center text-sm text-gray-600">
               没有账号？
               <a
-                href="#"
+                href="/user/register"
                 className="font-medium text-green-600 hover:text-green-500"
               >
                 点击这里注册

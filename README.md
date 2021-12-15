@@ -395,6 +395,9 @@ const {
 47.103.40.8
 120.26.201.239
 
+linux-funzm-production github
+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
+
 ### 配置 RDS 与服务器
 
 内网 `ip` 172.19.44.203，点击修改，出现 加载ECS内网IP，可选择的就是 172.19.44.203，这是在同一内网机器下自动出现的。

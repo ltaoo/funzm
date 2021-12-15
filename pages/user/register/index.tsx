@@ -2,7 +2,7 @@
  * @file 用户注册
  */
 import { useCallback } from "react";
-import Form from 'rc-field-form';
+import Form from "rc-field-form";
 import { LockClosedIcon } from "@heroicons/react/solid";
 
 import Link from "next/link";
@@ -42,15 +42,15 @@ const RegisterPage = () => {
               alt="Workflow"
             />
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Sign in to your account
+              Register a new account
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
-              没有账号？
+              已有账号？
               <a
-                href="#"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-medium text-green-600 hover:text-green-500 cursor-pointer"
+                href="/user/login"
               >
-                点击这里注册
+                直接登录
               </a>
             </p>
           </div>
@@ -68,7 +68,7 @@ const RegisterPage = () => {
                     type="email"
                     autoComplete="email"
                     required
-                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                     placeholder="邮箱"
                   />
                 </Form.Field>
@@ -84,50 +84,26 @@ const RegisterPage = () => {
                     type="password"
                     autoComplete="current-password"
                     required
-                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                     placeholder="密码"
                   />
                 </Form.Field>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-900"
-                >
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a
-                  href="#"
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  忘记密码
-                </a>
-              </div>
-            </div>
+            <div className="flex items-center justify-between"></div>
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                 onClick={registerAccount}
               >
                 <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                   <LockClosedIcon
-                    className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
+                    className="h-5 w-5 text-green-500 group-hover:text-green-400"
                     aria-hidden="true"
                   />
                 </span>
-                登录
+                注册
               </button>
             </div>
           </form>
