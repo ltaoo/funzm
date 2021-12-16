@@ -2,10 +2,15 @@
  * @file 字幕文件上传
  */
 import { useCallback, useEffect, useRef } from "react";
+import Upload from "rc-upload";
 
 import { getExt, readTextFromFile } from "@/domains/caption";
 
-const CaptionUpload = (props) => {
+interface IProps {
+  onChange?: (caption) => void;
+  children?: React.ReactNode;
+}
+const CaptionUpload: React.FC<IProps> = (props) => {
   const { children, onChange } = props;
 
   const onChangeRef = useRef(onChange);
@@ -15,13 +20,7 @@ const CaptionUpload = (props) => {
     }
   }, [onChange]);
 
-  const preventUpload = useCallback(() => {
-    return false;
-  }, []);
-  const handleUploadFile = useCallback(async (event) => {
-    const { files } = event.target;
-    // console.log('handle upload file', files)
-    const file = files[0];
+  const handleUploadFile = useCallback(async ({ file }) => {
     const content = await readTextFromFile(file);
     if (onChangeRef.current) {
       const segments = file.name.split(".");
@@ -32,9 +31,7 @@ const CaptionUpload = (props) => {
       });
     }
   }, []);
-  return (
-    <div className=""><input className="w-12" type="file" onChange={handleUploadFile} /></div>
-  );
+  return <Upload customRequest={handleUploadFile}>{children}</Upload>;
 };
 
 export default CaptionUpload;

@@ -2,7 +2,8 @@
  * @file 官网首页
  */
 
-import React, { Fragment, useCallback } from "react";
+import React, { Fragment, useCallback, useState } from "react";
+import cx from "classnames";
 import { useRouter } from "next/router";
 import { Popover, Transition } from "@headlessui/react";
 import {
@@ -45,7 +46,7 @@ const Website = (props) => {
   // const user = session?.user;
   // console.log("[PAGE]Website - render", user);
 
-  const handleUploadFile = useCallback(async (caption) => {
+  const uploadFile = useCallback(async (caption) => {
     captionTmpStorage.save(caption);
     router.push({
       pathname: "/captions/editor",
@@ -55,7 +56,7 @@ const Website = (props) => {
   return (
     <div className="relative bg-white overflow-hidden">
       <div className="mx-auto">
-        <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:w-full lg:pb-28 xl:pb-32">
+        <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:w-full lg:pb-28">
           <Popover className="header">
             <div className="relative pt-6 px-4 sm:px-6 lg:px-8">
               <nav
@@ -171,8 +172,8 @@ const Website = (props) => {
             </Transition>
           </Popover>
           {/* wall */}
-          <main className="mt-10 mx-auto px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
-            <div className="text-center">
+          <main className="mx-auto pt-10 px-4 sm:pt-12 sm:px-6 md:pt-16 lg:pt-20 lg:px-8 xl:pt-28">
+            <div className={cx("text-center")}>
               <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
                 <span className="block xl:inline">趣字幕</span>{" "}
                 <span className="block mt-2 text-green-600 xl:inline">
@@ -188,9 +189,11 @@ const Website = (props) => {
               </p>
               <div className="mt-5 sm:mt-8 sm:flex justify-center">
                 <div className="rounded-md shadow">
-                  <div className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-10">
-                    上传字幕文件
-                  </div>
+                  <CaptionUpload onChange={uploadFile}>
+                    <div className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-10">
+                      上传字幕文件
+                    </div>
+                  </CaptionUpload>
                 </div>
                 <div className="mt-3 sm:mt-0 sm:ml-3">
                   <div className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 md:py-4 md:text-lg md:px-10">

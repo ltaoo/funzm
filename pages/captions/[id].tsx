@@ -189,8 +189,12 @@ const CaptionPreviewPage = () => {
       return;
     }
     pdfLoadingRef.current = true;
-    // await import("./SourceHanSansCN-Medium-normal");
     const doc = new jsPDF();
+    doc.addFont(
+      "https://static.ltaoo.work/SourceHanSans-Normal.ttf",
+      "SourceHanSans",
+      "normal"
+    );
     const paddingX = 12;
     const WIDTH = 206;
     const maxWidth = WIDTH - paddingX - paddingX;
@@ -207,7 +211,8 @@ const CaptionPreviewPage = () => {
       const { text1 = "", text2 = "" } = paragraph;
       doc.setTextColor("#9da3ae");
       doc.setFontSize(12);
-      doc.setFont("SourceHanSansCN-Medium");
+
+      doc.setFont("SourceHanSans");
       if (y > 294 - paddingX) {
         doc.addPage();
         y = 24;
@@ -237,11 +242,10 @@ const CaptionPreviewPage = () => {
     });
 
     doc.setProperties({
-      // title: "hangge.com",
-      // subject: "This is the subject",
-      // author: "hangge",
-      // keywords: "generated, javascript, web 2.0, ajax",
-      // creator: "hangge",
+      title,
+      author: "funzm",
+      keywords: "caption, funzm",
+      creator: "funzm",
     });
     doc.save(`${title}.pdf`);
     pdfLoadingRef.current = false;
