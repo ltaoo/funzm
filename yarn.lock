@@ -2126,6 +2126,11 @@ detect-newline@^3.0.0:
   resolved "https://registry.npmmirror.com/detect-newline/download/detect-newline-3.1.0.tgz#576f5dfc63ae1a192ff192d8ad3af6308991b651"
   integrity sha1-V29d/GOuGhkv8ZLYrTr2MImRtlE=
 
+dexie@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.npmmirror.com/dexie/download/dexie-3.2.0.tgz#a1b0267b111f9422c4126da90d6b121b1deabeab"
+  integrity sha512-OpS8ss1CLHYAhxRu6hT+/Gt1uLhKCf0O18xHBdRGlemOWXXRiiOZ0ty1/bACIJzGt1DGmvarzrPwYYt9EkRZfw==
+
 diff-sequences@^27.4.0:
   version "27.4.0"
   resolved "https://registry.npmmirror.com/diff-sequences/download/diff-sequences-27.4.0.tgz#d783920ad8d06ec718a060d00196dfef25b132a5"

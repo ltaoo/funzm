@@ -1,6 +1,8 @@
 import { Caption } from ".prisma/client";
 
 import { IParagraph } from "@/domains/caption/types";
+import { localdb } from "@/utils/db";
+import { isLocalId, parseLocalId } from "@/utils/db/utils";
 
 import request from "./request";
 
@@ -18,7 +20,13 @@ export function addCaptionService(body): Promise<{ id: string }> {
  * 获取字幕基本信息
  * @param id
  */
-export function fetchCaptionWithoutParagraphsService({ id }): Promise<Caption> {
+export async function fetchCaptionWithoutParagraphsService({
+  id,
+}): Promise<Caption> {
+  if (id.includes("@id")) {
+    const lid = Number(id.replace("@id", ""));
+    return await localdb.table("captions").get({ id: lid });
+  }
   return request.get(`/api/caption/${id}`);
 }
 
@@ -49,7 +57,7 @@ export function deleteCaptionService({ id }) {
 /**
  * 获取句子列表
  */
-export function fetchParagraphsService(params: {
+export async function fetchParagraphsService(params: {
   page?: number;
   pageSize?: number;
   start?: string;
@@ -61,6 +69,22 @@ export function fetchParagraphsService(params: {
   isEnd: boolean;
   list: IParagraph[];
 }> {
+  const { captionId } = params;
+  if (isLocalId(captionId)) {
+    const result = await localdb
+      .table("paragraphs")
+      .where({
+        captionId: parseLocalId(captionId),
+      })
+      .toArray();
+    return {
+      list: result,
+      total: result.length,
+      isEnd: true,
+      page: 1,
+      pageSize: 100,
+    };
+  }
   // console.log('fetchParagraphsService', params);
   return request.get("/api/paragraphs", { params });
 }

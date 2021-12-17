@@ -9,7 +9,7 @@ import { useRouter } from "next/router";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { BellIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
 
-import { useSession } from "@/next-auth/client";
+import { signout, useSession } from "@/next-auth/client";
 
 const navigation = [
   { name: "个人中心", href: "/dashboard", current: true },
@@ -19,9 +19,13 @@ const navigation = [
   { name: "问题反馈", href: "#", current: false },
 ];
 const userNavigation = [
-  { name: "Your Profile", href: "#" },
-  { name: "Settings", href: "#" },
-  { name: "Sign out", href: "#" },
+  { name: "个人设置", href: "/user/profile" },
+  {
+    name: "退出登录",
+    onClick: (router) => {
+      signout();
+    },
+  },
 ];
 
 export default function Header(props) {
@@ -103,6 +107,18 @@ export default function Header(props) {
                                   active ? "bg-gray-100" : "",
                                   "block px-4 py-2 text-sm text-gray-700 cursor-pointer"
                                 )}
+                                onClick={() => {
+                                  console.log("click");
+                                  if (item.onClick) {
+                                    item.onClick(router);
+                                    return;
+                                  }
+                                  if (item.href) {
+                                    router.push({
+                                      pathname: item.href,
+                                    });
+                                  }
+                                }}
                               >
                                 {item.name}
                               </div>
@@ -166,15 +182,33 @@ export default function Header(props) {
                 </div>
               </div>
               <div className="mt-3 px-2 space-y-1">
-                {userNavigation.map((item) => (
-                  <Disclosure.Button
-                    key={item.name}
-                    as="div"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
-                  >
-                    {item.name}
-                  </Disclosure.Button>
-                ))}
+                {userNavigation.map((item) => {
+                  const { name, href, onClick } = item;
+                  return (
+                    <Disclosure.Button
+                      key={item.name}
+                      as="div"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
+                    >
+                      <div
+                        onClick={() => {
+                          console.log("click");
+                          if (onClick) {
+                            onClick(router);
+                            return;
+                          }
+                          if (href) {
+                            router.push({
+                              pathname: href,
+                            });
+                          }
+                        }}
+                      >
+                        {name}
+                      </div>
+                    </Disclosure.Button>
+                  );
+                })}
               </div>
             </div>
           </Disclosure.Panel>

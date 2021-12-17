@@ -5,10 +5,25 @@ import { useCallback, useEffect, useRef } from "react";
 import Upload from "rc-upload";
 
 import { getExt, readTextFromFile } from "@/domains/caption";
+import { Caption } from "@/domains/caption/types";
 
 interface IProps {
-  onChange?: (caption) => void;
+  /**
+   * 是否解析上传的字幕文件
+   */
+  // parse?: boolean;
+  /**
+   * 子元素
+   */
   children?: React.ReactNode;
+  /**
+   * 文件上传成功/字幕解析成功后的回调
+   */
+  onChange?: (content: {
+    title: string;
+    type: string;
+    content: string;
+  }) => void;
 }
 const CaptionUpload: React.FC<IProps> = (props) => {
   const { children, onChange } = props;
@@ -26,7 +41,7 @@ const CaptionUpload: React.FC<IProps> = (props) => {
       const segments = file.name.split(".");
       onChangeRef.current({
         title: segments.slice(0, -1).join("."),
-        ext: getExt(file.name),
+        type: getExt(file.name),
         content,
       });
     }

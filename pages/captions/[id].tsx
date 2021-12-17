@@ -5,7 +5,15 @@ import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { Dialog, Transition } from "@headlessui/react";
-import { CogIcon, TrashIcon, XIcon } from "@heroicons/react/outline";
+import {
+  CogIcon,
+  DocumentIcon,
+  HomeIcon,
+  MoonIcon,
+  SunIcon,
+  TrashIcon,
+  XIcon,
+} from "@heroicons/react/outline";
 import debounce from "lodash.debounce";
 import { saveAs } from "file-saver";
 import { Packer, Document, Paragraph, TextRun } from "docx";
@@ -19,6 +27,9 @@ import {
 } from "@/services/caption";
 import CaptionPreview from "@/components/CaptionPreview";
 import Drawer from "@/components/Drawer";
+import { parseCaptionContent } from "@/domains/caption";
+import { localdb } from "@/utils/db";
+import { parseLocalId } from "@/utils/db/utils";
 
 function getWidthAndHeight(text, doc, { maxWidth }) {
   // const size = doc.getFontSize();
@@ -61,14 +72,34 @@ const CaptionPreviewPage = () => {
   const fetchCaptionAndSave = useCallback(async (id) => {
     const response = await fetchCaptionWithoutParagraphsService({ id });
     setCaption(response);
+    // @ts-ignore
+    if (response.content) {
+      const paragraphs = parseCaptionContent(
+        response.content,
+        // @ts-ignore
+        response.type
+      ).map((paragraph) => {
+        return {
+          ...paragraph,
+          captionId: parseLocalId(id),
+        };
+      });
+      localdb.table("paragraphs").bulkAdd(paragraphs);
+      const newCaption = { ...response };
+      delete newCaption.content;
+      localdb.table("captions").put(newCaption, parseLocalId(id));
+      setParagraphs(paragraphs);
+      return { idEnd: true };
+    }
     loadingRef.current = true;
-    const { list: paragraphs } = await fetchParagraphsService({
+    const { list: paragraphs, isEnd } = await fetchParagraphsService({
       captionId: id,
       page: pageRef.current,
     });
     loadingRef.current = false;
     pageRef.current += 1;
     setParagraphs(paragraphs);
+    return { isEnd };
   }, []);
 
   const removeCaption = useCallback(async () => {
@@ -79,18 +110,14 @@ const CaptionPreviewPage = () => {
   }, []);
 
   useEffect(() => {
-    fetchCaptionAndSave(id);
     const handler = debounce(async (event) => {
-      console.log(document.documentElement.scrollTop);
-      console.log(document.documentElement.clientHeight);
-      console.log(document.body.clientHeight);
       if (
         document.documentElement.scrollTop +
           document.documentElement.clientHeight +
           200 >=
         document.body.clientHeight
       ) {
-        console.log("load more", loadingRef.current, pageRef.current);
+        // console.log("load more", loadingRef.current, pageRef.current);
         if (loadingRef.current) {
           return;
         }
@@ -110,8 +137,13 @@ const CaptionPreviewPage = () => {
         }
       }
     }, 400);
+    fetchCaptionAndSave(id).then(({ isEnd }) => {
+      if (isEnd) {
+        return;
+      }
+      document.addEventListener("scroll", handler);
+    });
     pageRef.current = 1;
-    document.addEventListener("scroll", handler);
     return () => {
       document.removeEventListener("scroll", handler);
     };
@@ -260,7 +292,7 @@ const CaptionPreviewPage = () => {
       <Head>
         <title>{title}</title>
       </Head>
-      <div className="relative">
+      <div className="relative dark:bg-gray-800">
         <CaptionPreview {...caption} paragraphs={paragraphs} />
         <div className="fixed bottom-40 right-0 hidden space-y-4 md:block">
           <div
@@ -276,6 +308,18 @@ const CaptionPreviewPage = () => {
             )}
           </div>
         </div>
+        <div className="fixed bottom-26 right-0 hidden space-y-4 md:block">
+          <div
+            className="group flex items-center py-2 px-4 rounded-l-lg bg-gray-100 cursor-pointer hover:bg-gray-200"
+            onClick={() => {
+              router.push({
+                pathname: "/",
+              });
+            }}
+          >
+            <HomeIcon className="w-6 h-6 text-gray-400 group-hover:text-gray-800" />
+          </div>
+        </div>
       </div>
       <Drawer
         visible={settingVisible}
@@ -284,22 +328,56 @@ const CaptionPreviewPage = () => {
         }}
       >
         <div>
-          <div className="section">
+          <div className="text-xl my-4">主题切换</div>
+          <div className="section flex space-x-6">
             <div
-              className="p-4 cursor-pointer"
+              className="flex items-center cursor-pointer"
+              onClick={() => {
+                themeToggle.lightTheme();
+              }}
+            >
+              <SunIcon className="w-4 h-4 mr-2" />
+              浅色
+            </div>
+            <div
+              className="flex items-center cursor-pointer"
+              onClick={() => {
+                themeToggle.darkTheme();
+              }}
+            >
+              <MoonIcon className="w-4 h-4 mr-2" />
+              深色
+            </div>
+            <div
+              className="flex items-center cursor-pointer"
+              onClick={() => {
+                themeToggle.autoTheme();
+              }}
+            >
+              <MoonIcon className="w-4 h-4 mr-2" />
+              自动
+            </div>
+          </div>
+          <hr className="mt-8" />
+          <div className="text-xl my-4">文件下载</div>
+          <div className="section flex space-x-6">
+            <div
+              className="flex items-center text-base text-gray-600 cursor-pointer hover:text-green-500"
               onClick={() => {
                 downloadDocx(title, paragraphs);
               }}
             >
-              下载 word
+              <DocumentIcon className="w-4 h-4 mr-2" />
+              docx
             </div>
             <div
-              className="p-4 cursor-pointer"
+              className="flex items-center text-base text-gray-600 cursor-pointer hover:text-green-500"
               onClick={() => {
                 downloadPDF(title, paragraphs);
               }}
             >
-              下载 PDF
+              <DocumentIcon className="w-4 h-4 mr-2" />
+              pdf
             </div>
           </div>
         </div>

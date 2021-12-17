@@ -66,9 +66,9 @@ const Drawer = (props) => {
                 </Transition.Child>
                 <div className="h-full flex flex-col py-6 bg-white shadow-xl overflow-y-scroll">
                   <div className="px-4 sm:px-6">
-                    <Dialog.Title className="text-lg font-medium text-gray-900">
+                    {/* <Dialog.Title className="text-lg font-medium text-gray-900">
                       Panel title
-                    </Dialog.Title>
+                    </Dialog.Title> */}
                   </div>
                   <div className="mt-6 relative flex-1 px-4 sm:px-6">
                     {/* Replace with your content */}

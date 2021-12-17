@@ -5,11 +5,26 @@ import React, { Fragment, useState, useCallback, useMemo } from "react";
 import { Disclosure, Menu, Dialog, Transition } from "@headlessui/react";
 import { CalendarIcon, UserIcon, XIcon } from "@heroicons/react/outline";
 import { StarIcon } from "@heroicons/react/solid";
+import { Paragraph } from ".prisma/client";
 
 import { splitText2Words } from "@/domains/caption/utils";
 import SoundPlay from "@/components/SoundPlay";
 
-const CaptionPreview = (props) => {
+interface ICaptionPreviewProps {
+  /**
+   * 字幕标题
+   */
+  title: string;
+  /**
+   * 字幕段落
+   */
+  paragraphs: Paragraph[];
+  /**
+   * 字幕创建时间
+   */
+  createdAt?: string;
+}
+const CaptionPreview: React.FC<ICaptionPreviewProps> = (props) => {
   const { title, createdAt, paragraphs = [] } = props;
 
   const [open, setOpen] = useState(false);
@@ -23,9 +38,9 @@ const CaptionPreview = (props) => {
 
   return (
     <div className="relative">
-      <div className="py-10 px-4 bg-gray-100 border-b">
+      <div className="py-10 px-4 bg-gray-100 border-b dark:bg-gray-800 dark:border-gray-600">
         <div className="mx-auto sm:w-180">
-          <h2 className="text-3xl break-all">{title}</h2>
+          <h2 className="text-3xl break-all dark:text-gray-400">{title}</h2>
           <div className="flex items-center mt-4 space-x-8">
             <div className="flex items-center">
               <UserIcon className="w-4 h-4 mr-2 text-gray-400" />
@@ -43,16 +58,13 @@ const CaptionPreview = (props) => {
           const { line, text1, text2 } = caption;
           return (
             <div key={line}>
-              <p className="text-md text-gray-400 dark:text-white">{text1}</p>
+              <p className="text1">{text1}</p>
               <p className="">
                 {(() => {
                   const words = splitText2Words(text2);
                   return words.map((word, i) => {
                     return (
-                      <span
-                        className="text-2xl font-serif text-black dark:text-white"
-                        key={i}
-                      >
+                      <span className="text2" key={i}>
                         {word[0]}
                         <span
                           className="cursor-pointer"
