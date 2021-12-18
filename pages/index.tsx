@@ -14,7 +14,6 @@ import {
   DownloadIcon,
   EmojiHappyIcon,
   MoonIcon,
-  SunIcon,
   TranslateIcon,
   UploadIcon,
   VolumeUpIcon,
@@ -24,7 +23,6 @@ import { getSession } from "@/next-auth/client";
 import SiteHeader from "@/layouts/site/header";
 import CaptionUpload from "@/components/CaptionFileUpload";
 import { localdb } from "@/utils/db";
-import CaptionPreview from "@/components/CaptionPreview";
 import ThemeToggler from "@/components/ThemeToggler";
 
 const Website = (props) => {
@@ -47,20 +45,22 @@ const Website = (props) => {
   const createCaptionFromExisting = useCallback(() => {}, []);
 
   return (
-    <div className="relative bg-white overflow-hidden">
+    <div className="relative bg-white overflow-hidden dark:bg-gray-800">
       <div className="mx-auto">
-        <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:w-full lg:pb-28">
+        <div className="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:w-full lg:pb-28">
           <SiteHeader user={user} />
           {/* wall */}
           <main className="mx-auto pt-10 px-4 sm:pt-12 sm:px-6 md:pt-16 lg:pt-20 lg:px-8 xl:pt-28">
             <div className={cx("text-center")}>
               <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-                <span className="block xl:inline">趣字幕</span>{" "}
+                <span className="block xl:inline dark:text-gray-200">
+                  趣字幕
+                </span>
                 <span className="block mt-2 text-green-600 xl:inline">
                   从有趣的字幕中学习英语
                 </span>
               </h1>
-              <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+              <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:mx-auto md:mt-5 md:text-xl lg:mx-0 dark:text-gray-300">
                 在线解析、查看字幕内容，自定义字幕文字样式，PC
                 端、移动端字幕数据同步。
               </p>
@@ -82,29 +82,31 @@ const Website = (props) => {
           </main>
         </div>
       </div>
-      <div className="mt-4 overflow-hidden sm:mt-6 lg:mt-10">
-        {/* 网站功能 */}
-        <div className="p-4 py-8 xl:py-10">
-          {/* 字幕解析、下载 */}
-          <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
-            <div className="#block mr-8 pt-4 w-180">
-              <h3 className="text-2xl sm:text-3xl">字幕解析与下载</h3>
-              <div className="mt-8 ml-2 space-y-4">
-                <p className="flex items-center text-lg sm:text-xl text-gray-500">
+
+      <div className="pointer-group-hover:a mt-4 overflow-hidden sm:mt-6 lg:mt-10">
+        {/* 字幕解析、下载 */}
+        <div className="#features p-4 py-8 xl:py-10 dark:bg-gray-700">
+          <section className="md:mx-auto md:w-80 md:flex md:justify-between md:w-260">
+            <div className="#info mr-8 pt-4 md:w-180">
+              <h3 className="mx-4 mt-8 text-2xl md:text-3xl dark:text-gray-200">
+                字幕解析与下载
+              </h3>
+              <div className="my-8 mx-4 space-y-4">
+                <p className="#feature-desc flex items-center text-lg sm:text-xl text-gray-500 dark:text-gray-400">
                   <UploadIcon className="w-6 h-6 mr-4 text-green-500" />
                   支持 ass、srt 等格式
                 </p>
-                <p className="flex items-center text-lg sm:text-xl text-gray-500">
+                <p className="flex items-center text-lg text-gray-500 sm:text-xl dark:text-gray-400">
                   <DownloadIcon className="w-6 h-6 mr-4 text-green-500" />
                   导出为 text、docx、pdf 等格式
                 </p>
               </div>
-              <div className="flex mt-10 space-x-4">
+              <div className="hidden flex mt-10 space-x-4 md:block">
                 <div className="btn">docx</div>
                 <div className="btn">pdf</div>
               </div>
             </div>
-            <div className="py-8 px-4 space-y-8 rounded bg-gray-100">
+            <div className="mt-8 py-8 px-4 space-y-8">
               <div>
                 <div className="text1">我一直喜欢火车</div>
                 <div className="text2">I've always loved trains.</div>
@@ -126,9 +128,31 @@ const Website = (props) => {
             </div>
           </section>
         </div>
-        <div className="p-4 py-8 bg-gray-100 xl:py-10 dark:bg-gray-800">
+        <div className="#features p-4 py-8 bg-gray-100 xl:py-10 dark:bg-gray-800">
           {/* PC、移动端同步 */}
-          <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
+          <section className="md:mx-auto md:w-240 md:flex md:justify-between">
+            <div className="#block md:w-180">
+              <h3 className="ml-4 text-2xl md:text-3xl dark:text-gray-200">
+                随时查看字幕
+              </h3>
+              <div className="my-8 mx-6 space-y-4 text-right">
+                <p className="flex items-center text-lg sm:text-xl text-gray-500 dark:text-gray-300">
+                  <DeviceMobileIcon className="w-6 h-6 mr-4" />
+                  支持 PC 和移动端
+                </p>
+                <p className="flex items-center text-lg sm:text-xl text-gray-500 dark:text-gray-300">
+                  <AdjustmentsIcon className="w-6 h-6 mr-4" />
+                  自定义字幕字体样式、大小
+                </p>
+                <p className="flex items-center text-lg sm:text-xl text-gray-500 dark:text-gray-300">
+                  <MoonIcon className="w-6 h-6 mr-4" />
+                  浅色、暗黑两种主题
+                </p>
+              </div>
+              <div className="flex justify-center mt-10">
+                <ThemeToggler />
+              </div>
+            </div>
             <div className="py-8 px-4 space-y-8 rounded">
               <div>
                 <div className="text1">我一直喜欢火车</div>
@@ -149,33 +173,14 @@ const Website = (props) => {
                 </p>
               </div>
             </div>
-            <div className="#block mr-8 pt-4 w-180">
-              <h3 className="text-2xl sm:text-3xl dark:text-gray-200">随时查看字幕</h3>
-              <div className="mt-8 ml-2 space-y-4 text-right">
-                <p className="flex items-center text-lg sm:text-xl text-gray-500 dark:text-gray-300">
-                  <DeviceMobileIcon className="w-6 h-6 mr-4" />
-                  支持 PC 和移动端
-                </p>
-                <p className="flex items-center text-lg sm:text-xl text-gray-500 dark:text-gray-300">
-                  <AdjustmentsIcon className="w-6 h-6 mr-4" />
-                  自定义字幕字体样式、大小
-                </p>
-                <p className="flex items-center text-lg sm:text-xl text-gray-500 dark:text-gray-300">
-                  <MoonIcon className="w-6 h-6 mr-4" />
-                  浅色、暗黑两种主题
-                </p>
-              </div>
-              <div className="mt-10 ml-12">
-                <ThemeToggler />
-              </div>
-            </div>
           </section>
         </div>
-        <div className="p-4 py-8 xl:py-10">
-          {/* PC、移动端同步 */}
+        {/* <div className="p-4 py-8 xl:py-10">
           <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
             <div>
-              <h3 className="text-2xl sm:text-3xl">生词本、错题本</h3>
+              <h3 className="#feature-title text-2xl sm:text-3xl dark:text-gray-200">
+                生词本、错题本
+              </h3>
               <div className="mt-8 ml-2 space-y-4">
                 <p className="flex items-center text-lg sm:text-xl text-gray-500">
                   <VolumeUpIcon className="w-6 h-6 mr-4" />
@@ -194,10 +199,12 @@ const Website = (props) => {
             <div></div>
           </section>
         </div>
-        <div className="p-4 py-8 bg-gray-100 xl:py-10">
+        <div className="p-4 py-8 xl:py-10">
           <section className="flex justify-between w-80 min-h-80 sm:mx-auto sm:w-80 md:w-240">
-            <div className="features">
-              <h3 className="text-2xl sm:text-3xl">测验模式加强字幕记忆</h3>
+            <div className="#features">
+              <h3 className="#feature-title text-2xl sm:text-3xl">
+                测验模式加强字幕记忆
+              </h3>
               <div className="mt-8 ml-2 space-y-4">
                 <p className="flex items-center text-lg sm:text-xl text-gray-500">
                   <EmojiHappyIcon className="w-6 h-6 mr-4" />
@@ -215,7 +222,7 @@ const Website = (props) => {
             </div>
             <div></div>
           </section>
-        </div>
+        </div> */}
       </div>
       <div className="block my-8 mx-4 py-8 px-4 rounded sm:mx-auto sm:w-180 sm:flex sm:items-center sm:justify-between ">
         <div className="mb-6 sm:mb-0">

@@ -47,8 +47,8 @@ const SiteHeader = (props) => {
                   src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
                 />
               </a>
-              <div className="-mr-2 flex items-center md:hidden">
-                <Popover.Button className="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+              <div className="flex items-center md:hidden">
+                <Popover.Button className="bg-white rounded-md p-2 inline-flex items-center justify-center outline-0 text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:bg-gray-800 hover:dark:bg-gray-700">
                   <span className="sr-only">Open main menu</span>
                   <MenuIcon className="h-6 w-6" aria-hidden="true" />
                 </Popover.Button>
@@ -67,7 +67,7 @@ const SiteHeader = (props) => {
             ))}
             {user ? (
               <div
-                className="inline-flex rounded bg-gray-100 p-2 px-4 items-center font-medium text-green-600 cursor-pointer hover:text-green-500"
+                className="inline-flex rounded bg-gray-100 p-2 px-4 items-center font-medium text-green-600 cursor-pointer hover:text-green-500 dark:bg-gray-800"
                 onClick={() => {
                   router.push({
                     pathname: "/dashboard",
@@ -94,19 +94,19 @@ const SiteHeader = (props) => {
       <Transition
         as={Fragment}
         enter="duration-150 ease-out"
-        enterFrom="opacity-0 scale-95"
+        enterFrom="opacity-0"
         enterTo="opacity-100 scale-100"
         leave="duration-100 ease-in"
         leaveFrom="opacity-100 scale-100"
-        leaveTo="opacity-0 scale-95"
+        leaveTo="opacity-0"
       >
         <Popover.Panel
           focus
-          className="absolute z-10 top-0 inset-x-0 p-2 transition transform origin-top-right md:hidden"
+          className="absolute z-10 top-0 inset-x-0 transition transform origin-top-right md:hidden"
         >
-          <div className="rounded-lg shadow-md bg-white ring-1 ring-black ring-opacity-5 overflow-hidden">
+          <div className="rounded-lg shadow-md bg-white ring-1 ring-black ring-opacity-5 overflow-hidden dark:bg-gray-800">
             <div>
-              <div className="px-5 pt-4 flex items-center justify-between">
+              <div className="flex items-center justify-between px-4 py-6">
                 <div>
                   <img
                     className="h-8 w-auto"
@@ -114,8 +114,8 @@ const SiteHeader = (props) => {
                     alt=""
                   />
                 </div>
-                <div className="-mr-2">
-                  <Popover.Button className="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                <div className="">
+                  <Popover.Button className="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 outline-0 hover:text-gray-500 hover:bg-gray-100 focus:outline-none dark:bg-gray-700">
                     <span className="sr-only">Close main menu</span>
                     <XIcon className="h-6 w-6" aria-hidden="true" />
                   </Popover.Button>
@@ -126,7 +126,7 @@ const SiteHeader = (props) => {
                   <a
                     key={item.name}
                     href={item.href}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
                   >
                     {item.name}
                   </a>
@@ -134,7 +134,7 @@ const SiteHeader = (props) => {
               </div>
             </div>
             <div
-              className="block w-full px-5 py-3 text-center font-medium text-green-600 bg-gray-50 cursor-pointer hover:bg-gray-100"
+              className="block w-full px-5 py-3 text-center font-medium text-green-600 bg-gray-50 cursor-pointer hover:bg-gray-100 dark:bg-gray-700"
               onClick={() => {
                 router.push({
                   pathname: user ? "/dashboard" : "/user/login",
