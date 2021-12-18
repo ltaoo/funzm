@@ -36,3 +36,5 @@ declare interface Headers extends IterableCopy {
 declare interface URLSearchParams extends IterableCopy {
   //
 }
+
+declare type CaptionFileType = 'ass' | 'srt' | 'text';

@@ -63,11 +63,11 @@ const CAPTION_PARSER_MAP = {
     const oriParagraphs = content.split("\r\n\r\n").filter(Boolean);
     return oriParagraphs.map((paragraph) => {
       const [line, startAndEnd, text1, text2] = paragraph.split("\r\n");
-      const [start, end] = startAndEnd.split(' --> ');
+      const [start, end] = startAndEnd.split(" --> ");
       return {
         line,
-        start: start.split(',')[0],
-        end: end.split(',')[0],
+        start: start.split(",")[0],
+        end: end.split(",")[0],
         text1,
         text2,
       };
@@ -98,7 +98,7 @@ const CAPTION_PARSER_MAP = {
  */
 export function parseCaptionContent(
   content: string,
-  format?: "srt" | "ass" | "txt"
+  format?: CaptionFileType
 ): Caption["paragraphs"] {
   const parser = CAPTION_PARSER_MAP[format];
   if (parser) {

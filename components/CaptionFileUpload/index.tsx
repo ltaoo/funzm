@@ -21,7 +21,7 @@ interface IProps {
    */
   onChange?: (content: {
     title: string;
-    type: string;
+    type: CaptionFileType;
     content: string;
   }) => void;
 }

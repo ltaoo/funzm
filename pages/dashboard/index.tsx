@@ -43,8 +43,8 @@ const Dashboard = (props) => {
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
             <CaptionUpload
               onChange={async (caption) => {
-                const { title, content, ext } = caption;
-                const p = await parseCaptionContent(content, ext);
+                const { title, content, type } = caption;
+                const p = await parseCaptionContent(content, type);
                 const captionResult = {
                   title,
                   paragraphs: p,
