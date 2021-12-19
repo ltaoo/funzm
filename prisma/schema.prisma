@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://litao:Li1218040201@rm-bp1rzk2qoex2351o6vo.mysql.rds.aliyuncs.com:3306/caption-learning"
+  url      = env("DATABASE_URL")
 }
 
 model Account {

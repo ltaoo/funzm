@@ -3,6 +3,7 @@
  * https://developer.qiniu.com/kodo/sdk/nodejs
  */
 const fs = require("fs");
+const cp = require("child_process");
 const path = require("path");
 
 const qiniu = require("qiniu");
@@ -109,11 +110,12 @@ function getFiles(dir) {
 
 (async () => {
   const dir = resolve("./.next/static");
+  const commit = cp.execSync('git log -1 --pretty=format:"%H"');
   const files = getFiles(dir);
   for (let i = 0; i < files.length; i += 1) {
     const { url } = await upload(files[i], {
-      hash: "d559022",
-      replacement: (filename) => filename.replace(/\.next/, '_next'),
+      hash: commit.toString(),
+      replacement: (filename) => filename.replace(/\.next/, "_next"),
     });
     console.log(url);
   }

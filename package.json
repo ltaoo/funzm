@@ -41,6 +41,7 @@
     "eslint-plugin-testing-library": "^5.0.0",
     "jest": "^27.4.4",
     "qiniu": "^7.4.0",
+    "ssh2": "^1.5.0",
     "typescript": "^4.3.5",
     "windicss-webpack-plugin": "^1.5.8"
   }

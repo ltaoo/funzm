@@ -53,10 +53,10 @@ const Website = (props) => {
           <main className="mx-auto pt-10 px-4 sm:pt-12 sm:px-6 md:pt-16 lg:pt-20 lg:px-8 xl:pt-28">
             <div className={cx("text-center")}>
               <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-                <span className="block xl:inline dark:text-gray-200">
+                <span className="block text-8xl dark:text-gray-200">
                   趣字幕
                 </span>
-                <span className="block mt-2 text-green-600 xl:inline">
+                <span className="block mt-2 text-green-600">
                   从有趣的字幕中学习英语
                 </span>
               </h1>
