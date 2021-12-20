@@ -1,0 +1,22 @@
+kind: pipeline
+type: ssh
+name: default
+
+server:
+  host: 120.26.201.239
+  user: root
+  password:
+    from_secret: password
+
+steps:
+  - name: build
+    commands:
+      - export PM2_HOME=/root/.pm2
+      - export prod=true
+      - cd /root/Documents/funzm
+      - git pull
+      - yarn --registry=https://registry.npmmirror.com
+      - yarn prisma generate
+      - yarn build
+      - node ./scripts/qiniu.js
+      - pm2 restart funzm
