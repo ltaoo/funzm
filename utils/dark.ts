@@ -25,10 +25,10 @@ export function darkTheme() {
  */
 export function toggleTheme() {
   if (document.documentElement.classList.contains("dark")) {
-    document.documentElement.classList.remove("dark");
+    lightTheme();
     return Theme.light;
   }
-  document.documentElement.classList.add("dark");
+  darkTheme();
   return Theme.dark;
 }
 export function autoTheme() {

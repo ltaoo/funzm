@@ -25,6 +25,8 @@ import { SpellingResultType } from "@/domains/exam/constants";
 import Exam, { ExamStatus } from "@/domains/exam";
 import Loading from "@/components/Loading";
 import Modal from "@/components/Modal";
+import SimpleExamInput from "@/components/SimpleExamInput";
+import SimpleExamOperator from "@/components/SimpleExamOperator";
 
 const SimpleCaptionExamPage = () => {
   const router = useRouter();
@@ -188,95 +190,19 @@ const SimpleCaptionExamPage = () => {
           >
             <QuestionMarkCircleIcon className="w-6 h-6 text-gray-500 cursor-pointer" />
           </div> */}
-          <div className="py-8 px-4 text-xl text-gray-800 bg-gray-100 dark:text-white sm:px-0">
-            <div className="sm:mx-auto sm:w-180">{exam.curParagraph.text1}</div>
-          </div>
-          <div className="py-6 px-4 sm:mx-auto sm:w-180 sm:px-0">
-            <div className="text-3xl font-serif text-black dark:text-white min-h-36 dark:text-white">
-              {(() => {
-                const result = [];
-                const elms = [...exam.inputtingWords];
-                for (let i = 0; i < exam.curWords.length; i += 1) {
-                  const [prefix, word, suffix] = exam.curWords[i];
-                  let w = word;
-                  if (word) {
-                    w = elms.shift()?.word;
-                  }
-                  result.push(
-                    <span key={i}>
-                      {w ? prefix : ""}
-                      {w}
-                      {w ? suffix : ""}{" "}
-                    </span>
-                  );
-                }
-                return result;
-              })()}
-            </div>
-          </div>
-          <div className="min-h-48 px-4 sm:mx-auto sm:w-180 sm:px-0">
-            <div className="flex flex-wrap h-full overflow-auto">
-              {exam.displayedWords.map((segment) => {
-                const { uid, word } = segment;
-                const existing = exam.inputtingWords
-                  .map((t) => t.uid)
-                  .includes(uid);
-                return (
-                  <div
-                    key={uid}
-                    className={cx(
-                      "inline mr-2 mb-2 px-4 py-1 text-white rounded-md bg-green-500 cursor-pointer hover:shadow",
-                      existing ? "!bg-green-100 !hover:shadow-none" : ""
-                    )}
-                    onClick={() => {
-                      if (!examRef.current) {
-                        return;
-                      }
-                      if (existing) {
-                        return;
-                      }
-                      examRef.current.write(segment);
-                    }}
-                  >
-                    {word}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <SimpleExamInput
+            {...exam}
+            onClick={(segment) => {
+              if (!examRef.current) {
+                return;
+              }
+              examRef.current.write(segment);
+            }}
+          />
           <hr />
           <div className="flex items-center justify-between mt-6 px-4 sm:mx-auto sm:w-180 sm:px-0">
             <div className="text-xl text-gray-400">13/{totalRef.current}</div>
-            <div className="flex space-x-4">
-              <ChartBarIcon
-                className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100"
-                onClick={() => {
-                  if (!examRef.current) {
-                    return;
-                  }
-                  examRef.current.clear();
-                }}
-              />
-              <LightBulbIcon className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100" />
-              <ScissorsIcon
-                className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100"
-                onClick={() => {
-                  if (!examRef.current) {
-                    return;
-                  }
-                  examRef.current.skip();
-                }}
-              />
-              <FireIcon
-                className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100"
-                onClick={() => {
-                  if (!examRef.current) {
-                    return;
-                  }
-                  examRef.current.clear();
-                }}
-              />
-            </div>
+            <SimpleExamOperator instance={examRef.current} />
           </div>
         </div>
       )}

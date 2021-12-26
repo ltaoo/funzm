@@ -124,6 +124,7 @@ class Exam {
       combo = 0,
       maxCombo = 0,
       paragraphs = [],
+      canComplete = false,
       onChange = noop,
       onSkip,
       onCorrect = noop,
@@ -141,7 +142,7 @@ class Exam {
     this.onNext = onNext;
 
     this.needMoreParagraphs = 2;
-    this.canComplete = false;
+    this.canComplete = canComplete;
 
     this.status = status;
     this.curParagraph = null;
@@ -260,6 +261,10 @@ class Exam {
         };
       });
     }
+    console.log(
+      "[DOMAIN]next - check can complete",
+      !nextParagraph && this.canComplete
+    );
     if (!nextParagraph && this.canComplete) {
       this.status = ExamStatus.Completed;
     }
@@ -307,6 +312,7 @@ class Exam {
 
     const curWords = this.curWords.map(([, word]) => word).filter(Boolean);
     if (this.inputtingWords.length === curWords.length) {
+      this.onChange(this.toJSON());
       this.compare(this.inputtingWords, curWords);
       return;
     }
