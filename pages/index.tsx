@@ -2,7 +2,7 @@
  * @file 官网首页
  */
 
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import cx from "classnames";
 import { useRouter } from "next/router";
 import {
@@ -10,6 +10,7 @@ import {
   BookOpenIcon,
   ChartSquareBarIcon,
   DeviceMobileIcon,
+  DocumentIcon,
   DocumentTextIcon,
   DownloadIcon,
   EmojiHappyIcon,
@@ -20,15 +21,45 @@ import {
 } from "@heroicons/react/outline";
 
 import { getSession } from "@/next-auth/client";
+import { localdb } from "@/utils/db";
+import { useVisible } from "@/hooks";
 import SiteHeader from "@/layouts/site/header";
 import CaptionUpload from "@/components/CaptionFileUpload";
-import { localdb } from "@/utils/db";
+import ParagraphSettingsForm from "@/components/ParagraphSettingsForm";
 import ThemeToggler from "@/components/ThemeToggler";
+import Modal from "@/components/Modal";
+import { downloadDocx, downloadPdf, downloadTxt, insertStyle } from "@/utils";
 
 const Website = (props) => {
   const { user } = props;
   const router = useRouter();
   const loadingRef = useRef(false);
+  const [visible, show, hide] = useVisible();
+
+  const [caption] = useState({
+    title: "《Young Sheldon》S01.01",
+    paragraphs: [
+      {
+        text1: "我一直喜欢火车",
+        text2: "I've always loved trains.",
+      },
+      {
+        text1:
+          "事实上，如果我在理论物理没有什么成果，我的后备计划是成为一个火车检票员",
+        text2:
+          "In fact, if my career in theoretical physics had't worded out, my backup plan was to become a professional ticket taker.",
+      },
+      {
+        text1: "或者是流浪汉",
+        text2: "Or hobo.",
+      },
+      {
+        text1: "而当我发现火车能让我",
+        text2: "And when I figured out that trains allowed me",
+      },
+    ],
+    from: "--《Young Sheldon》S01.01",
+  });
 
   const uploadFile = useCallback(async (caption) => {
     if (loadingRef.current) {
@@ -43,6 +74,15 @@ const Website = (props) => {
   }, []);
 
   const createCaptionFromExisting = useCallback(() => {}, []);
+  const updateParagraphStyles = useCallback(() => {
+    insertStyle(`.text1 {
+  font-size: 20px;
+}
+.text2 {
+  font-size: 36px;
+}
+`);
+  }, []);
 
   return (
     <div className="relative bg-white overflow-hidden dark:bg-gray-800">
@@ -50,19 +90,19 @@ const Website = (props) => {
         <div className="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:w-full lg:pb-28">
           <SiteHeader user={user} />
           {/* wall */}
-          <main className="mx-auto pt-10 px-4 sm:pt-12 sm:px-6 md:pt-16 lg:pt-20 lg:px-8 xl:pt-28">
-            <div className={cx("text-center")}>
+          <main className="relative mx-auto pt-10 px-4 sm:pt-12 sm:px-6 md:pt-16 lg:pt-20 lg:px-8 xl:pt-28">
+            <div className={cx("relative z-10 text-center")}>
               <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
                 <span className="block text-8xl dark:text-gray-200">
                   趣字幕
                 </span>
-                <span className="block mt-2 text-green-600">
+                <span className="block mt-8 text-green-600">
                   从有趣的字幕中学习英语
                 </span>
               </h1>
               <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:mx-auto md:mt-5 md:text-xl lg:mx-0 dark:text-gray-300">
                 在线解析、查看字幕内容，自定义字幕文字样式，PC
-                端、移动端字幕数据同步。
+                端、移动端字幕数据同步
               </p>
               <div className="mt-5 sm:mt-8 sm:flex justify-center">
                 <div className="rounded-md shadow">
@@ -79,6 +119,10 @@ const Website = (props) => {
                 </div>
               </div>
             </div>
+            <div className="#bg absolute z-5 inset-0">
+              <div className="absolute left-20 bottom-[-10px] w-30 h-30 bg-green-300 transform rotate-26 dark:bg-green-800"></div>
+              <div className="absolute right-20 top-10 w-20 h-20 bg-blue-400 rounded-full transform rotate-26 dark:bg-blue-600"></div>
+            </div>
           </main>
         </div>
       </div>
@@ -86,7 +130,47 @@ const Website = (props) => {
       <div className="pointer-group-hover:a mt-4 overflow-hidden sm:mt-6 lg:mt-10">
         {/* 字幕解析、下载 */}
         <div className="#features p-4 py-8 xl:py-10 dark:bg-gray-700">
-          <section className="md:mx-auto md:w-80 md:flex md:justify-between md:w-260">
+          <div className="relative space-y-8 md:mx-auto md:w-260">
+            <div className="absolute right-0 top-0">
+              <div className="hidden flex space-x-4 md:block">
+                <DocumentIcon
+                  className="w-4 h-4 cursor-pointer"
+                  onClick={() => {
+                    downloadTxt(caption);
+                  }}
+                />
+                <DocumentIcon
+                  className="w-4 h-4 cursor-pointer"
+                  onClick={() => {
+                    downloadDocx(caption);
+                  }}
+                />
+                <DocumentIcon
+                  className="w-4 h-4 cursor-pointer"
+                  onClick={() => {
+                    downloadPdf(caption);
+                  }}
+                />
+                <AdjustmentsIcon
+                  className="w-4 h-4 cursor-pointer"
+                  onClick={updateParagraphStyles}
+                />
+              </div>
+            </div>
+            {caption.paragraphs.map((paragraph) => {
+              const { text1, text2 } = paragraph;
+              return (
+                <div key={text1}>
+                  <div className="text1">{text1}</div>
+                  <div className="text2">{text2}</div>
+                </div>
+              );
+            })}
+            <div>
+              <p className="float-right italic text-gray-400">{caption.from}</p>
+            </div>
+          </div>
+          <section className="mt-40 md:mx-auto md:w-80 md:flex md:justify-between md:w-260">
             <div className="#info mr-8 pt-4 md:w-180">
               <h3 className="mx-4 mt-8 text-2xl md:text-3xl dark:text-gray-200">
                 字幕解析与下载
@@ -106,7 +190,7 @@ const Website = (props) => {
                 <div className="btn">pdf</div>
               </div>
             </div>
-            <div className="mt-8 py-8 px-4 space-y-8">
+            <div className="py-8 px-4 space-y-8">
               <div>
                 <div className="text1">我一直喜欢火车</div>
                 <div className="text2">I've always loved trains.</div>
@@ -253,6 +337,9 @@ const Website = (props) => {
           </a>
         </div>
       </div>
+      <Modal visible={visible} onCancel={hide}>
+        <ParagraphSettingsForm />
+      </Modal>
     </div>
   );
 };

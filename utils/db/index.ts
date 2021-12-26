@@ -21,6 +21,7 @@ export class FunzmStore extends Dexie {
     this.version(1).stores({
       captions: "++id",
       paragraphs: "++id, captionId",
+      settings: "++id",
     });
   }
 }
