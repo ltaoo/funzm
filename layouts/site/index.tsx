@@ -2,6 +2,7 @@
  * @file 官网布局
  */
 import SiteHeader from "./header";
+import Footer from "./footer";
 
 const SiteLayout = (props) => {
   const { user, children } = props;
@@ -9,11 +10,14 @@ const SiteLayout = (props) => {
   return (
     <div className="relative bg-white overflow-hidden">
       <div className="mx-auto">
-        <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:w-full lg:pb-28">
+        <div className="relative z-10 bg-whitelg:w-full">
           <SiteHeader user={user} />
-          {children}
+          <div className="bg-gray-100 pb-16 md:pb-28">
+            {children}
+          </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

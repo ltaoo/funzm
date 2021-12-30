@@ -6,7 +6,7 @@ export interface IParagraph {
   text2: string;
 }
 
-export interface Caption {
+export interface CaptionFile {
   title: string;
   type: string;
   paragraphs: IParagraph[];

@@ -4,10 +4,17 @@
  * 2、已结束状态由外部决定
  */
 import { Paragraph } from "@prisma/client";
+import dayjs, { Dayjs } from "dayjs";
 
 import { compareLine, splitText2Words } from "../caption/utils";
 
-import { shuffle, arr2map, uid } from "./utils";
+import {
+  shuffle,
+  arr2map,
+  uid,
+  removeZeroAtTail,
+  computeScoreByStats,
+} from "./utils";
 
 enum ExamLevel {
   Simple = 1,
@@ -71,6 +78,14 @@ class Exam {
   incorrectParagraphs: (Paragraph & {
     error: string;
   })[];
+  /**
+   * 开始时间
+   */
+  startAt: Dayjs;
+  /**
+   * 结束/完成时间
+   */
+  endAt: Dayjs;
 
   /**
    * 输入的单词
@@ -108,6 +123,7 @@ class Exam {
   onCorrect: (examJSON: Record<string, any>) => void;
   onSkip?: (examJSON: Record<string, any>) => void;
   onIncorrect: (examJSON: Record<string, any>) => void;
+  onComplete?: () => void;
 
   /**
    * 剩余段落不够了，需要补充的临界值
@@ -149,6 +165,7 @@ class Exam {
     this.skippedParagraphs = [];
     this.correctParagraphs = [];
     this.incorrectParagraphs = [];
+    this.startAt = dayjs();
 
     this.title = title;
     this.paragraphs = filterEmptyTextParagraphs(paragraphs);
@@ -267,6 +284,10 @@ class Exam {
     );
     if (!nextParagraph && this.canComplete) {
       this.status = ExamStatus.Completed;
+      this.endAt = dayjs();
+      if (this.onComplete) {
+        this.onComplete();
+      }
     }
     const res = this.toJSON();
     console.log(
@@ -380,6 +401,54 @@ class Exam {
       appendedParagraphs.length + prevRemaining.length;
   }
 
+  /**
+   * 统计
+   */
+  stats() {
+    const {
+      paragraphs,
+      correctParagraphs,
+      incorrectParagraphs,
+      skippedParagraphs,
+    } = this;
+    const stats = {
+      total: paragraphs.length,
+      correct: correctParagraphs.length,
+      incorrect: incorrectParagraphs.length,
+      skipped: skippedParagraphs.length,
+      startAt: this.startAt.format("YYYY-MM-DD HH:mm:ss"),
+      endAt: this.endAt ? this.endAt.format("YYYY-MM-DD HH:mm:ss") : "-",
+      spend: (() => {
+        if (this.endAt) {
+          const spendSeconds = this.endAt.unix() - this.startAt.unix();
+          const remainingSeconds = spendSeconds % 60;
+          const spendMinutes = spendSeconds / 60;
+          return spendSeconds < 60
+            ? `${spendSeconds}秒`
+            : `${spendMinutes}分${remainingSeconds}秒`;
+        }
+        return null;
+      })(),
+      seconds: (() => {
+        if (this.endAt) {
+          return this.endAt.unix() - this.startAt.unix();
+        }
+        return 0;
+      })(),
+      correctRate: parseFloat(
+        removeZeroAtTail(
+          ((correctParagraphs.length / paragraphs.length) * 100).toFixed(2)
+        )
+      ),
+      correctRateText: `${removeZeroAtTail(
+        ((correctParagraphs.length / paragraphs.length) * 100).toFixed(2)
+      )}%`,
+      score: 0,
+    };
+    stats.score = computeScoreByStats(stats);
+    return stats;
+  }
+
   toJSON() {
     const {
       paragraphs,
@@ -410,6 +479,7 @@ class Exam {
       incorrectParagraphs,
       skippedParagraphs,
       remainingParagraphsCount,
+      stats: this.stats(),
     };
   }
 }

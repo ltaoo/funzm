@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef } from "react";
 import Upload from "rc-upload";
 
 import { getExt, readTextFromFile } from "@/domains/caption";
-import { Caption } from "@/domains/caption/types";
+import { CaptionFile } from "@/domains/caption/types";
 
 interface IProps {
   /**

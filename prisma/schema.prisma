@@ -36,12 +36,17 @@ model User {
   password      String
   salt          String
 
+  score         Int       @default(0)
+
   accounts      Account[]
   sessions      Session[]
   captions      Caption[]
   exams         Exam[]
   notebooks     Notebook[]
   spellingResults SpellingResult[]
+  scoreRecords    ScoreRecord[]
+  packages         Package[]
+  sign         SignRecord[]
 
   created_at    Int
   last_updated  Int?
@@ -109,6 +114,17 @@ model Paragraph {
   words        Word[]
 
   @@map("paragraphs")
+}
+
+model Scene {
+  id           String   @id @default(cuid())
+
+  // 场景开始段落
+  start        String
+  // 场景结束段落
+  end          String
+
+  @@map("scenes")
 }
 
 // 阅读记录
@@ -182,10 +198,10 @@ model Word {
 
   text                  String
 
-  notebookId            String
+  notebookId            String        @map("notebook_id")
   notebook              Notebook?     @relation(fields: [notebookId], references: [id])
 
-  paragraphId           String                  
+  paragraphId           String        @map("paragraph_id")
   paragraph             Paragraph     @relation(fields: [paragraphId], references: [id])
 
   created_at            Int
@@ -193,3 +209,64 @@ model Word {
   @@map("words")
 }
 
+// 积分记录
+model ScoreRecord {
+  id                    String     @id @default(cuid())
+
+  user              User?     @relation(fields: [userId], references: [id])
+  userId            String?   @map("user_id")
+
+  type              Int
+  number            Int
+  desc              String?
+
+  created_at            Int
+
+  @@map("score_records")
+}
+
+// 签到记录
+model SignRecord {
+  id                    String     @id @default(cuid())
+
+  user                  User?     @relation(fields: [userId], references: [id])
+  userId                String?   @map("user_id")
+  // 星期几
+  day                  Int
+  created_at            Int
+
+  @@map("sign_records")
+}
+
+
+// 游戏道具
+model Item {
+  id                    String     @id @default(cuid())
+
+  type                  Int
+
+  name                  String
+  price                 Int
+
+  packages              Package[]
+
+  created_at            Int
+
+  @@map("items")
+}
+
+// user package
+model Package {
+  id                    String     @id @default(cuid())
+
+  item                  Item      @relation(fields: [itemId], references: [id])
+  itemId                String       @map("item_id")
+  num                   Int
+
+  user                  User     @relation(fields: [userId], references: [id])
+  userId                String   @map("user_id")
+
+  created_at            Int
+
+  @@map("packages")
+}

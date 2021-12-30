@@ -35,6 +35,7 @@ import SimpleExamInput from "@/components/SimpleExamInput";
 import SimpleExamOperator from "@/components/SimpleExamOperator";
 import { showModal } from "@/utils/modal";
 import ResultTip from "@/components/ResultTip";
+import Footer from "@/layouts/site/footer";
 
 import "rc-tooltip/assets/bootstrap_white.css";
 import SimpleExamStats from "@/components/SimpleExamStats";
@@ -55,23 +56,23 @@ const Website = (props) => {
         text1: "我一直喜欢火车",
         text2: "I've always loved trains.",
       },
-      // {
-      //   id: 2,
-      //   text1:
-      //     "事实上，如果我在理论物理没有什么成果，我的后备计划是成为一个火车检票员",
-      //   text2:
-      //     "In fact, if my career in theoretical physics had't worked out, my backup plan was to become a professional ticket taker.",
-      // },
+      {
+        id: 2,
+        text1:
+          "事实上，如果我在理论物理没有什么成果，我的后备计划是成为一个火车检票员",
+        text2:
+          "In fact, if my career in theoretical physics had't worked out, my backup plan was to become a professional ticket taker.",
+      },
       {
         id: 3,
         text1: "或者是流浪汉",
         text2: "Or hobo.",
       },
-      // {
-      //   id: 4,
-      //   text1: "而当我发现火车能让我",
-      //   text2: "And when I figured out that trains allowed me",
-      // },
+      {
+        id: 4,
+        text1: "而当我发现火车能让我",
+        text2: "And when I figured out that trains allowed me",
+      },
     ],
     from: "--《Young Sheldon》S01.01",
   });
@@ -175,8 +176,8 @@ const Website = (props) => {
               </div>
             </div>
             <div className="#bg absolute z-5 inset-0">
-              <div className="absolute left-20 bottom-[-10px] w-30 h-30 bg-green-300 transform rotate-26 dark:bg-green-800"></div>
-              <div className="absolute right-20 top-10 w-20 h-20 bg-blue-400 rounded-full transform rotate-26 dark:bg-blue-600"></div>
+              <div className="hidden absolute left-20 bottom-[-10px] w-30 h-30 bg-green-300 transform rotate-26 dark:bg-green-800 md:block"></div>
+              <div className="hidden absolute right-20 top-10 w-20 h-20 bg-blue-400 rounded-full transform rotate-26 dark:bg-blue-600 md:block"></div>
             </div>
           </main>
         </div>
@@ -201,82 +202,100 @@ const Website = (props) => {
               <p className="float-right italic text-gray-400">{caption.from}</p>
             </div>
           </div>
-          <div className="flex space-x-4 mt-12 md:block">
-            <Tooltip placement="bottom" overlay={<div>下载 txt 文件</div>}>
-              <DocumentIcon
-                className="icon"
-                onClick={() => {
-                  downloadTxt(caption);
-                }}
-              />
-            </Tooltip>
-            <Tooltip
-              placement="bottom"
-              overlay={<div>下载 docx 文件</div>}
-              overlayClassName="bg-gray-500"
-            >
-              <DocumentIcon
-                className="icon"
-                onClick={() => {
-                  downloadDocx(caption);
-                }}
-              />
-            </Tooltip>
-            <Tooltip
-              placement="bottom"
-              overlay={<div>下载 PDF（耗时较长）</div>}
-            >
-              <DocumentIcon
-                className="icon"
-                onClick={() => {
-                  downloadPdf(caption);
-                }}
-              />
-            </Tooltip>
-            <Tooltip placement="bottom" overlay={<div>改变字幕样式</div>}>
-              <AdjustmentsIcon
-                className="icon"
-                onClick={updateParagraphStyles}
-              />
-            </Tooltip>
+          <div className="mt-12 text-center">
+            <div className="inline-flex space-x-4 md:block">
+              <Tooltip placement="bottom" overlay={<div>下载 txt 文件</div>}>
+                <DocumentIcon
+                  className="icon"
+                  onClick={() => {
+                    downloadTxt(caption);
+                  }}
+                />
+              </Tooltip>
+              <Tooltip
+                placement="bottom"
+                overlay={<div>下载 docx 文件</div>}
+                overlayClassName="bg-gray-500"
+              >
+                <DocumentIcon
+                  className="icon"
+                  onClick={() => {
+                    downloadDocx(caption);
+                  }}
+                />
+              </Tooltip>
+              <Tooltip
+                placement="bottom"
+                overlay={<div>下载 PDF（耗时较长）</div>}
+              >
+                <DocumentIcon
+                  className="icon"
+                  onClick={() => {
+                    downloadPdf(caption);
+                  }}
+                />
+              </Tooltip>
+              <Tooltip placement="bottom" overlay={<div>改变字幕样式</div>}>
+                <AdjustmentsIcon
+                  className="icon"
+                  onClick={updateParagraphStyles}
+                />
+              </Tooltip>
+            </div>
           </div>
-          <p className="inline-block underline text-gray-300">
+          <p className="block underline text-center text-gray-300">
             无需注册即可下载多种格式字幕
           </p>
-          <div className="mt-36 text-center md:mx-auto md:w-260">
+          <hr className="mt-10" />
+          <div className="mt-26 text-center md:mx-auto md:w-260">
             <div className="text-3xl underline decoration-wavy decoration-green-500 underline-offset-6 dark:text-gray-200">
               &nbsp;&nbsp;进行一个小测验&nbsp;&nbsp;
             </div>
             <div className="inline-block mt-6 text-gray-500">
               上面字幕内容还记得多少呢？
             </div>
-            <div>
+            <div className="">
               {!exam && (
                 <div
                   className="mt-12 inline-block py-2 px-4 text-green-500 rounded border-1 border-green-500 cursor-pointer"
                   onClick={() => {
                     startSimpleExam(caption);
+                    const $exam = document.querySelector("#exam");
+                    import("scroll-into-view-if-needed").then((mod) => {
+                      const scrollIntoView = mod.default;
+                      scrollIntoView($exam, {
+                        scrollMode: "if-needed",
+                        behavior: "smooth",
+                        block: "start",
+                        inline: "nearest",
+                      });
+                    });
                   }}
                 >
                   点击开始
                 </div>
               )}
             </div>
-            {exam?.status === ExamStatus.Started && (
-              <div>
-                <SimpleExamInput
-                  className="md:mx-auto md:w-180"
-                  {...exam}
-                  onClick={(segment) => {
-                    if (!examRef.current) {
-                      return;
-                    }
-                    examRef.current.write(segment);
-                  }}
-                />
-                <SimpleExamOperator instance={examRef.current} />
-              </div>
-            )}
+            <div id="exam">
+              {exam?.status === ExamStatus.Started && (
+                <div className="mt-12">
+                  {/* @ts-ignore */}
+                  <SimpleExamInput
+                    className="md:mx-auto md:w-180"
+                    {...exam}
+                    onClick={(segment) => {
+                      if (!examRef.current) {
+                        return;
+                      }
+                      examRef.current.write(segment);
+                    }}
+                  />
+                  <div className="text-center">
+                    <SimpleExamOperator instance={examRef.current} />
+                  </div>
+                </div>
+              )}
+            </div>
             {exam?.status === ExamStatus.Completed && (
               <div className="mt-12">
                 <div className="text-3xl">
@@ -284,7 +303,9 @@ const Website = (props) => {
                   <span className="inline-block mx-4 text-green-500">完成</span>
                   🎉
                 </div>
-                <SimpleExamStats />
+                <div className="mt-18 md:mx-auto md:w-120">
+                  <SimpleExamStats data={exam.stats} />
+                </div>
               </div>
             )}
           </div>
@@ -364,40 +385,13 @@ const Website = (props) => {
       <div className="min-h-36"></div>
       <hr />
       <div className="flex py-32 items-center justify-center">
-        <div className="inline-block py-2 px-4 text-green-500 rounded border-1 border-green-500 shadow-xl shadow-green-500 cursor-pointer">
-          开始专属自己的字幕学习之旅吧
-        </div>
-      </div>
-      <div className="bg-gray-900">
-        <div className="w-full py-8 px-4 text-gray-100 text-center md:mx-auto md:w-260 md:p-10">
-          <div className="inline-flex items-center justify-between">
-            <div className="inline-block space-x-4">
-              <p className="inline-block cursor-pointer">
-                <a className="text-white" href="/changelog" target="_blank">
-                  过去与未来
-                </a>
-              </p>
-              <p className="inline-block cursor-pointer">
-                <a className="text-white" href="/help" target="_blank">
-                  帮助文档
-                </a>
-              </p>
-              <p className="inline-block cursor-pointer">问题反馈</p>
-              <p className="inline-block cursor-pointer">联系我们</p>
-            </div>
+        <a href="/user/login">
+          <div className="inline-block py-2 px-4 text-green-500 rounded border-1 border-green-500 shadow-xl shadow-green-500 cursor-pointer">
+            开始专属自己的字幕学习之旅吧
           </div>
-          <div className="block mt-12 text-center text-gray-400">
-            <a
-              href="https://beian.miit.gov.cn"
-              className="text-gray-400"
-              target="_blank"
-            >
-              <div>浙ICP备2021007841号</div>
-            </a>
-            <div>Copyright © 2021 qunzm.com All Rights Reserved</div>
-          </div>
-        </div>
+        </a>
       </div>
+      <Footer />
       <Modal visible={visible} onCancel={hide}>
         <ParagraphSettingsForm />
       </Modal>

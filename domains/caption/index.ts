@@ -1,4 +1,7 @@
-import { Caption } from "./types";
+/**
+ * @file 字幕领域
+ */
+import { CaptionFile } from "./types";
 
 /**
  * 获取文件拓展
@@ -99,7 +102,7 @@ const CAPTION_PARSER_MAP = {
 export function parseCaptionContent(
   content: string,
   format?: CaptionFileType
-): Caption["paragraphs"] {
+): CaptionFile["paragraphs"] {
   const parser = CAPTION_PARSER_MAP[format];
   if (parser) {
     return parser(content);
@@ -120,7 +123,7 @@ export function parseCaptionContent(
  * @param caption
  * @returns
  */
-export function stringifyCaption(caption: Caption) {
+export function stringifyCaption(caption: CaptionFile) {
   const { title, paragraphs } = caption;
   return {
     title,
@@ -131,4 +134,18 @@ export function stringifyCaption(caption: Caption) {
       })
       .join("\n\n"),
   };
+}
+
+export default class Caption {
+  constructor(options) {
+    const { title, type, content } = options;
+  }
+
+  /**
+   * 将段落切割成多个场景
+   */
+  splitParagraphsAsScene(paragraphs) {
+    const total = paragraphs.length;
+    // 一个场景建议 50 个段落
+  }
 }
