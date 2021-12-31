@@ -190,6 +190,7 @@ const SimpleCaptionExamPage = () => {
           >
             <QuestionMarkCircleIcon className="w-6 h-6 text-gray-500 cursor-pointer" />
           </div> */}
+          {/* @ts-ignore */}
           <SimpleExamInput
             {...exam}
             onClick={(segment) => {
