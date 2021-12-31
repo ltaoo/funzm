@@ -24,7 +24,7 @@ const footer = () => {
             className="text-gray-400"
             target="_blank"
           >
-            <div>浙ICP备2021007841号</div>
+            <div>浙ICP备2021007841号-2</div>
           </a>
           <div>Copyright © 2021 qunzm.com All Rights Reserved</div>
         </div>

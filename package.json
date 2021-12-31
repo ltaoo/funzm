@@ -3,7 +3,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "prod=true next start"
   },
   "dependencies": {
     "@headlessui/react": "^1.4.2",
