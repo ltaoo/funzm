@@ -29,7 +29,7 @@ const formUploader = new qiniu.form_up.FormUploader(config);
  */
 function addUrl(body) {
   console.log("[addUrl]", body.key);
-  return { ...body, url: `//static.ltaoo.work/${body.key}` };
+  return { ...body, url: `//static.funzm.com/${body.key}` };
 }
 
 /**
