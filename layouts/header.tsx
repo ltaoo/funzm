@@ -7,7 +7,7 @@ import Link from "next/link";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { BellIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
+import { BellIcon, MenuIcon, XIcon } from "@ltaoo/icons/outline";
 
 import { signout, useSession } from "@/next-auth/client";
 

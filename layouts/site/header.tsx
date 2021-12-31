@@ -1,22 +1,7 @@
 import { Fragment } from "react";
 import { Popover, Transition } from "@headlessui/react";
 import Link from "next/link";
-import {
-  AdjustmentsIcon,
-  BookOpenIcon,
-  ChartSquareBarIcon,
-  DeviceMobileIcon,
-  DocumentTextIcon,
-  DownloadIcon,
-  EmojiHappyIcon,
-  MenuIcon,
-  MoonIcon,
-  TranslateIcon,
-  UploadIcon,
-  UserIcon,
-  VolumeUpIcon,
-  XIcon,
-} from "@heroicons/react/outline";
+import { MenuIcon, XIcon, LogoIcon } from "@ltaoo/icons/outline";
 import { useRouter } from "next/router";
 
 const navigation = [
@@ -32,7 +17,7 @@ const SiteHeader = (props) => {
   const router = useRouter();
 
   return (
-    <Popover className="header">
+    <Popover className="header relative z-12">
       <div className="relative py-6 px-4 shadow sm:px-6 lg:px-8">
         <nav
           className="relative flex items-center justify-between sm:h-10"
@@ -42,13 +27,10 @@ const SiteHeader = (props) => {
             <div className="flex items-center justify-between w-full md:w-auto">
               <a href="#">
                 <span className="sr-only">FunZM</span>
-                <img
-                  className="h-8 w-auto sm:h-10"
-                  src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
-                />
+                <LogoIcon className="h-8 w-auto text-green-500 sm:h-10" />
               </a>
               <div className="flex items-center md:hidden">
-                <Popover.Button className="bg-white rounded-md p-2 inline-flex items-center justify-center outline-0 text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:bg-gray-800 hover:dark:bg-gray-700">
+                <Popover.Button className="bg-white rounded-md p-2 inline-flex items-center justify-center !outline-0 text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:bg-gray-800 hover:dark:bg-gray-700">
                   <span className="sr-only">Open main menu</span>
                   <MenuIcon className="h-6 w-6" aria-hidden="true" />
                 </Popover.Button>
@@ -104,18 +86,14 @@ const SiteHeader = (props) => {
           focus
           className="absolute z-10 top-0 inset-x-0 transition transform origin-top-right md:hidden"
         >
-          <div className="rounded-lg shadow-md bg-white ring-1 ring-black ring-opacity-5 overflow-hidden dark:bg-gray-800">
+          <div className="rounded-lg shadow-md bg-white ring-1 ring-green-500 ring-opacity-5 overflow-hidden dark:bg-gray-800">
             <div>
               <div className="flex items-center justify-between px-4 py-6">
                 <div>
-                  <img
-                    className="h-8 w-auto"
-                    src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
-                    alt=""
-                  />
+                  <LogoIcon className="h-8 w-auto text-green-500" />
                 </div>
                 <div className="">
-                  <Popover.Button className="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 outline-0 hover:text-gray-500 hover:bg-gray-100 focus:outline-none dark:bg-gray-700">
+                  <Popover.Button className="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 !outline-0 hover:text-gray-500 hover:bg-gray-100 focus:outline-none dark:bg-gray-700">
                     <span className="sr-only">Close main menu</span>
                     <XIcon className="h-6 w-6" aria-hidden="true" />
                   </Popover.Button>

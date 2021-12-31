@@ -3,8 +3,8 @@
  */
 import React, { Fragment, useState, useCallback, useMemo } from "react";
 import { Disclosure, Menu, Dialog, Transition } from "@headlessui/react";
-import { CalendarIcon, UserIcon, XIcon } from "@heroicons/react/outline";
-import { StarIcon } from "@heroicons/react/solid";
+import { CalendarIcon, UserIcon, XIcon } from "@ltaoo/icons/outline";
+import { StarIcon } from "@ltaoo/icons/solid";
 import { Paragraph } from ".prisma/client";
 
 import { splitText2Words } from "@/domains/caption/utils";

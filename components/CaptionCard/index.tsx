@@ -6,7 +6,7 @@ import {
   PencilAltIcon,
   TranslateIcon,
   TrashIcon,
-} from "@heroicons/react/outline";
+} from "@ltaoo/icons/outline";
 import Link from "next/link";
 import { useRouter } from "next/router";
 

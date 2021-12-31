@@ -13,7 +13,7 @@ import {
   SunIcon,
   TrashIcon,
   XIcon,
-} from "@heroicons/react/outline";
+} from "@ltaoo/icons/outline";
 import debounce from "lodash.debounce";
 import { saveAs } from "file-saver";
 import { Packer, Document, Paragraph, TextRun } from "docx";

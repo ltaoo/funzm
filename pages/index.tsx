@@ -7,38 +7,28 @@ import cx from "classnames";
 import { useRouter } from "next/router";
 import {
   AdjustmentsIcon,
-  BookOpenIcon,
-  ChartSquareBarIcon,
-  DeviceMobileIcon,
-  DocumentIcon,
-  DocumentTextIcon,
-  DownloadIcon,
-  EmojiHappyIcon,
-  MoonIcon,
-  TranslateIcon,
-  UploadIcon,
-  VolumeUpIcon,
-} from "@heroicons/react/outline";
+  DocumentPdfIcon,
+  DocumentDocxIcon,
+  DocumentTxtIcon,
+} from "@ltaoo/icons/outline";
 import Tooltip from "rc-tooltip";
 
 import { getSession } from "@/next-auth/client";
-import { localdb } from "@/utils/db";
 import { useVisible } from "@/hooks";
+import { localdb } from "@/utils/db";
+import { showModal } from "@/utils/modal";
+import { downloadDocx, downloadPdf, downloadTxt, insertStyle } from "@/utils";
+import Footer from "@/layouts/site/footer";
 import SiteHeader from "@/layouts/site/header";
+import Exam, { ExamStatus } from "@/domains/exam";
 import CaptionUpload from "@/components/CaptionFileUpload";
 import ParagraphSettingsForm from "@/components/ParagraphSettingsForm";
-import ThemeToggler from "@/components/ThemeToggler";
 import Modal from "@/components/Modal";
-import { downloadDocx, downloadPdf, downloadTxt, insertStyle } from "@/utils";
-import Exam, { ExamStatus } from "@/domains/exam";
 import SimpleExamInput from "@/components/SimpleExamInput";
 import SimpleExamOperator from "@/components/SimpleExamOperator";
-import { showModal } from "@/utils/modal";
-import ResultTip from "@/components/ResultTip";
-import Footer from "@/layouts/site/footer";
+import SimpleExamStats from "@/components/SimpleExamStats";
 
 import "rc-tooltip/assets/bootstrap_white.css";
-import SimpleExamStats from "@/components/SimpleExamStats";
 
 const Website = (props) => {
   const { user } = props;
@@ -143,7 +133,7 @@ const Website = (props) => {
   return (
     <div className="relative bg-white overflow-hidden dark:bg-gray-800">
       <div className="mx-auto">
-        <div className="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:w-full lg:pb-28">
+        <div className="relative z-1 pb-8 sm:pb-16 md:pb-20 lg:w-full lg:pb-28">
           <SiteHeader user={user} />
           {/* wall */}
           <main className="relative mx-auto pt-10 px-4 sm:pt-12 sm:px-6 md:pt-16 lg:pt-20 lg:px-8 xl:pt-28">
@@ -169,7 +159,21 @@ const Website = (props) => {
                   </CaptionUpload>
                 </div>
                 <div className="mt-3 sm:mt-0 sm:ml-3">
-                  <div className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 cursor-pointer hover:bg-green-200 md:py-4 md:text-lg md:px-10">
+                  <div
+                    className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 cursor-pointer hover:bg-green-200 md:py-4 md:text-lg md:px-10"
+                    onClick={() => {
+                      const $exam = document.querySelector("#exp");
+                      import("scroll-into-view-if-needed").then((mod) => {
+                        const scrollIntoView = mod.default;
+                        scrollIntoView($exam, {
+                          scrollMode: "if-needed",
+                          behavior: "smooth",
+                          block: "start",
+                          inline: "nearest",
+                        });
+                      });
+                    }}
+                  >
                     开始体验
                   </div>
                 </div>
@@ -182,9 +186,12 @@ const Website = (props) => {
           </main>
         </div>
       </div>
-      <div className="pointer-group-hover:a mt-4 overflow-hidden sm:mt-6 lg:mt-10">
+      <div
+        id="exp"
+        className="pointer-group-hover:a mt-4 overflow-hidden sm:mt-6 lg:mt-8"
+      >
         {/* 字幕解析、下载 */}
-        <div className="#features p-4 py-8 xl:py-10 dark:bg-gray-700">
+        <div className="#features p-4 py-8 xl:py-6 dark:bg-gray-700">
           <div className="text-center text-3xl text-gray-800 underline decoration-wavy decoration-green-500 underline-offset-6 dark:text-gray-200">
             &nbsp;&nbsp;这是一段美剧字幕&nbsp;&nbsp;
           </div>
@@ -205,7 +212,7 @@ const Website = (props) => {
           <div className="mt-12 text-center">
             <div className="inline-flex space-x-4 md:block">
               <Tooltip placement="bottom" overlay={<div>下载 txt 文件</div>}>
-                <DocumentIcon
+                <DocumentTxtIcon
                   className="icon"
                   onClick={() => {
                     downloadTxt(caption);
@@ -217,7 +224,7 @@ const Website = (props) => {
                 overlay={<div>下载 docx 文件</div>}
                 overlayClassName="bg-gray-500"
               >
-                <DocumentIcon
+                <DocumentDocxIcon
                   className="icon"
                   onClick={() => {
                     downloadDocx(caption);
@@ -228,23 +235,23 @@ const Website = (props) => {
                 placement="bottom"
                 overlay={<div>下载 PDF（耗时较长）</div>}
               >
-                <DocumentIcon
+                <DocumentPdfIcon
                   className="icon"
                   onClick={() => {
                     downloadPdf(caption);
                   }}
                 />
               </Tooltip>
-              <Tooltip placement="bottom" overlay={<div>改变字幕样式</div>}>
+              {/* <Tooltip placement="bottom" overlay={<div>改变字幕样式</div>}>
                 <AdjustmentsIcon
                   className="icon"
                   onClick={updateParagraphStyles}
                 />
-              </Tooltip>
+              </Tooltip> */}
             </div>
           </div>
           <p className="block underline text-center text-gray-300">
-            无需注册即可下载多种格式字幕
+            无需注册即可下载多种格式文档
           </p>
           <hr className="mt-10" />
           <div className="mt-26 text-center md:mx-auto md:w-260">

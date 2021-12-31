@@ -4,7 +4,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import cx from "classnames";
 import { useRouter } from "next/router";
-import { TrashIcon } from "@heroicons/react/outline";
+import { TrashIcon } from "@ltaoo/icons/outline";
 
 import { addCaptionService } from "@/services/caption";
 import tmpCaptionStorage from "@/domains/caption/storage";

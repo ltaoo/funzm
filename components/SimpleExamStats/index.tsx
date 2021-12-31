@@ -38,7 +38,7 @@ const SimpleExamStats = (props) => {
       </div>
       <hr className="mt-8" />
       <div className="mt-8 flex flex-row-reverse">
-        <span className="mr-6 text-5xl text-gray-800">{score}</span>
+        <span className="mr-6 text-5xl text-green-500">{score}</span>
         <span className="w-24 text-gray-800 self-end">获得积分数</span>
       </div>
     </div>

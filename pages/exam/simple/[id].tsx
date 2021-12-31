@@ -13,7 +13,7 @@ import {
   QuestionMarkCircleIcon,
   ReplyIcon,
   ScissorsIcon,
-} from "@heroicons/react/outline";
+} from "@ltaoo/icons/outline";
 
 import {
   createExamSpellingService,

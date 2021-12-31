@@ -3,7 +3,8 @@
  */
 import { useCallback } from "react";
 import Form from "rc-field-form";
-import { LockClosedIcon } from "@heroicons/react/solid";
+import { LockClosedIcon } from "@ltaoo/icons/solid";
+import { LogoIcon } from "@ltaoo/icons/outline";
 
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -38,11 +39,9 @@ const RegisterPage = () => {
         <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-md w-full space-y-8">
             <div>
-              <img
-                className="mx-auto h-12 w-auto"
-                src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
-                alt="Workflow"
-              />
+              <div className="text-center">
+              <LogoIcon className="mx-auto w-12 h-12 text-green-500" />
+              </div>
               <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
                 Register a new account
               </h2>

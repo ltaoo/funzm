@@ -1,9 +1,9 @@
 import {
   ChartBarIcon,
-  FireIcon,
   LightBulbIcon,
-  ScissorsIcon,
-} from "@heroicons/react/outline";
+  SkipIcon,
+  ClearIcon,
+} from "@ltaoo/icons/outline";
 
 const SimpleExamOperator = (props) => {
   const { instance } = props;
@@ -27,7 +27,7 @@ const SimpleExamOperator = (props) => {
         <p className="text-sm text-gray-500">提示</p>
       </div>
       <div>
-        <ScissorsIcon
+        <SkipIcon
           className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100"
           onClick={() => {
             if (!instance) {
@@ -39,7 +39,7 @@ const SimpleExamOperator = (props) => {
         <p className="text-sm text-gray-500">跳过</p>
       </div>
       <div>
-        <FireIcon
+        <ClearIcon
           className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100"
           onClick={() => {
             if (!instance) {

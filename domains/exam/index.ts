@@ -14,6 +14,7 @@ import {
   uid,
   removeZeroAtTail,
   computeScoreByStats,
+  paddingZero,
 } from "./utils";
 
 enum ExamLevel {
@@ -422,10 +423,10 @@ class Exam {
         if (this.endAt) {
           const spendSeconds = this.endAt.unix() - this.startAt.unix();
           const remainingSeconds = spendSeconds % 60;
-          const spendMinutes = spendSeconds / 60;
+          const spendMinutes = (spendSeconds / 60).toFixed(0);
           return spendSeconds < 60
             ? `${spendSeconds}秒`
-            : `${spendMinutes}分${remainingSeconds}秒`;
+            : `${spendMinutes}分${paddingZero(remainingSeconds)}秒`;
         }
         return null;
       })(),

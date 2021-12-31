@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { ExclamationIcon } from "@heroicons/react/outline";
+import { ExclamationIcon } from "@ltaoo/icons/outline";
 
 import { jsPDF } from "jspdf";
 

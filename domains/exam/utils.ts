@@ -78,3 +78,11 @@ export function computeScoreByStats(stats) {
   score += remainingSeconds;
   return score;
 }
+
+export function paddingZero(num) {
+  const number = parseInt(num, 10);
+  if (number < 10) {
+    return `0${number}`;
+  }
+  return number;
+}

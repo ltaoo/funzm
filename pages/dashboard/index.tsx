@@ -5,7 +5,7 @@ import React, { Fragment } from "react";
 import cx from "classnames";
 import router from "next/router";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { BellIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
+import { BellIcon, MenuIcon, XIcon } from "@ltaoo/icons/outline";
 
 import Layout from "@/layouts";
 import { getSession, signOut } from "@/next-auth/client";
