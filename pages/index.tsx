@@ -12,6 +12,7 @@ import {
   DocumentTxtIcon,
 } from "@ltaoo/icons/outline";
 import Tooltip from "rc-tooltip";
+import Head from "next/head";
 
 import { getSession } from "@/next-auth/client";
 import { useVisible } from "@/hooks";
@@ -134,6 +135,9 @@ const Website = (props) => {
     <div className="relative bg-white overflow-hidden dark:bg-gray-800">
       <div className="mx-auto">
         <div className="relative z-1 pb-8 sm:pb-16 md:pb-20 lg:w-full lg:pb-28">
+          <Head>
+            <title>趣字幕 - 从有趣的字幕中学习英语</title>
+          </Head>
           <SiteHeader user={user} />
           {/* wall */}
           <main className="relative mx-auto pt-10 px-4 sm:pt-12 sm:px-6 md:pt-16 lg:pt-20 lg:px-8 xl:pt-28">
@@ -195,7 +199,7 @@ const Website = (props) => {
           <div className="text-center text-3xl text-gray-800 underline decoration-wavy decoration-green-500 underline-offset-6 dark:text-gray-200">
             &nbsp;&nbsp;这是一段美剧字幕&nbsp;&nbsp;
           </div>
-          <div className="#example relative space-y-8 mt-10 py-2 px-8 rounded-xl shadow-xl shadow-green-800 md:mx-auto md:w-260">
+          <div className="#example relative space-y-8 mt-10 py-2 px-2 rounded-xl md:shadow-xl md:shadow-green-800 md:px-8 md:mx-auto md:w-260 dark:shadow-gray-800">
             {caption.paragraphs.map((paragraph) => {
               const { text1, text2 } = paragraph;
               return (
@@ -253,7 +257,7 @@ const Website = (props) => {
           <p className="block underline text-center text-gray-300">
             无需注册即可下载多种格式文档
           </p>
-          <hr className="mt-10" />
+          <hr className="mt-10 dark:opacity-40" />
           <div className="mt-26 text-center md:mx-auto md:w-260">
             <div className="text-3xl underline decoration-wavy decoration-green-500 underline-offset-6 dark:text-gray-200">
               &nbsp;&nbsp;进行一个小测验&nbsp;&nbsp;
@@ -267,9 +271,9 @@ const Website = (props) => {
                   className="mt-12 inline-block py-2 px-4 text-green-500 rounded border-1 border-green-500 cursor-pointer"
                   onClick={() => {
                     startSimpleExam(caption);
-                    const $exam = document.querySelector("#exam");
                     import("scroll-into-view-if-needed").then((mod) => {
                       const scrollIntoView = mod.default;
+                      const $exam = document.querySelector("#exam");
                       scrollIntoView($exam, {
                         scrollMode: "if-needed",
                         behavior: "smooth",
@@ -389,8 +393,7 @@ const Website = (props) => {
           </div>
         </div>
       </div> */}
-      <div className="min-h-36"></div>
-      <hr />
+      <div className="min-h-36 dark:bg-gray-700"></div>
       <div className="flex py-32 items-center justify-center">
         <a href="/user/login">
           <div className="inline-block py-2 px-4 text-green-500 rounded border-1 border-green-500 shadow-xl shadow-green-500 cursor-pointer">
