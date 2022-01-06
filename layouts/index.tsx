@@ -13,7 +13,7 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div>
       <Header />
-      <main className="py-4 px-2">{children}</main>
+      <main className="min-h-screen py-4 px-2 bg-gray-100">{children}</main>
     </div>
   );
 }

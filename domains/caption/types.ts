@@ -1,4 +1,5 @@
-export interface IParagraph {
+export interface IParagraphValues {
+  id: string;
   line: number;
   start: string;
   end: string;
@@ -9,7 +10,7 @@ export interface IParagraph {
 export interface CaptionFile {
   title: string;
   type: string;
-  paragraphs: IParagraph[];
+  paragraphs: IParagraphValues[];
 }
 
 export interface DiffNode {

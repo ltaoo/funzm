@@ -7,7 +7,9 @@ import { useRouter } from "next/router";
 import { Dialog, Transition } from "@headlessui/react";
 import {
   CogIcon,
-  DocumentIcon,
+  DocumentPdfIcon,
+  DocumentDocxIcon,
+  DocumentTxtIcon,
   HomeIcon,
   MoonIcon,
   SunIcon,
@@ -15,9 +17,6 @@ import {
   XIcon,
 } from "@ltaoo/icons/outline";
 import debounce from "lodash.debounce";
-import { saveAs } from "file-saver";
-import { Packer, Document, Paragraph, TextRun } from "docx";
-import { jsPDF } from "jspdf";
 
 import * as themeToggle from "@/utils/dark";
 import {
@@ -30,6 +29,9 @@ import Drawer from "@/components/Drawer";
 import { parseCaptionContent } from "@/domains/caption";
 import { localdb } from "@/utils/db";
 import { parseLocalId } from "@/utils/db/utils";
+import IconWithTxt from "@/components/IconWithTxt";
+import { downloadTxt, downloadDocx, downloadPdf } from "@/utils";
+import { createExamService, fetchCurExamSceneByCaption } from "@/services/exam";
 
 const CaptionPreviewPage = () => {
   const router = useRouter();
@@ -40,10 +42,14 @@ const CaptionPreviewPage = () => {
   const [paragraphs, setParagraphs] = useState([]);
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
-  const wordLoadingRef = useRef<boolean>(false);
-  const pdfLoadingRef = useRef<boolean>(false);
+  const totalRef = useRef(0);
 
-  const id = router.query.id as string;
+  const id = parseLocalId(router.query.id) as string;
+  const idRef = useRef(id);
+
+  useEffect(() => {
+    idRef.current = id;
+  }, [id]);
 
   const fetchCaptionAndSave = useCallback(async (id) => {
     const response = await fetchCaptionWithoutParagraphsService({ id });
@@ -57,25 +63,31 @@ const CaptionPreviewPage = () => {
       ).map((paragraph) => {
         return {
           ...paragraph,
-          captionId: parseLocalId(id),
+          captionId: id,
         };
       });
       localdb.table("paragraphs").bulkAdd(paragraphs);
       const newCaption = { ...response };
       delete newCaption.content;
-      localdb.table("captions").put(newCaption, parseLocalId(id));
+      localdb.table("captions").put(newCaption, id);
       setParagraphs(paragraphs);
-      return { idEnd: true };
+      totalRef.current = paragraphs.length;
+      return { idEnd: true, total: paragraphs.length };
     }
     loadingRef.current = true;
-    const { list: paragraphs, isEnd } = await fetchParagraphsService({
+    const {
+      list: paragraphs,
+      total,
+      isEnd,
+    } = await fetchParagraphsService({
       captionId: id,
       page: pageRef.current,
     });
     loadingRef.current = false;
     pageRef.current += 1;
+    totalRef.current = total;
     setParagraphs(paragraphs);
-    return { isEnd };
+    return { isEnd, total };
   }, []);
 
   const removeCaption = useCallback(async () => {
@@ -125,21 +137,38 @@ const CaptionPreviewPage = () => {
     };
   }, []);
 
-  const downloadDocx = useCallback((title, paragraphs) => {
-    if (wordLoadingRef.current) {
+  const prepareExam = useCallback(async () => {
+    const existing = await fetchCurExamSceneByCaption({
+      captionId: idRef.current,
+    });
+    if (existing) {
+      router.push({
+        // @ts-ignore
+        pathname: `/exam/simple/${existing.id}`,
+      });
       return;
     }
-    wordLoadingRef.current = true;
-    wordLoadingRef.current = false;
-  }, []);
-
-  const downloadPDF = useCallback(async (title, paragraphs) => {
-    if (pdfLoadingRef.current) {
-      return;
-    }
-    pdfLoadingRef.current = true;
-    pdfLoadingRef.current = false;
-  }, []);
+    const suggestedSceneCount = Math.ceil(totalRef.current / 20);
+    console.log("句子总数", totalRef.current);
+    console.log("划分场景数", suggestedSceneCount);
+    console.log("开始测验");
+    // 新增多条场景记录
+    //
+    const exam = await createExamService({
+      captionId: idRef.current,
+      scenes: [
+        {
+          captionId: idRef.current,
+          paragraphId: paragraphs[0].id,
+        },
+      ],
+    });
+    // console.log(exam);
+    router.push({
+      // @ts-ignore
+      pathname: `/exam/simple/${exam.scenes[0].id}`,
+    });
+  }, [paragraphs]);
 
   if (!caption) {
     return null;
@@ -174,6 +203,14 @@ const CaptionPreviewPage = () => {
                 pathname: "/",
               });
             }}
+          >
+            <HomeIcon className="w-6 h-6 text-gray-400 group-hover:text-gray-800" />
+          </div>
+        </div>
+        <div className="fixed bottom-12 right-0 hidden space-y-4 md:block">
+          <div
+            className="group flex items-center py-2 px-4 rounded-l-lg bg-gray-100 cursor-pointer hover:bg-gray-200"
+            onClick={prepareExam}
           >
             <HomeIcon className="w-6 h-6 text-gray-400 group-hover:text-gray-800" />
           </div>
@@ -216,28 +253,33 @@ const CaptionPreviewPage = () => {
               自动
             </div>
           </div>
-          <hr className="mt-8" />
+          <hr className="my-8" />
           <div className="text-xl my-4">文件下载</div>
           <div className="section flex space-x-6">
-            <div
-              className="flex items-center text-base text-gray-600 cursor-pointer hover:text-green-500"
+            <IconWithTxt
+              icon={DocumentTxtIcon}
+              txt="docx"
               onClick={() => {
-                downloadDocx(title, paragraphs);
+                downloadTxt({ title, paragraphs });
               }}
-            >
-              <DocumentIcon className="w-4 h-4 mr-2" />
-              docx
-            </div>
-            <div
-              className="flex items-center text-base text-gray-600 cursor-pointer hover:text-green-500"
+            />
+            <IconWithTxt
+              icon={DocumentDocxIcon}
+              txt="docx"
               onClick={() => {
-                downloadPDF(title, paragraphs);
+                downloadDocx({ title, paragraphs });
               }}
-            >
-              <DocumentIcon className="w-4 h-4 mr-2" />
-              pdf
-            </div>
+            />
+            <IconWithTxt
+              icon={DocumentPdfIcon}
+              txt="pdf"
+              onClick={() => {
+                downloadPdf({ title, paragraphs });
+              }}
+            />
           </div>
+          <hr className="my-8" />
+          <div className="text-xl my-4">字幕编辑</div>
         </div>
       </Drawer>
       <Transition.Root show={open} as={Fragment}>

@@ -1,6 +1,6 @@
 import { Caption } from ".prisma/client";
 
-import { IParagraph } from "@/domains/caption/types";
+import { IParagraphValues } from "@/domains/caption/types";
 import { localdb } from "@/utils/db";
 import { isLocalId, parseLocalId } from "@/utils/db/utils";
 
@@ -23,9 +23,8 @@ export function addCaptionService(body): Promise<{ id: string }> {
 export async function fetchCaptionWithoutParagraphsService({
   id,
 }): Promise<Caption> {
-  if (id.includes("@id")) {
-    const lid = Number(id.replace("@id", ""));
-    return await localdb.table("captions").get({ id: lid });
+  if (typeof id === "number") {
+    return await localdb.table("captions").get({ id });
   }
   return request.get(`/api/caption/${id}`);
 }
@@ -38,12 +37,16 @@ export function fetchCaptionService({ id }) {
   return request.get(`/api/caption/${id}?paragraph=1`);
 }
 
+export function fetchCaptionsService(params) {
+  return request.get("/api/captions", params);
+}
+
 /**
  * 编辑字幕详情
  * @param id
  */
-export function editCaptionService({ id }) {
-  return request.get(`/api/caption/edit?id=${id}`);
+export function updateCaptionService(body) {
+  return request.put("/api/caption/update", body);
 }
 
 /**
@@ -61,13 +64,14 @@ export async function fetchParagraphsService(params: {
   page?: number;
   pageSize?: number;
   start?: string;
+  skip?: number;
   captionId: string;
 }): Promise<{
   page: number;
   pageSize: number;
   total: number;
   isEnd: boolean;
-  list: IParagraph[];
+  list: IParagraphValues[];
 }> {
   const { captionId } = params;
   if (isLocalId(captionId)) {
@@ -87,4 +91,20 @@ export async function fetchParagraphsService(params: {
   }
   // console.log('fetchParagraphsService', params);
   return request.get("/api/paragraphs", { params });
+}
+
+/**
+ * 删除指定句子
+ */
+export function deleteParagraphService({ id }) {
+  return request.delete("/api/paragraphs/delete", { params: { id } });
+}
+
+/**
+ * 更新指定句子
+ * @param body
+ * @returns
+ */
+export function updateParagraphService(body) {
+  return request.put("/api/paragraphs/update", body);
 }

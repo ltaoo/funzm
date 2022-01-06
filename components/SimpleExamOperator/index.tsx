@@ -9,7 +9,7 @@ const SimpleExamOperator = (props) => {
   const { instance } = props;
 
   return (
-    <div className="inline-flex space-x-4">
+    <div className="inline-flex space-x-4 text-center">
       <div>
         <ChartBarIcon
           className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100"

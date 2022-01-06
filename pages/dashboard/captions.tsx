@@ -3,11 +3,11 @@
  */
 import React from "react";
 import Link from "next/link";
-import { getSession } from "next-auth/client";
 import { useRouter } from "next/router";
 
 import Layout from "@/layouts";
-import { fetchCaptionsService } from "@/lib/caption";
+import { getSession } from "@/next-auth/client";
+import { fetchCaptionsServer } from "@/lib/caption";
 
 const PersonlyCaptions = (props) => {
   const { user, dataSource = [] } = props;
@@ -53,7 +53,7 @@ const PersonlyCaptions = (props) => {
 
 export const getServerSideProps = async (context) => {
   const session = await getSession(context);
-  const captions = await fetchCaptionsService({ pageSize: 10 }, session?.user);
+  const captions = await fetchCaptionsServer({ pageSize: 10 }, session?.user);
   return {
     props: {
       user: session?.user ?? null,

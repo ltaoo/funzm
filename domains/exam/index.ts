@@ -16,18 +16,7 @@ import {
   computeScoreByStats,
   paddingZero,
 } from "./utils";
-
-enum ExamLevel {
-  Simple = 1,
-  Normal = 2,
-  Difficult = 3,
-}
-
-export enum ExamStatus {
-  Prepare = 1,
-  Started = 2,
-  Completed = 3,
-}
+import { ExamStatus, EXPECTED_SECONDS_PER_PARAGRAPH } from "./constants";
 
 function noop() {}
 
@@ -51,7 +40,14 @@ class Exam {
    * 当前看到的段落 id
    */
   curParagraphId: string;
-
+  /**
+   * 倒计时（秒数）
+   */
+  countdown: string;
+  /**
+   * 倒计时计时器
+   */
+  countdownTimer: NodeJS.Timer;
   /**
    * 字幕标题
    */
@@ -87,7 +83,10 @@ class Exam {
    * 结束/完成时间
    */
   endAt: Dayjs;
-
+  /**
+   * 当前句子处于第几个
+   */
+  index: number = 1;
   /**
    * 输入的单词
    */
@@ -116,21 +115,48 @@ class Exam {
    * 没有更多数据，当使用完现有数据，可以结束了
    */
   canComplete: boolean;
-
-  onChange: (examJSON: Record<string, any>) => void;
-  onBeforeNext?: (exam: Record<string, any>) => boolean;
-  onNext: (exam: Record<string, any>) => void;
-  onBeforeSkip?: (exam: Record<string, any>) => boolean;
-  onCorrect: (examJSON: Record<string, any>) => void;
-  onSkip?: (examJSON: Record<string, any>) => void;
-  onIncorrect: (examJSON: Record<string, any>) => void;
-  onComplete?: () => void;
-
   /**
    * 剩余段落不够了，需要补充的临界值
    * @param params
    */
   needMoreParagraphs: number;
+
+  /**
+   * 实例上挂载的值发生变化时调用
+   */
+  onChange: (examJSON: Record<string, any>) => void;
+  /**
+   * 调用 next 方法前的回调
+   */
+  onBeforeNext?: (exam: Record<string, any>) => boolean;
+  /**
+   * 调用 next 后的回调
+   */
+  onNext: (exam: Record<string, any>) => void;
+  /**
+   * 调用 skip 前的回调
+   */
+  onBeforeSkip?: (exam: Record<string, any>) => boolean;
+  /**
+   * 答题正确的回调
+   */
+  onCorrect: (examJSON: Record<string, any>) => void;
+  /**
+   * 跳过的回调
+   */
+  onSkip?: (examJSON: Record<string, any>) => void;
+  /**
+   * 答题错误的回调
+   */
+  onIncorrect: (examJSON: Record<string, any>) => void;
+  /**
+   * 完成测验的回调
+   */
+  onComplete?: (examJSON: Record<string, any>) => void;
+  /**
+   * 失败（超时）的回调
+   */
+  onFailed?: (examJSON: Record<string, any>) => void;
 
   constructor(params) {
     const {
@@ -149,6 +175,8 @@ class Exam {
       onBeforeSkip,
       onBeforeNext,
       onNext = noop,
+      onComplete,
+      onFailed,
     } = params;
     this.onChange = onChange;
     this.onCorrect = onCorrect;
@@ -157,6 +185,8 @@ class Exam {
     this.onBeforeSkip = onBeforeSkip;
     this.onBeforeNext = onBeforeNext;
     this.onNext = onNext;
+    this.onComplete = onComplete;
+    this.onFailed = onFailed;
 
     this.needMoreParagraphs = 2;
     this.canComplete = canComplete;
@@ -170,11 +200,50 @@ class Exam {
 
     this.title = title;
     this.paragraphs = filterEmptyTextParagraphs(paragraphs);
-    this.remainingParagraphsCount = this.paragraphs.length;
+    console.log(
+      "[LOG][Domain]Exam - constructor - this.paragraphs",
+      this.paragraphs
+    );
     this.paragraphMap = arr2map(this.paragraphs, "id");
+
+    const curParagraphIndex = paragraphs.findIndex(
+      (paragraph) => paragraph.id === curParagraphId
+    );
+    this.index = curParagraphIndex + 1;
+    this.remainingParagraphsCount =
+      this.paragraphs.slice(curParagraphIndex).length;
+
     this.curParagraphId = curParagraphId;
     this.curWords = [];
     this.displayedWords = [];
+
+    // 20 * 10 === 200
+    const expectedSeconds =
+      this.paragraphs.length * EXPECTED_SECONDS_PER_PARAGRAPH;
+    // 200 - 15 * 10 === 50
+    let countdown =
+      expectedSeconds -
+      (expectedSeconds -
+        this.remainingParagraphsCount * EXPECTED_SECONDS_PER_PARAGRAPH);
+
+    this.countdownTimer = setInterval(() => {
+      countdown -= 1;
+      const countdownPercent = (
+        100 -
+        (countdown / expectedSeconds) * 100
+      ).toFixed(2);
+      this.countdown = countdownPercent;
+
+      if (countdown === 0) {
+        clearInterval(this.countdownTimer);
+        if (this.onFailed) {
+          this.onFailed(this.toJSON());
+        }
+      }
+      if (this.onChange) {
+        this.onChange(this.toJSON());
+      }
+    }, 1000);
 
     if (this.curParagraphId && this.paragraphs.length > 0) {
       // console.log(
@@ -183,6 +252,9 @@ class Exam {
       //   this.paragraphMap
       // );
       this.curParagraph = this.paragraphMap[this.curParagraphId];
+      if (!this.curParagraph) {
+        this.curParagraph = this.paragraphMap[this.paragraphs[0].id];
+      }
       this.curWords = splitText2Words(this.curParagraph.text2);
       this.displayedWords = shuffle([
         ...this.curWords.map(([, word]) => word).filter(Boolean),
@@ -259,7 +331,7 @@ class Exam {
     //   remainingParagraphsCount
     // );
     const nextParagraph = this.paragraphs[matchedIndex + 1];
-    console.log("[]next", matchedIndex, nextParagraph);
+    // console.log("[]next", matchedIndex, nextParagraph);
     if (nextParagraph) {
       if (isSkip) {
         if (this.onSkip) {
@@ -281,13 +353,19 @@ class Exam {
     }
     console.log(
       "[DOMAIN]next - check can complete",
-      !nextParagraph && this.canComplete
+      !nextParagraph && this.canComplete,
+      this.canComplete,
+      nextParagraph
     );
+    this.index += 1;
     if (!nextParagraph && this.canComplete) {
       this.status = ExamStatus.Completed;
       this.endAt = dayjs();
+      console.log("invoke onComplete", this.onComplete);
       if (this.onComplete) {
-        this.onComplete();
+        clearInterval(this.countdownTimer);
+        const res = this.toJSON();
+        this.onComplete(res);
       }
     }
     const res = this.toJSON();
@@ -297,6 +375,15 @@ class Exam {
     );
     this.onNext(res);
     this.onChange(res);
+  }
+
+  reset() {
+    this.index = 1;
+  }
+
+  setStatus(status) {
+    this.status = status;
+    this.onChange(this.toJSON());
   }
 
   skip() {
@@ -387,6 +474,10 @@ class Exam {
     this.paragraphMap = arr2map(this.paragraphs, "id");
     this.remainingParagraphsCount = this.paragraphs.length;
   }
+  setCurParagraph(paragraphId: string) {
+    this.curParagraphId = paragraphId;
+    this.curParagraph = this.paragraphMap[paragraphId];
+  }
   appendParagraphs(paragraphs) {
     const appendedParagraphs = filterEmptyTextParagraphs(paragraphs);
     const matchedIndex = this.paragraphs.findIndex(
@@ -416,6 +507,8 @@ class Exam {
       total: paragraphs.length,
       correct: correctParagraphs.length,
       incorrect: incorrectParagraphs.length,
+      skippedParagraphs,
+      incorrectParagraphs,
       skipped: skippedParagraphs.length,
       startAt: this.startAt.format("YYYY-MM-DD HH:mm:ss"),
       endAt: this.endAt ? this.endAt.format("YYYY-MM-DD HH:mm:ss") : "-",
@@ -458,6 +551,8 @@ class Exam {
       curWords,
       combo,
       maxCombo,
+      countdown,
+      index,
       curParagraph,
       curParagraphId,
       inputtingWords,
@@ -471,6 +566,8 @@ class Exam {
       paragraphs,
       combo,
       maxCombo,
+      countdown,
+      index,
       curWords,
       displayedWords,
       inputtingWords,

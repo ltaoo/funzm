@@ -1,9 +1,12 @@
 export function parseLocalId(id) {
+  if (!id) {
+    return null;
+  }
   const t = String(id);
   if (t.includes("@id")) {
     return Number(t.replace("@id", ""));
   }
-  return Number(id);
+  return id;
 }
 
 export function isLocalId(id) {

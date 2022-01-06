@@ -3,10 +3,10 @@ import prisma from "@/lib/prisma";
 import { Prisma } from ".prisma/client";
 
 function paginationParams(params) {
-  const { page, pageSize } = params;
+  const { page, pageSize, skip = 0 } = params;
   return {
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    skip: (page - 1) * pageSize + Number(skip),
+    take: Number(pageSize),
   };
 }
 
@@ -18,7 +18,7 @@ export default async function fetchParagraphsAPI(req, res) {
     return;
   }
   const {
-    query: { page = 1, pageSize = 10, start, captionId },
+    query: { page = 1, pageSize = 10, start, skip, captionId },
   } = req;
   if (!captionId) {
     res
@@ -28,7 +28,7 @@ export default async function fetchParagraphsAPI(req, res) {
   }
   const findManyParams = {
     where: { captionId },
-    ...paginationParams({ page, pageSize }),
+    ...paginationParams({ page, pageSize, skip }),
   } as Prisma.ParagraphFindManyArgs;
   if (start) {
     findManyParams.cursor = {

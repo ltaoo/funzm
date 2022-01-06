@@ -6,15 +6,17 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getSession } from "@/next-auth/client";
 import prisma from "@/lib/prisma";
 import dayjs from "dayjs";
+import { addScore } from "@/lib/models/score";
 
 enum RandomPrize {
   Chape = 1,
   Normal = 2,
 }
-// 150
-// skip card 38
-// tip  card 68
-const signRewards = [10, 20, RandomPrize.Chape, 30, 40, 50, RandomPrize.Normal];
+// 6+10+20+30+42= 108
+// skip card 3
+// tip  card 5
+//                          3*2 + 5*2                      3*8 + 5*8
+const signRewards = [6, 10, RandomPrize.Chape, 20, 30, 42, RandomPrize.Normal];
 enum ScoreType {
   Get = 1,
   Consume = 2,
@@ -30,7 +32,7 @@ function getScoreBySignDates(dates, curDay) {
   return signRewards[curDay];
 }
 
-export default async function provideSignService(
+export default async function provideCheckInService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -39,7 +41,7 @@ export default async function provideSignService(
     res.status(200).json({ code: 401, msg: "请先登录", data: null });
     return;
   }
-  const userId = session.userId as string;
+  const userId = session.user.id as string;
   const current = dayjs();
   const currentDay = current.clone().day();
   const endSecond = dayjs().hour(23).minute(59).second(59).unix();
@@ -70,19 +72,15 @@ export default async function provideSignService(
   const scoreReward = getScoreBySignDates(signDates, currentDay);
   // score reward
   if (typeof scoreReward === "number") {
-    await prisma.scoreRecord.create({
-      data: {
-        desc: `${current.format("YYYY-MM-DD")} 签到`,
-        type: ScoreType.Get,
-        number: scoreReward,
-        created_at: current.clone().unix(),
-      },
+    await addScore(userId, {
+      value: scoreReward,
+      type: ScoreType.Get,
+      desc: `${current.format("YYYY-MM-DD")} 签到`,
+      createdAt: current.clone().unix(),
     });
-  }
-  if (scoreReward === RandomPrize.Chape) {
+  } else if (scoreReward === RandomPrize.Chape) {
     // get one skip card
-  }
-  if (scoreReward === RandomPrize.Normal) {
+  } else if (scoreReward === RandomPrize.Normal) {
     // get tip card
   }
   res.status(200).json({
@@ -91,7 +89,8 @@ export default async function provideSignService(
     data: (() => {
       if (typeof scoreReward === "number") {
         return {
-          msg: `score ${scoreReward}`,
+          msg: `积分 ${scoreReward}`,
+          value: scoreReward,
         };
       }
       if (scoreReward === RandomPrize.Chape) {

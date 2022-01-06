@@ -4,7 +4,7 @@
 
 import React, { useMemo } from "react";
 
-import { fetchCaptionsService } from "@/lib/caption";
+import { fetchCaptionsServer } from "@/lib/caption";
 import Layout from "@/layouts";
 
 const CaptionsManagePage = (props) => {
@@ -45,7 +45,7 @@ const CaptionsManagePage = (props) => {
 export default CaptionsManagePage;
 
 export async function getStaticProps() {
-  const dataSource = (await fetchCaptionsService({ pageSize: 20 })) || [];
+  const dataSource = (await fetchCaptionsServer({ pageSize: 20 })) || [];
   return {
     props: { dataSource },
   };

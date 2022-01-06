@@ -1,3 +1,10 @@
+import {
+  DECREMENT_SCORES_FOR_INCORRECT_SPELLING,
+  EXPECTED_SECONDS_PER_PARAGRAPH,
+  REWARD_SCORES_FOR_CORRECT_SPELLING,
+  REWARD_SCORES_FOR_REMAINING_PER_SECOND,
+} from "./constants";
+
 /**
  * 打乱数组顺序，会改变原始数组
  * @param arr
@@ -63,9 +70,22 @@ export function removeZeroAtTail(string: string) {
   return int;
 }
 
+/**
+ * 根据测验结果计算获得积分数
+ * @param stats
+ * @returns
+ */
 export function computeScoreByStats(stats) {
-  const { correct, correctRate, spend, total, seconds } = stats;
-  let score = correct * 6;
+  const { correct, incorrect, correctRate, total, seconds } = stats;
+  // console.log(
+  //   "[LOG][utils]computeScoreByStats - data",
+  //   total,
+  //   seconds,
+  //   correct,
+  //   incorrect,
+  //   correctRate
+  // );
+  let score = correct * REWARD_SCORES_FOR_CORRECT_SPELLING;
   if (correctRate >= 60 && correctRate < 70) {
     score += 4;
   } else if (correctRate >= 70 && correctRate < 80) {
@@ -73,9 +93,10 @@ export function computeScoreByStats(stats) {
   } else if (correctRate >= 80) {
     score += 10;
   }
-  const estimated = total * 8;
+  const estimated = total * EXPECTED_SECONDS_PER_PARAGRAPH;
   const remainingSeconds = seconds ? estimated - seconds : 0;
-  score += remainingSeconds;
+  score += remainingSeconds * REWARD_SCORES_FOR_REMAINING_PER_SECOND;
+  score -= incorrect * DECREMENT_SCORES_FOR_INCORRECT_SPELLING;
   return score;
 }
 

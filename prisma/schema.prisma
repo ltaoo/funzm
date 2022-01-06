@@ -38,15 +38,16 @@ model User {
 
   score         Int       @default(0)
 
-  accounts      Account[]
-  sessions      Session[]
-  captions      Caption[]
-  exams         Exam[]
-  notebooks     Notebook[]
+  subscription    Subscription?
+  accounts        Account[]
+  sessions        Session[]
+  captions        Caption[]
+  exams           Exam[]
+  notebooks       Notebook[]
   spellingResults SpellingResult[]
   scoreRecords    ScoreRecord[]
-  packages         Package[]
-  sign         SignRecord[]
+  packages        Package[]
+  sign            SignRecord[]
 
   created_at    Int
   last_updated  Int?
@@ -73,24 +74,36 @@ model VerificationToken {
   @@map("verificationtokens")
 }
 
-// model Email {
-//   id            Int     @id @default(autoincrement())
-//   userUid       String
-//   email         String  @unique
-// }
+// 订阅（试用、会员）
+model Subscription {
+  id              String       @id @default(cuid())
+
+  type            Int          @default(1)
+
+  user            User         @relation(fields: [userId], references: [id])
+  userId          String       @map("user_id")
+
+  // 到期时间
+  expired_at      Int
+
+  created_at      Int
+
+  @@map("roles")
+}
 
 model Caption {
-  id           String        @id @default(cuid())
-  title        String
-  content      String?       @db.LongText
-  published    Boolean       @default(false)
-  publisher    User?         @relation(fields: [publisherId], references: [id])
-  publisherId  String?       @map("publisher_id")
+  id            String        @id @default(cuid())
+  title         String
+  content       String?       @db.LongText
+  published     Boolean       @default(false)
+  publisher     User?         @relation(fields: [publisherId], references: [id])
+  publisherId   String?       @map("publisher_id")
 
-  movieId      String?       @map("movie_id")
+  movieId       String?       @map("movie_id")
 
-  paragraphs   Paragraph[]
-  exams        Exam[]
+  paragraphs    Paragraph[]
+  exams         Exam[]
+  examScenes    ExamScene[]
 
   created_at    Int
   last_updated  Int?
@@ -108,8 +121,9 @@ model Paragraph {
   captionId    String   @map("caption_id")
   caption      Caption  @relation(fields: [captionId], references: [id], onDelete: Cascade)
 
+  // examScenes   ExamScene[]
   // 该段落被拼写（正确、错误、跳过）的记录
-  spellings       SpellingResult[]
+  spellings    SpellingResult[]
   // 该段落有哪些单词被记录进单词本
   words        Word[]
 
@@ -135,26 +149,46 @@ model Reading {
 }
 
 model Exam {
-  id           String    @id @default(cuid())
+  id              String    @id @default(cuid())
 
-  status       Int       @default(1)
+  status          Int       @default(1)
 
-  captionId    String    
-  caption      Caption   @relation(fields: [captionId], references: [id], onDelete: Cascade)
+  captionId       String    
+  caption         Caption   @relation(fields: [captionId], references: [id], onDelete: Cascade)
 
-  user         User?     @relation(fields: [userId], references: [id])
-  userId       String?   @map("publisher_id")
+  user            User?     @relation(fields: [userId], references: [id])
+  userId          String?   @map("publisher_id")
 
-  curParagraphId String? @map("cur_paragraph_id")
-  combo          Int     @default(0)
-  maxCombo       Int     @default(0) @map("max_combo")
+  scenes          ExamScene[]
+
+  created_at      Int
+  last_updated    Int?
+
+  @@map("exams")
+}
+
+model ExamScene {
+  id              String    @id @default(cuid())
+
+  status          Int @default(1)
+
+  captionId       String    
+  caption         Caption   @relation(fields: [captionId], references: [id])
+
+  examId          String?   @map("exam_id")
+  exam            Exam?     @relation(fields: [examId], references: [id])
+
+  start           String    
+  // startParagraph  Paragraph @relation(fields: [start], references: [id])
+
+  score           Int?      @default(0)
 
   spellings       SpellingResult[]
 
-  created_at    Int
-  last_updated  Int?
+  created_at      Int
+  ended_at        Int?
 
-  @@map("exams")
+  @@map("exam_scenes")
 }
 
 model SpellingResult {
@@ -167,8 +201,11 @@ model SpellingResult {
   paragraphId  String     @map("paragraph_id")
   paragraph    Paragraph  @relation(fields: [paragraphId], references: [id], onDelete: Cascade)
 
-  examId  String?     @map("exam_id")
-  exam    Exam?       @relation(fields: [examId], references: [id], onDelete: Cascade)
+  // examId  String?     @map("exam_id")
+  // exam    Exam?       @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  examSceneId  String?     @map("exam_scene_id")
+  examScene    ExamScene?       @relation(fields: [examSceneId], references: [id], onDelete: Cascade)
 
   input   String?
 

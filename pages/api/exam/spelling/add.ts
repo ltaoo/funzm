@@ -28,7 +28,7 @@ export default async function addExamSpellingErrorAPI(req, res) {
     const existing = await prisma.spellingResult.findFirst({
       where: {
         paragraphId,
-        examId,
+        examSceneId: examId,
       },
     });
     if (existing) {
@@ -40,7 +40,7 @@ export default async function addExamSpellingErrorAPI(req, res) {
       data: {
         userId,
         paragraphId,
-        examId,
+        examSceneId: examId,
         type,
         input,
         created_at: utils.seconds(),

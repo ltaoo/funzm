@@ -1,4 +1,6 @@
+import { getSession } from "@/next-auth/client";
 import crypto from "crypto";
+import { NextApiRequest, NextApiResponse } from "next";
 
 export type UID<N extends number> = { 0: string; length: N } & string;
 
@@ -347,3 +349,20 @@ export function byteLength(input?: string): number {
 }
 
 export const seconds = (): TIMESTAMP => (Date.now() / 1e3) | 0;
+
+export async function ensureLogin(req: NextApiRequest, res: NextApiResponse) {
+  const session = await getSession({ req });
+  if (!session) {
+    res.status(200).json({
+      code: 401,
+      msg: "请先登录",
+      data: null,
+    });
+    return Promise.reject({
+      code: 401,
+      message: "请先登录",
+      data: null,
+    });
+  }
+  return session.user.id as string;
+}

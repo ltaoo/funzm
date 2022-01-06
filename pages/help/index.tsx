@@ -12,6 +12,13 @@ const HelpPage = () => {
         <div className="w-full overflow-hidden px-4 md:px-20 md:mx-auto md:w-240">
           <h2 className="mt-24 mb-12 text-3xl text-gray-800">常见问题</h2>
           <div className="#title mb-4 text-xl text-gray-800">
+            测验模式下部分句子有问题
+          </div>
+          <div className="text-gray-800">
+            <p>测验模式依赖字幕本身的质量，如果存在只有中文部分，或者英文部分也是中文，就会出现测验模式时许多句子没有内容，或没有选项。</p>
+            <p>建议在测验模式前先完整看一遍字幕，并优化其中错误部分。</p>
+          </div>
+          <div className="#title mb-4 text-xl text-gray-800">
             积分有什么用？
           </div>
           <div className="text-gray-800">
@@ -42,6 +49,11 @@ const HelpPage = () => {
             <p>前面说到我们会参考游戏，那每日签到获取积分肯定也是有的。</p>
             <p>
               同样的，我们也在探索还有哪些方式能够结合获取积分来让学习更有趣。就好像一些大型游戏中内嵌的小游戏，增加趣味性。
+            </p>
+            <p>签到</p>
+            <p>
+              每天签到所获得的积分数不同，假设每天都签到，能获得共计 108
+              积分；一个月共计 432 积分；
             </p>
           </div>
           <div className="#title mt-12 mb-4 text-xl text-gray-800">

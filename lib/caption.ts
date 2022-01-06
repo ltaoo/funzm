@@ -10,7 +10,7 @@ import prisma from "./prisma";
 /**
  * 获取字幕列表
  */
-export async function fetchCaptionsService(
+export async function fetchCaptionsServer(
   params?: {
     page?: number;
     pageSize?: number;

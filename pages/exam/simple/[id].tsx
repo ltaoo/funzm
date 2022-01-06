@@ -2,27 +2,18 @@
  * @file 低难度字幕测验
  */
 import { Fragment, useRef, useCallback, useEffect, useState } from "react";
-import cx from "classnames";
 import { useRouter } from "next/router";
 import { Transition } from "@headlessui/react";
-import {
-  ArrowRightIcon,
-  ChartBarIcon,
-  FireIcon,
-  LightBulbIcon,
-  QuestionMarkCircleIcon,
-  ReplyIcon,
-  ScissorsIcon,
-} from "@ltaoo/icons/outline";
 
 import {
   createExamSpellingService,
-  fetchExamService,
-  updateExamService,
+  fetchExamSceneService,
+  updateExamSceneService,
 } from "@/services/exam";
 import { fetchParagraphsService } from "@/services/caption";
 import { SpellingResultType } from "@/domains/exam/constants";
-import Exam, { ExamStatus } from "@/domains/exam";
+import Exam from "@/domains/exam";
+import { ExamStatus } from "@/domains/exam/constants";
 import Loading from "@/components/Loading";
 import Modal from "@/components/Modal";
 import SimpleExamInput from "@/components/SimpleExamInput";
@@ -33,11 +24,9 @@ const SimpleCaptionExamPage = () => {
 
   const examRef = useRef(null);
   const loadingRef = useRef(false);
-  const startRef = useRef(null);
   const idRef = useRef<string>(null);
-  const pageRef = useRef<number>(1);
-  const moreRef = useRef([]);
-  const totalRef = useRef(0);
+  const sceneIdRef = useRef<string>(null);
+  const examIdRef = useRef<string>(null);
   const [loading, setLoading] = useState(false);
   const [curCombo, setCurCombo] = useState(0);
   const [exam, setExam] = useState<Exam>(null);
@@ -46,91 +35,52 @@ const SimpleCaptionExamPage = () => {
   const [text2, setText2] = useState(null);
   const [tipVisible, setTipVisible] = useState(false);
 
-  useEffect(() => {
-    pageRef.current = 1;
-  }, []);
-
-  const fetchParagraphs = useCallback(async () => {
-    const response = await fetchParagraphsService({
-      captionId: idRef.current,
-      start: startRef.current,
-      page: pageRef.current,
-    });
-    pageRef.current += 1;
-    totalRef.current = response.total;
-    return response.list;
-  }, []);
-
   const init = useCallback(async () => {
-    const { id } = router.query;
-    const res = await fetchExamService({ id: id as string });
-    const { captionId, status, combo, maxCombo, curParagraphId } = res;
+    const id = router.query.id as string;
+    console.log("[PAGE]exam/simple/[id] - init", id);
+    const res = await fetchExamSceneService({ id });
+    const { examId, captionId, status, start, cur } = res;
+
+    if ([ExamStatus.Completed, ExamStatus.Failed].includes(status)) {
+      router.replace({
+        pathname: `/exam/simple/result/${id}`,
+      });
+      return;
+    }
+    sceneIdRef.current = id;
+    examIdRef.current = examId;
     idRef.current = captionId;
-    startRef.current = curParagraphId;
-    const paragraphs = await fetchParagraphs();
+    const { list: paragraphs } = await fetchParagraphsService({
+      captionId: idRef.current,
+      start,
+      pageSize: 20,
+      page: 1,
+    });
+    const curParagraphIndex = cur
+      ? paragraphs.findIndex((paragraph) => paragraph.id === cur)
+      : undefined;
+    console.log(
+      "[PAGE]exam/simple/[id] - init result",
+      paragraphs,
+      cur,
+      curParagraphIndex
+    );
     examRef.current = new Exam({
       title: "",
       status: ExamStatus.Started,
-      combo,
-      maxCombo,
-      curParagraphId,
+      curParagraphId: (() => {
+        if (curParagraphIndex && curParagraphIndex !== -1) {
+          return paragraphs[curParagraphIndex + 1].id;
+        }
+        return start;
+      })(),
+      canComplete: true,
       paragraphs,
       onChange: async (nextExam) => {
         setExam(nextExam);
       },
-      onBeforeNext({ remainingParagraphsCount }) {
-        console.log(remainingParagraphsCount, loadingRef.current);
-        if (remainingParagraphsCount === 1 && loadingRef.current) {
-          alert("1 is loading data");
-          return false;
-        }
-      },
-      onBeforeSkip({ remainingParagraphsCount }) {
-        console.log(remainingParagraphsCount, loadingRef.current);
-        if (remainingParagraphsCount === 1 && loadingRef.current) {
-          alert("2 is loading data");
-          return false;
-        }
-      },
-      onNext: async (nextExam) => {
-        const { combo, maxCombo, curParagraphId, remainingParagraphsCount } =
-          nextExam;
-        updateExamService({
-          id,
-          combo,
-          maxCombo,
-          curParagraphId,
-        });
-        if (remainingParagraphsCount === 3) {
-          if (loadingRef.current) {
-            console.log("has requested", loadingRef.current);
-            return;
-          }
-          loadingRef.current = true;
-          fetchParagraphs()
-            .then((moreParagraphs) => {
-              moreRef.current = moreParagraphs;
-            })
-            .finally(() => {
-              loadingRef.current = false;
-            });
-        }
-        if (remainingParagraphsCount === 1) {
-          if (loadingRef.current) {
-            // show loading to prevent user operate
-            alert("is request data, please wait a minutes.");
-            return;
-          }
-          if (moreRef.current.length !== 0) {
-            examRef.current.appendParagraphs(moreRef.current);
-            moreRef.current = [];
-            return;
-          }
-        }
-      },
       onCorrect({ combo, curParagraphId }) {
         setCorrectVisible(true);
-        setCurCombo(combo);
         createExamSpellingService({
           examId: id,
           paragraphId: curParagraphId,
@@ -154,9 +104,29 @@ const SimpleCaptionExamPage = () => {
       },
       onSkip({ curParagraphId }) {
         createExamSpellingService({
+          // examSceneId
           examId: id,
           paragraphId: curParagraphId,
           type: SpellingResultType.Skipped,
+        });
+      },
+      async onComplete() {
+        await updateExamSceneService({
+          id,
+          status: ExamStatus.Completed,
+        });
+        router.replace({
+          pathname: `/exam/simple/result/${id}`,
+        });
+      },
+      async onFailed() {
+        await updateExamSceneService({
+          id,
+          status: ExamStatus.Failed,
+        });
+        alert("测验失败");
+        router.replace({
+          pathname: `/exam/simple/result/${id}`,
         });
       },
     });
@@ -174,7 +144,7 @@ const SimpleCaptionExamPage = () => {
     };
   }, []);
 
-  console.log("[PAGE]exam/simple/[id] - render", exam);
+  // console.log("[PAGE]exam/simple/[id] - render", exam);
 
   if (exam === null) {
     return null;
@@ -183,13 +153,7 @@ const SimpleCaptionExamPage = () => {
   return (
     <div className="h-screen">
       {exam?.status === ExamStatus.Started && (
-        <div className="relative h-full">
-          {/* <div
-            className="absolute left-4 top-4"
-            onClick={showText2(exam.curParagraph)}
-          >
-            <QuestionMarkCircleIcon className="w-6 h-6 text-gray-500 cursor-pointer" />
-          </div> */}
+        <div className="relative h-full md:mx-auto md:w-240">
           {/* @ts-ignore */}
           <SimpleExamInput
             {...exam}
@@ -200,14 +164,21 @@ const SimpleCaptionExamPage = () => {
               examRef.current.write(segment);
             }}
           />
-          <hr />
+          <div className="relative">
+            <div
+              className="absolute w-2 h-2 bg-green-500"
+              style={{ left: `${exam.countdown}%` }}
+            ></div>
+            <hr />
+          </div>
           <div className="flex items-center justify-between mt-6 px-4 sm:mx-auto sm:w-180 sm:px-0">
-            <div className="text-xl text-gray-400">13/{totalRef.current}</div>
+            <div className="text-xl text-gray-400">
+              {exam.index}/{exam.paragraphs.length}
+            </div>
             <SimpleExamOperator instance={examRef.current} />
           </div>
         </div>
       )}
-      {exam?.status === ExamStatus.Completed && <div>完成</div>}
       <Transition
         show={correctVisible}
         as={Fragment}
@@ -220,9 +191,6 @@ const SimpleCaptionExamPage = () => {
       >
         <div className="absolute right-10 top-16 transform -rotate-6">
           <p className="text-4xl text-green-500">CORRECT!</p>
-          <p className="pr-4 text-right text-2xl text-yellow-500">
-            x{curCombo}
-          </p>
         </div>
       </Transition>
       <Transition
