@@ -51,6 +51,9 @@ export function uid() {
 }
 
 function removeZero(string: string) {
+  if (!string) {
+    return "";
+  }
   const segments = string.split("");
   const last = segments.pop();
   if (last === "0") {

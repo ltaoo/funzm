@@ -41,6 +41,14 @@ export function examSceneRes2Ins(res): ExamSceneValues {
   const incorrectSpellings = spellings.filter(
     (spelling) => spelling.type === SpellingResultType.Incorrect
   );
+  const correctRate =
+    correctSpellings.length === 0
+      ? 0
+      : parseFloat(
+          removeZeroAtTail(
+            ((correctSpellings.length / spellings.length) * 100).toFixed(2)
+          )
+        );
 
   return {
     id,
@@ -71,14 +79,8 @@ export function examSceneRes2Ins(res): ExamSceneValues {
       incorrect: incorrectSpellings.length,
       skipped: skippedSpellings.length,
 
-      correctRate: parseFloat(
-        removeZeroAtTail(
-          ((correctSpellings.length / spellings.length) * 100).toFixed(2)
-        )
-      ),
-      correctRateText: `${removeZeroAtTail(
-        ((correctSpellings.length / spellings.length) * 100).toFixed(2)
-      )}%`,
+      correctRate,
+      correctRateText: `${correctRate}%`,
 
       createdAt: dayjs(created_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
       endAt: dayjs(ended_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
