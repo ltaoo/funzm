@@ -37,6 +37,11 @@ export function fetchCaptionService({ id }) {
   return request.get(`/api/caption/${id}?paragraph=1`);
 }
 
+/**
+ * 获取字幕列表
+ * @param {number} params.page - 页码
+ * @returns
+ */
 export function fetchCaptionsService(params) {
   return request.get("/api/captions", params);
 }

@@ -213,7 +213,7 @@ const CaptionEditorPage = () => {
         <title>{title}</title>
       </Head>
       <div className="relative dark:bg-gray-800">
-        <div className="py-10 bg-gray-100 border-b">
+        <div className="py-10 px-4 bg-gray-100 border-b">
           <div className="mx-auto md:px-60">
             <h2
               className="text-3xl break-all dark:text-gray-400"

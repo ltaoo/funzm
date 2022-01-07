@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 
 import {
   AcademicCapIcon,
+  BookOpenIcon,
   PencilAltIcon,
   TranslateIcon,
   TrashIcon,
@@ -62,7 +63,7 @@ const CaptionCard = (props) => {
       </p>
       <div className="flex justify-space-between mt-4 space-x-4">
         <button className="text-sm">
-          <AcademicCapIcon
+          <BookOpenIcon
             className="w-6 h-6 text-gray-500 hover:text-gray-800"
             onClick={fetchCurExamScene}
           />

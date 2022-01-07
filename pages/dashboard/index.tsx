@@ -1,17 +1,17 @@
 /**
  * @file 个人中心
  */
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import router from "next/router";
 
 import Layout from "@/layouts";
-import { getSession } from "@/next-auth/client";
 import { parseCaptionContent } from "@/domains/caption";
-import { fetchCaptionsServer } from "@/lib/caption";
 import CaptionCard from "@/components/CaptionCard";
 import CaptionUpload from "@/components/CaptionFileUpload";
 import { addCaptionService, fetchCaptionsService } from "@/services/caption";
 import { checkInService } from "@/services";
+import { LocationMarkerIcon, UploadIcon } from "@ltaoo/icons/outline";
+import { getSession } from "@/next-auth/client";
 
 const Dashboard = (props) => {
   const { user, dataSource = [] } = props;
@@ -24,13 +24,15 @@ const Dashboard = (props) => {
     setCaptions(nextCaptions.list);
   }, []);
 
+  useEffect(() => {
+    refresh();
+  }, []);
+
   const checkIn = useCallback(async () => {
     try {
       const res = await checkInService();
-      console.log("签到成果，获得", res.msg);
-      console.log(res);
+      alert(`签到成功，获得${res.msg}`);
     } catch (err) {
-      // console.log(err, err.message);
       alert(err.message);
     }
   }, []);
@@ -54,20 +56,25 @@ const Dashboard = (props) => {
   }
   return (
     <Layout>
-      <div className="min-h-full">
-        <header className="bg-white shadow">
-          <div className="flex justify-between max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <div className="flex space-x-4">
-              <p onClick={checkIn}>签到</p>
+      <div className="min-h-screen">
+        <header className="">
+          <div className="relative flex space-x-4">
+            <div
+              className="flex-1 overflow-hidden relative px-4 py-2 bg-white rounded shadow"
+              onClick={checkIn}
+            >
+              <div className="flex items-center justify-between text-gray-800">
+                <div>
+                  <p className="text-xm text-gray-500">签到</p>
+                </div>
+                <LocationMarkerIcon className="absolute -bottom-2 -right-2 w-14 h-14 text-gray-100" />
+              </div>
+            </div>
+            <div className="flex-1 overflow-hidden relative px-4 py-2 bg-white rounded shadow">
               <CaptionUpload
                 onChange={async (caption) => {
                   const { title, content, type } = caption;
                   const p = await parseCaptionContent(content, type);
-                  // const captionResult = {
-                  //   title,
-                  //   paragraphs: p,
-                  // };
                   const { id } = await addCaptionService({
                     title,
                     type,
@@ -81,13 +88,19 @@ const Dashboard = (props) => {
                   router.push({ pathname: `/captions/${id}` });
                 }}
               >
-                上传
+                <div className="flex items-center justify-between text-gray-800">
+                  <div>
+                    <p className="text-xm text-gray-500">上传</p>
+                  </div>
+                  <UploadIcon className="absolute -bottom-2 -right-2 w-14 h-14 text-gray-100" />
+                </div>
               </CaptionUpload>
             </div>
           </div>
         </header>
         <main>
-          <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div className="mt-8 text-center text-gray-800">我的字幕</div>
+          <div className="mt-2">
             {/* content */}
             <div className="space-y-4 sm:grid md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
               {captions.map((caption) => {
@@ -104,11 +117,9 @@ const Dashboard = (props) => {
 
 export const getServerSideProps = async (context) => {
   const session = await getSession(context);
-  const captions = await fetchCaptionsServer({ pageSize: 5 }, session?.user);
   return {
     props: {
       user: session?.user ?? null,
-      dataSource: captions,
     },
   };
 };
