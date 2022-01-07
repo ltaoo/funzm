@@ -53,13 +53,11 @@ const SimpleCaptionExamPage = () => {
   const startExam = useCallback(async () => {
     const instance = new Exam({});
     const paragraphs = await fetchParagraphs();
-    const { status, combo, maxCombo, curParagraphId } =
+    const { status, curParagraphId } =
       instance.start(paragraphs);
     const { id } = await createExamService({
       captionId: idRef.current,
       status,
-      combo,
-      maxCombo,
       curParagraphId,
     });
     router.replace({

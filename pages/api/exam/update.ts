@@ -12,10 +12,10 @@ export default async function updateExamAPI(req, res) {
     await prisma.exam.update({
       where: { id },
       data: {
-        combo,
-        maxCombo,
+        // combo,
+        // maxCombo,
         status,
-        curParagraphId,
+        // curParagraphId,
       },
     });
 

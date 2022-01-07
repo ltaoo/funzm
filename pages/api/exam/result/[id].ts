@@ -21,7 +21,6 @@ export default async function fetchExamResultAPI(req, res) {
   try {
     const dataSources = await prisma.spellingResult.findMany({
       where: {
-        examId: id,
         userId,
         type: type ? Number(type) : undefined,
       },

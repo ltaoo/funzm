@@ -7,6 +7,7 @@ import { getSession } from "@/next-auth/client";
 import prisma from "@/lib/prisma";
 import dayjs from "dayjs";
 import { addScore } from "@/lib/models/score";
+import { ScoreType } from "@/domains/exam/constants";
 
 enum RandomPrize {
   Chape = 1,
@@ -16,11 +17,7 @@ enum RandomPrize {
 // skip card 3
 // tip  card 5
 //                          3*2 + 5*2                      3*8 + 5*8
-const signRewards = [6, 10, RandomPrize.Chape, 20, 30, 42, RandomPrize.Normal];
-enum ScoreType {
-  Get = 1,
-  Consume = 2,
-}
+const signRewards = [10, 20, 40, 50, 80, 100, 120];
 
 function getScoreBySignDates(dates, curDay) {
   if ([2, 6].includes(curDay)) {
@@ -74,7 +71,7 @@ export default async function provideCheckInService(
   if (typeof scoreReward === "number") {
     await addScore(userId, {
       value: scoreReward,
-      type: ScoreType.Get,
+      type: ScoreType.Increment,
       desc: `${current.format("YYYY-MM-DD")} 签到`,
       createdAt: current.clone().unix(),
     });

@@ -109,6 +109,7 @@ export function parseCaptionContent(
   }
   return [
     {
+      id: '1',
       line: 1,
       start: "",
       end: "",

@@ -164,21 +164,7 @@ const Website = (props) => {
                   </CaptionUpload>
                 </div>
                 <div className="mt-3 sm:mt-0 sm:ml-3">
-                  <div
-                    className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 cursor-pointer hover:bg-green-200 md:py-4 md:text-lg md:px-10"
-                    onClick={() => {
-                      const $exam = document.querySelector("#exp");
-                      import("scroll-into-view-if-needed").then((mod) => {
-                        const scrollIntoView = mod.default;
-                        scrollIntoView($exam, {
-                          scrollMode: "if-needed",
-                          behavior: "smooth",
-                          block: "start",
-                          inline: "nearest",
-                        });
-                      });
-                    }}
-                  >
+                  <div className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 cursor-pointer hover:bg-green-200 md:py-4 md:text-lg md:px-10">
                     开始体验
                   </div>
                 </div>
@@ -288,38 +274,6 @@ const Website = (props) => {
                 </div>
               )}
             </div>
-            <div id="exam">
-              {exam?.status === ExamStatus.Started && (
-                <div className="mt-12">
-                  {/* @ts-ignore */}
-                  <SimpleExamInput
-                    className="md:mx-auto md:w-180"
-                    {...exam}
-                    onClick={(segment) => {
-                      if (!examRef.current) {
-                        return;
-                      }
-                      examRef.current.write(segment);
-                    }}
-                  />
-                  <div className="text-center">
-                    <SimpleExamOperator instance={examRef.current} />
-                  </div>
-                </div>
-              )}
-            </div>
-            {exam?.status === ExamStatus.Completed && (
-              <div className="mt-12">
-                <div className="text-3xl">
-                  🎉
-                  <span className="inline-block mx-4 text-green-500">完成</span>
-                  🎉
-                </div>
-                <div className="mt-18 md:mx-auto md:w-120">
-                  <SimpleExamStats data={exam.stats} />
-                </div>
-              </div>
-            )}
           </div>
           {/* <div className="mt-36 text-center md:mx-auto md:w-260">
             <div className="inline-block text-3xl underline decoration-wavy decoration-green-500 underline-offset-6 dark:text-gray-200">
