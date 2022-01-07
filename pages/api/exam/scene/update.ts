@@ -64,12 +64,14 @@ export default async function provideUpdateExamSceneService(
     end_at: ended_at,
   });
 
-  await addScore(userId, {
-    value: score,
-    desc: `完成测验 ${id}`,
-    type: ScoreType.Increment,
-    createdAt: now.clone().unix(),
-  });
+  if (status === ExamStatus.Completed) {
+    await addScore(userId, {
+      value: score,
+      desc: `完成测验 ${id}`,
+      type: ScoreType.Increment,
+      createdAt: now.clone().unix(),
+    });
+  }
 
   await prisma.examScene.update({
     where: {

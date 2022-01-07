@@ -28,6 +28,7 @@ const SimpleCaptionExamPage = () => {
     let startedExamScene = examScenesResponse.find((scene) =>
       [ExamStatus.Prepare, ExamStatus.Started].includes(scene.status)
     );
+    console.log('started', startedExamScene, examScenesResponse)
     if (startedExamScene) {
       setStartedScene(startedExamScene);
       setExamScenes(

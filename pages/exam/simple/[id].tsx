@@ -28,9 +28,6 @@ const SimpleCaptionExamPage = () => {
   const router = useRouter();
 
   const examRef = useRef(null);
-  const idRef = useRef<string>(null);
-  const sceneIdRef = useRef<string>(null);
-  const examIdRef = useRef<string>(null);
   const [loading, setLoading] = useState(false);
   const [exam, setExam] = useState<IExamSceneDomain>(null);
   const [correctVisible, setCorrectVisible] = useState(false);
@@ -40,7 +37,7 @@ const SimpleCaptionExamPage = () => {
 
   const init = useCallback(async () => {
     const id = router.query.id as string;
-    console.log("[PAGE]exam/simple/[id] - init", id);
+    // console.log("[PAGE]exam/simple/[id] - init", id);
     const res = await fetchExamSceneService({ id });
     const { examId, captionId, status, start, cur } = res;
 
@@ -50,11 +47,8 @@ const SimpleCaptionExamPage = () => {
       });
       return;
     }
-    sceneIdRef.current = id;
-    examIdRef.current = examId;
-    idRef.current = captionId;
     const { list: paragraphs } = await fetchParagraphsService({
-      captionId: idRef.current,
+      captionId,
       start,
       pageSize: PARAGRAPH_COUNT_PER_EXAM_SCENE,
       page: 1,
@@ -82,7 +76,7 @@ const SimpleCaptionExamPage = () => {
       onChange: async (nextExam) => {
         setExam(nextExam);
       },
-      onCorrect({ combo, curParagraphId }) {
+      onCorrect({ curParagraphId }) {
         setCorrectVisible(true);
         createExamSpellingService({
           examId: id,

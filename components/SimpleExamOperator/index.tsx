@@ -34,7 +34,7 @@ const SimpleExamOperator: React.FC<IProps> = (props) => {
       <IconWithTxt icon={LightBulbIcon}>提示</IconWithTxt>
       <IconWithTxt
         icon={SkipIcon}
-        disabled={Number(instance.countdown) <= 5}
+        disabled={Number(instance.countdown) >= 95}
         onClick={() => {
           if (!instance) {
             return;
