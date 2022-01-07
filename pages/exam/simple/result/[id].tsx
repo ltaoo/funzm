@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 
 import {
   createExamSceneService,
+  fetchCurExamSceneByCaption,
   fetchExamSceneProfileService,
 } from "@/services/exam";
 import { ExamStatus } from "@/domains/exam/constants";
@@ -38,28 +39,12 @@ const SimpleCaptionExamPage = () => {
   }, []);
 
   const nextExamScene = useCallback(async () => {
-    // startRef.current = stats.paragraphs[stats.paragraphs.length - 1].id;
-    // const response = await fetchParagraphsService({
-    //   captionId: idRef.current,
-    //   start: startRef.current,
-    //   pageSize: 21,
-    //   page: 1,
-    // });
-    // const remainingParagraphs = response.list;
-    // if (remainingParagraphs.length === 1) {
-    //   // is end
-    //   return;
-    // }
-    // const { id } = await createExamSceneService({
-    //   captionId: idRef.current,
-    //   examId: examIdRef.current,
-    //   // @ts-ignore
-    //   start: remainingParagraphs[1].id,
-    // });
-    // router.replace({
-    //   pathname: `/exam/simple/${id}`,
-    // });
-  }, []);
+    const { captionId } = examScene;
+    const { id } = await fetchCurExamSceneByCaption({ captionId });
+    router.push({
+      pathname: `/exam/simple/${id}`,
+    });
+  }, [examScene]);
 
   const replay = useCallback(async () => {
     if (examScene === null) {
@@ -85,29 +70,31 @@ const SimpleCaptionExamPage = () => {
 
   return (
     <div className="overflow-hidden px-4 pb-12 bg-gray-100">
-      <div className="mt-12 text-center">
-        <div className="inline-flex items-center text-3xl bg-white">
-          {examScene.status === ExamStatus.Completed && (
-            <CheckIcon className="w-10 h-10 text-green-500" />
-          )}
-          {examScene.status === ExamStatus.Failed && (
-            <XIcon className="w-10 h-10 text-red-500" />
-          )}
-          <span
-            className={cx(
-              "inline-block mx-4",
-              examScene.status === ExamStatus.Completed
-                ? "text-green-500"
-                : "text-red-500"
+      <div className="mt-4 text-center">
+        <div className="flex items-center justify-center py-2 text-3xl rounded shadow bg-white">
+          <div className="inline-flex items-center">
+            {examScene.status === ExamStatus.Completed && (
+              <CheckIcon className="w-10 h-10 text-green-500" />
             )}
-          >
-            {examScene.status === ExamStatus.Completed ? "完成" : "失败"}
-          </span>
+            {examScene.status === ExamStatus.Failed && (
+              <XIcon className="w-10 h-10 text-red-500" />
+            )}
+            <span
+              className={cx(
+                "inline-block mx-4",
+                examScene.status === ExamStatus.Completed
+                  ? "text-green-500"
+                  : "text-red-500"
+              )}
+            >
+              {examScene.status === ExamStatus.Completed ? "完成" : "失败"}
+            </span>
+          </div>
         </div>
-        <div className="mt-18 py-4 bg-white rounded">
+        <div className="mt-6 py-4 bg-white rounded shadow-xl">
           <SimpleExamStats data={examScene.stats} />
         </div>
-        <div className="flex justify-evenly mt-10 space-x-8 md:mx-auto md:w-240">
+        <div className="flex justify-evenly mt-10 py-2 space-x-8 bg-white rounded shadow md:mx-auto md:w-240">
           <IconWithTxt
             icon={ArrowLeftIcon}
             size="large"
@@ -130,42 +117,46 @@ const SimpleCaptionExamPage = () => {
             下一幕
           </IconWithTxt>
         </div>
-        <div className="mt-10 py-4 text-left">
-          <div className="text-xl text-gray-800">错误句子</div>
-          <div className="mt-2 space-y-4">
-            {examScene.incorrectSpellings.map((spelling) => {
-              const {
-                id,
-                input,
-                paragraph: { text2 },
-              } = spelling;
-              return (
-                <div key={id} className="p-4 shadow bg-white">
-                  <p className="text-gray-500 text-md">原句</p>
-                  <div className="text-gray-800 text-lg">{text2}</div>
-                  <p className="mt-4 text-gray-500 text-md">你的输入</p>
-                  <div className="text-gray-800 text-lg">{input}</div>
-                </div>
-              );
-            })}
+        {examScene.incorrectSpellings.length !== 0 && (
+          <div className="mt-10 py-4 text-left">
+            <div className="text-xl text-gray-800">错误句子</div>
+            <div className="mt-2 space-y-4">
+              {examScene.incorrectSpellings.map((spelling) => {
+                const {
+                  id,
+                  input,
+                  paragraph: { text2 },
+                } = spelling;
+                return (
+                  <div key={id} className="p-4 shadow bg-white">
+                    <p className="text-gray-500 text-md">原句</p>
+                    <div className="text-gray-800 text-lg">{text2}</div>
+                    <p className="mt-4 text-gray-500 text-md">你的输入</p>
+                    <div className="text-gray-800 text-lg">{input}</div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-        <div className="mt-6 py-4 text-left">
-          <div className="text-xl text-gray-800">跳过句子</div>
-          <div className="mt-2 space-y-4">
-            {examScene.skippedSpellings.map((spelling) => {
-              const {
-                id,
-                paragraph: { text2 },
-              } = spelling;
-              return (
-                <div key={id} className="p-4 shadow bg-white">
-                  <div className="text-gray-800 text-lg">{text2}</div>
-                </div>
-              );
-            })}
+        )}
+        {examScene.skippedSpellings.length !== 0 && (
+          <div className="mt-6 py-4 text-left">
+            <div className="text-xl text-gray-800">跳过句子</div>
+            <div className="mt-2 space-y-4">
+              {examScene.skippedSpellings.map((spelling) => {
+                const {
+                  id,
+                  paragraph: { text2 },
+                } = spelling;
+                return (
+                  <div key={id} className="p-4 shadow bg-white">
+                    <div className="text-gray-800 text-lg">{text2}</div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

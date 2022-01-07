@@ -1,20 +1,18 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import dayjs from "dayjs";
 
-import { getSession } from "@/next-auth/client";
-
 import prisma from "@/lib/prisma";
-import { ExamStatus } from "@/domains/exam/constants";
+import { ensureLogin } from "@/lib/utils";
+import {
+  ExamStatus,
+  PARAGRAPH_COUNT_PER_EXAM_SCENE,
+} from "@/domains/exam/constants";
 
 export default async function provideCurExamScene(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const session = await getSession({ req });
-  if (!session) {
-    return;
-  }
-  const userId = session.user.id as string;
+  const userId = await ensureLogin(req, res);
   const captionId = req.query.captionId as string;
   const initialized = await prisma.examScene.findFirst({
     where: {
@@ -54,7 +52,11 @@ export default async function provideCurExamScene(
   const { id, status, examId, start } = initialized;
   console.log("[API]provideCurExamScene", id, status, start);
   if ([ExamStatus.Prepare, ExamStatus.Started].includes(status)) {
-    res.status(200).json({ code: 0, msg: "", data: { id, status } });
+    res.status(200).json({ code: 0, msg: "", data: initialized });
+    return;
+  }
+  if ([ExamStatus.Failed].includes(status)) {
+    res.status(200).json({ code: 0, msg: "", data: initialized });
     return;
   }
   // create a new exam scene
@@ -66,7 +68,7 @@ export default async function provideCurExamScene(
       id: start,
     },
     skip: 1,
-    take: 20,
+    take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
   });
   // console.log("[API]provideCurExamScene - next paragraphs", response);
   const remainingParagraphs = response;

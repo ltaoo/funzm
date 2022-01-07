@@ -580,6 +580,12 @@ class Exam {
       stats: this.stats(),
     };
   }
+
+  clearTimer() {
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+    }
+  }
 }
 
 export default Exam;

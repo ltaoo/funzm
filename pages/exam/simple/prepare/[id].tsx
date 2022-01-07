@@ -57,11 +57,16 @@ const SimpleCaptionExamPage = () => {
     <Layout>
       <div className="bg-gray-100">
         <Link href={`/exam/simple/${startedScene.id}`}>
-          <div className="py-4 text-center rounded bg-white cursor-pointer">
-            开始
+          <div className="py-4 text-center text-xl rounded bg-white cursor-pointer shadow-xl">
+            {startedScene.start}
           </div>
         </Link>
-        <div className="ml-4 mt-4 text-xl text-gray-800">历史</div>
+        <Link href={`/captions/${startedScene.captionId}`}>
+          <div className="mt-4 py-4 text-center text-xl rounded bg-white cursor-pointer shadow-xl">
+            复习
+          </div>
+        </Link>
+        <div className="mt-8 text-gray-800">历史({examScenes.length})</div>
         <div className="mt-2 space-y-4">
           {examScenes.map((scene) => {
             const { id, start, score, status, startedAt, endedAt } = scene;
@@ -77,12 +82,10 @@ const SimpleCaptionExamPage = () => {
               >
                 <div className="text-gray-300">{start}</div>
                 <div className="flex justify-between items-center mt-2">
-                  <div className="text-green-300">
-                    {examStatusTexts[status]}
-                  </div>
+                  <div className="text-gray-300">{examStatusTexts[status]}</div>
                   <span>{score}</span>
                 </div>
-                <div className="flex text-gray-300">
+                <div className="flex text-sm text-gray-300">
                   <div className="">{startedAt}</div>
                   {endedAt && <div className="text-gray-300"> - {endedAt}</div>}
                 </div>

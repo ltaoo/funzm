@@ -5,10 +5,12 @@ import { ExamSceneValues, IPartialExamSceneValues } from "./types";
 import { paddingZero, removeZeroAtTail } from "./utils";
 
 export function partialExamSceneRes2Values(res): IPartialExamSceneValues {
-  const { id, status, start, score, created_at, ended_at } = res;
+  const { id, captionId, status, start, score, created_at, ended_at } = res;
 
   return {
     id,
+    captionId,
+
     status,
 
     start,

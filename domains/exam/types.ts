@@ -4,6 +4,7 @@ import { ExamStatus, SpellingResultType } from "./constants";
 
 export interface IPartialExamSceneValues {
   id: string;
+  captionId: string;
 
   score: number;
   status: ExamStatus;

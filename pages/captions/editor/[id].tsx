@@ -117,14 +117,17 @@ const CaptionEditorPage = () => {
 
   const updateTitle = useCallback(
     async (event) => {
-      const nextTitle = event.target.innerHTML;
+      const nextTitle = event.target.innerText;
       setCaption((prev) => {
         return {
           ...prev,
           title: nextTitle,
         };
       });
-      const { id } = caption;
+      const { id, title } = caption;
+      if (nextTitle === title) {
+        return;
+      }
       await updateCaptionService({ id, title: nextTitle });
       alert("更新成功");
     },
@@ -132,8 +135,11 @@ const CaptionEditorPage = () => {
   );
   const updateText1 = useCallback((updatedParagraph) => {
     return async (event) => {
-      const { id } = updatedParagraph;
-      const nextText1 = event.target.innerHTML;
+      const { id, text1 } = updatedParagraph;
+      const nextText1 = event.target.innerText;
+      if (text1 === nextText1) {
+        return;
+      }
       await updateParagraphService({ id, text1: nextText1 });
       alert("更新成功");
     };
@@ -141,8 +147,11 @@ const CaptionEditorPage = () => {
   const updateText2 = useCallback(
     (updatedParagraph) => {
       return async (event) => {
-        const { id } = updatedParagraph;
-        const nextText2 = event.target.innerHTML;
+        const { id, text2 } = updatedParagraph;
+        const nextText2 = event.target.innerText;
+        if (text2 === nextText2) {
+          return;
+        }
         await updateParagraphService({ id, text2: nextText2 });
         alert("更新成功");
       };

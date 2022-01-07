@@ -11,7 +11,10 @@ import {
   updateExamSceneService,
 } from "@/services/exam";
 import { fetchParagraphsService } from "@/services/caption";
-import { SpellingResultType } from "@/domains/exam/constants";
+import {
+  PARAGRAPH_COUNT_PER_EXAM_SCENE,
+  SpellingResultType,
+} from "@/domains/exam/constants";
 import Exam from "@/domains/exam";
 import { ExamStatus } from "@/domains/exam/constants";
 import Loading from "@/components/Loading";
@@ -53,7 +56,7 @@ const SimpleCaptionExamPage = () => {
     const { list: paragraphs } = await fetchParagraphsService({
       captionId: idRef.current,
       start,
-      pageSize: 20,
+      pageSize: PARAGRAPH_COUNT_PER_EXAM_SCENE,
       page: 1,
     });
     const curParagraphIndex = cur
@@ -135,6 +138,11 @@ const SimpleCaptionExamPage = () => {
 
   useEffect(() => {
     init();
+    return () => {
+      if (examRef.current) {
+        examRef.current.clearTimer();
+      }
+    };
   }, []);
 
   const showText2 = useCallback((paragraph) => {

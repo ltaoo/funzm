@@ -27,7 +27,7 @@ const SimpleExamStats = (props) => {
           </div>
         </div>
       </div>
-      <hr className="mt-12" />
+      <hr className="mt-8" />
       <div className="mt-8 ml-5">
         <div className="flex items-center">
           <div className="w-24 text-gray-400">完成于</div>
