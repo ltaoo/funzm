@@ -5,13 +5,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
+import Layout from "@/layouts";
 import {
   fetchCurExamSceneByCaption,
   fetchExamScenesByCaptionService,
 } from "@/services/exam";
 import { ExamStatus, examStatusTexts } from "@/domains/exam/constants";
 import { IPartialExamSceneValues } from "@/domains/exam/types";
-import Layout from "@/layouts";
 
 const SimpleCaptionExamPage = () => {
   const router = useRouter();
@@ -57,12 +57,12 @@ const SimpleCaptionExamPage = () => {
     <Layout>
       <div className="bg-gray-100">
         <Link href={`/exam/simple/${startedScene.id}`}>
-          <div className="py-4 text-center text-xl rounded bg-white cursor-pointer shadow-xl">
+          <div className="py-4 text-center text-xl rounded bg-white cursor-pointer shadow">
             {startedScene.start}
           </div>
         </Link>
         <Link href={`/captions/${startedScene.captionId}`}>
-          <div className="mt-4 py-4 text-center text-xl rounded bg-white cursor-pointer shadow-xl">
+          <div className="mt-4 py-4 text-center text-xl rounded bg-white cursor-pointer shadow">
             复习
           </div>
         </Link>
@@ -83,7 +83,7 @@ const SimpleCaptionExamPage = () => {
                 <div className="text-gray-300">{start}</div>
                 <div className="flex justify-between items-center mt-2">
                   <div className="text-gray-300">{examStatusTexts[status]}</div>
-                  <span>{score}</span>
+                  {status === ExamStatus.Completed && <span>{score}</span>}
                 </div>
                 <div className="flex text-sm text-gray-300">
                   <div className="">{startedAt}</div>

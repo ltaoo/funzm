@@ -62,12 +62,12 @@ const SimpleCaptionExamPage = () => {
     const curParagraphIndex = cur
       ? paragraphs.findIndex((paragraph) => paragraph.id === cur)
       : undefined;
-    console.log(
-      "[PAGE]exam/simple/[id] - init result",
-      paragraphs,
-      cur,
-      curParagraphIndex
-    );
+    // console.log(
+    //   "[PAGE]exam/simple/[id] - init result",
+    //   paragraphs,
+    //   cur,
+    //   curParagraphIndex
+    // );
     examRef.current = new Exam({
       title: "",
       status: ExamStatus.Started,

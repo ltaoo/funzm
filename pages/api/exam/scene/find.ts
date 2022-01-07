@@ -27,7 +27,7 @@ export default async function provideCurExamScene(
         captionId,
       },
     });
-    const { id, scenes } = await prisma.exam.create({
+    const theNewOne = await prisma.exam.create({
       data: {
         userId,
         captionId,
@@ -46,7 +46,8 @@ export default async function provideCurExamScene(
         scenes: true,
       },
     });
-    res.status(200).json({ code: 0, msg: "", data: { id: scenes[0].id } });
+    const { scenes } = theNewOne;
+    res.status(200).json({ code: 0, msg: "", data: scenes[0] });
     return;
   }
   const { id, status, examId, start } = initialized;

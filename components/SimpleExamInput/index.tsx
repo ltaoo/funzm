@@ -21,11 +21,11 @@ const SimpleExamInput: React.FC<IProps> = (props) => {
 
   return (
     <div className={cx("text-left", className)}>
-      <div className="py-8 px-4 text-xl text-gray-800 dark:text-white">
+      <div className="py-8 px-4 text-xl text-gray-800">
         <div className="">{curParagraph.text1}</div>
       </div>
       <div className="py-6 px-4">
-        <div className="text-3xl font-serif text-black dark:text-white min-h-36 dark:text-white">
+        <div className="text-3xl font-serif text-black min-h-36">
           {(() => {
             const result = [];
             const elms = [...inputtingWords];

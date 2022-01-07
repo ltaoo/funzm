@@ -41,15 +41,15 @@ const SimpleExamStats: React.FC<IProps> = (props) => {
       <hr className="mt-8" />
       <div className="mt-8 ml-5">
         <div className="flex items-center">
-          <div className="w-24 text-gray-400">完成于</div>
+          <div className="w-16 text-gray-400">完成于</div>
           <div className="ml-4 text-gray-800 dark:text-gray-300">{endAt}</div>
         </div>
         <div className="flex items-center">
-          <div className="w-24 text-gray-400">耗时</div>
+          <div className="w-16 text-gray-400">耗时</div>
           <div className="ml-4 text-gray-800 dark:text-gray-300">{spend}</div>
         </div>
         <div className="flex items-center">
-          <div className="w-24 text-gray-400">正确率</div>
+          <div className="w-16 text-gray-400">正确率</div>
           <div className="ml-4 text-gray-800 dark:text-gray-300">
             {correctRateText}
           </div>

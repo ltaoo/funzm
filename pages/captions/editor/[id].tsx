@@ -169,7 +169,6 @@ const CaptionEditorPage = () => {
         });
         setParagraphs(nextParagraphs);
         await deleteParagraphService({ id: deletedLine.id });
-        alert("删除成功");
       };
     },
     [caption, paragraphs]
