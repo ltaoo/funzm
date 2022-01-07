@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 
 import { SpellingResultType } from "./constants";
-import { ExamSceneValues, IPartialExamSceneValues } from "./types";
+import { IExamSceneValues, IPartialExamSceneValues } from "./types";
 import { paddingZero, removeZeroAtTail } from "./utils";
 
 export function partialExamSceneRes2Values(res): IPartialExamSceneValues {
@@ -21,7 +21,7 @@ export function partialExamSceneRes2Values(res): IPartialExamSceneValues {
   };
 }
 
-export function examSceneRes2Ins(res): ExamSceneValues {
+export function examSceneRes2Ins(res): IExamSceneValues {
   const {
     id,
     examId,

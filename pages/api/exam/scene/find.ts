@@ -56,7 +56,15 @@ export default async function provideCurExamScene(
     return;
   }
   if ([ExamStatus.Failed].includes(status)) {
-    res.status(200).json({ code: 0, msg: "", data: initialized });
+    const data = await prisma.examScene.create({
+      data: {
+        captionId,
+        examId,
+        start,
+        created_at: dayjs().unix(),
+      },
+    });
+    res.status(200).json({ code: 0, msg: "", data });
     return;
   }
   // create a new exam scene
@@ -68,7 +76,8 @@ export default async function provideCurExamScene(
       id: start,
     },
     skip: 1,
-    take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
+    take: 1,
+    // take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
   });
   // console.log("[API]provideCurExamScene - next paragraphs", response);
   const remainingParagraphs = response;
@@ -76,13 +85,13 @@ export default async function provideCurExamScene(
     res.status(200).json({ code: 0, msg: "", data: { id: null } });
     return;
   }
-  const { id: newExamSceneId } = await prisma.examScene.create({
+  const createdNewExamScene = await prisma.examScene.create({
     data: {
       captionId,
       examId,
-      start: response[response.length - 1].id,
+      start: response[0].id,
       created_at: dayjs().unix(),
     },
   });
-  res.status(200).json({ code: 0, msg: "", data: { id: newExamSceneId } });
+  res.status(200).json({ code: 0, msg: "", data: createdNewExamScene });
 }

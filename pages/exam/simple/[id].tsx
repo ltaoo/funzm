@@ -12,11 +12,13 @@ import {
 } from "@/services/exam";
 import { fetchParagraphsService } from "@/services/caption";
 import {
+  CORRECT_RATE_NEEDED_FOR_COMPLETE,
   PARAGRAPH_COUNT_PER_EXAM_SCENE,
   SpellingResultType,
 } from "@/domains/exam/constants";
 import Exam from "@/domains/exam";
 import { ExamStatus } from "@/domains/exam/constants";
+import { IExamSceneDomain } from "@/domains/exam/types";
 import Loading from "@/components/Loading";
 import Modal from "@/components/Modal";
 import SimpleExamInput from "@/components/SimpleExamInput";
@@ -26,13 +28,11 @@ const SimpleCaptionExamPage = () => {
   const router = useRouter();
 
   const examRef = useRef(null);
-  const loadingRef = useRef(false);
   const idRef = useRef<string>(null);
   const sceneIdRef = useRef<string>(null);
   const examIdRef = useRef<string>(null);
   const [loading, setLoading] = useState(false);
-  const [curCombo, setCurCombo] = useState(0);
-  const [exam, setExam] = useState<Exam>(null);
+  const [exam, setExam] = useState<IExamSceneDomain>(null);
   const [correctVisible, setCorrectVisible] = useState(false);
   const [incorrectVisible, setIncorrectVisible] = useState(false);
   const [text2, setText2] = useState(null);
@@ -113,10 +113,13 @@ const SimpleCaptionExamPage = () => {
           type: SpellingResultType.Skipped,
         });
       },
-      async onComplete() {
+      async onComplete({ stats }: IExamSceneDomain) {
         await updateExamSceneService({
           id,
-          status: ExamStatus.Completed,
+          status:
+            stats.correctRate > CORRECT_RATE_NEEDED_FOR_COMPLETE
+              ? ExamStatus.Completed
+              : ExamStatus.Failed,
         });
         router.replace({
           pathname: `/exam/simple/result/${id}`,
@@ -175,7 +178,10 @@ const SimpleCaptionExamPage = () => {
           <div className="relative">
             <div
               className="absolute w-2 h-2 bg-green-500"
-              style={{ left: `${exam.countdown}%` }}
+              style={{
+                left: `${exam.countdown}%`,
+                transform: `translateX(-${exam.countdown}%)`,
+              }}
             ></div>
             <hr />
           </div>

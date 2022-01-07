@@ -2,7 +2,7 @@ import { Exam, SpellingResult } from ".prisma/client";
 
 import { SpellingResultType } from "@/domains/exam/constants";
 import { partialExamSceneRes2Values } from "@/domains/exam/transformer";
-import { ExamSceneValues, IPartialExamSceneValues } from "@/domains/exam/types";
+import { IExamSceneValues, IPartialExamSceneValues } from "@/domains/exam/types";
 
 import request from "./request";
 
@@ -80,7 +80,7 @@ export function fetchExamResultByTypeService({
  */
 export function fetchCurExamSceneByCaption({
   captionId,
-}): Promise<ExamSceneValues> {
+}): Promise<IExamSceneValues> {
   return request.get("/api/exam/scene/find", {
     params: {
       captionId,
@@ -109,7 +109,7 @@ export async function fetchExamScenesByCaptionService(params: {
  */
 export function fetchExamSceneService(params: {
   id: string;
-}): Promise<ExamSceneValues> {
+}): Promise<IExamSceneValues> {
   return request.get(`/api/exam/scene/${params.id}`);
 }
 
@@ -118,7 +118,7 @@ export function fetchExamSceneService(params: {
  * @param param0
  * @returns
  */
-export function fetchExamSceneProfileService({ id }): Promise<ExamSceneValues> {
+export function fetchExamSceneProfileService({ id }): Promise<IExamSceneValues> {
   return request.get(`/api/exam/scene/${id}?profile=1`);
 }
 

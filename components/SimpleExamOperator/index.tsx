@@ -1,3 +1,7 @@
+/**
+ * @file 测验操作栏（跳过、清除等操作）
+ */
+
 import {
   ChartBarIcon,
   LightBulbIcon,
@@ -5,51 +9,52 @@ import {
   ClearIcon,
 } from "@ltaoo/icons/outline";
 
-const SimpleExamOperator = (props) => {
+import IconWithTxt from "@/components/IconWithTxt";
+import Exam from "@/domains/exam";
+
+interface IProps {
+  instance: Exam;
+}
+const SimpleExamOperator: React.FC<IProps> = (props) => {
   const { instance } = props;
 
   return (
     <div className="inline-flex space-x-4 text-center">
-      <div>
-        <ChartBarIcon
-          className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100"
-          onClick={() => {
-            if (!instance) {
-              return;
-            }
-            instance.clear();
-          }}
-        />
-        <p className="text-sm text-gray-500">统计</p>
-      </div>
-      <div>
-        <LightBulbIcon className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100" />
-        <p className="text-sm text-gray-500">提示</p>
-      </div>
-      <div>
-        <SkipIcon
-          className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100"
-          onClick={() => {
-            if (!instance) {
-              return;
-            }
-            instance.skip();
-          }}
-        />
-        <p className="text-sm text-gray-500">跳过</p>
-      </div>
-      <div>
-        <ClearIcon
-          className="w-10 h-10 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100"
-          onClick={() => {
-            if (!instance) {
-              return;
-            }
-            instance.clear();
-          }}
-        />
-        <p className="text-sm text-gray-500">清除</p>
-      </div>
+      <IconWithTxt
+        icon={ChartBarIcon}
+        onClick={() => {
+          if (!instance) {
+            return;
+          }
+          instance.clear();
+        }}
+      >
+        统计
+      </IconWithTxt>
+      <IconWithTxt icon={LightBulbIcon}>提示</IconWithTxt>
+      <IconWithTxt
+        icon={SkipIcon}
+        disabled={Number(instance.countdown) <= 5}
+        onClick={() => {
+          if (!instance) {
+            return;
+          }
+          instance.skip();
+        }}
+      >
+        跳过
+      </IconWithTxt>
+      <IconWithTxt
+        icon={ClearIcon}
+        onClick={() => {
+          if (!instance) {
+            return;
+          }
+          instance.clear();
+        }}
+      >
+        清除
+      </IconWithTxt>
     </div>
   );
 };

@@ -13,20 +13,37 @@ interface IProps {
   icon: React.FC;
   txt?: string;
   size?: "small" | "default" | "large";
+  disabled?: boolean;
   onClick?: (event?: React.MouseEvent) => void;
 }
 const IconWithTxt: React.FC<IProps> = (props) => {
-  const { icon, txt, size = "default", children, onClick } = props;
+  const {
+    icon,
+    txt,
+    size = "default",
+    disabled = false,
+    children,
+    onClick,
+  } = props;
   return (
     <div className="inline-block">
       <div>
         {React.createElement(icon, {
           // @ts-ignore
           className: cx(
-            "p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100",
-            sizeClassNames[size]
+            "p-2 rounded cursor-pointer hover:bg-gray-100",
+            sizeClassNames[size],
+            disabled ? "text-gray-300" : "text-gray-500"
           ),
-          onClick,
+          onClick: (event) => {
+            if (disabled) {
+              event.stopPropagation();
+              return;
+            }
+            if (onClick) {
+              onClick(event);
+            }
+          },
         })}
         <p className="text-sm text-center text-gray-500">{txt || children}</p>
       </div>

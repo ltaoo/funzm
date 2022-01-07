@@ -1,10 +1,21 @@
 /**
  * 简单测验统计面板
  */
-const SimpleExamStats = (props) => {
+
+import { ExamStatus } from "@/domains/exam/constants";
+import { IExamSceneDomain, IExamSceneValues } from "@/domains/exam/types";
+
+interface IProps {
+  data: IExamSceneValues;
+}
+const SimpleExamStats: React.FC<IProps> = (props) => {
   const { data } = props;
-  const { correct, incorrect, skipped, spend, endAt, correctRateText, score } =
-    data;
+
+  const {
+    status,
+    score,
+    stats: { correct, incorrect, skipped, spend, endAt, correctRateText },
+  } = data;
   return (
     <div className="px-4 text-left">
       <div className="flex justify-between">
@@ -44,13 +55,17 @@ const SimpleExamStats = (props) => {
           </div>
         </div>
       </div>
-      <hr className="mt-8" />
-      <div className="mt-8 flex flex-row-reverse">
-        <span className="mr-6 text-5xl text-green-500">{score}</span>
-        <span className="w-24 text-gray-800 self-end dark:text-gray-300">
-          获得积分数
-        </span>
-      </div>
+      {status === ExamStatus.Completed && (
+        <>
+          <hr className="mt-8" />
+          <div className="mt-8 flex flex-row-reverse">
+            <span className="mr-6 text-5xl text-green-500">{score}</span>
+            <span className="w-24 text-gray-800 self-end dark:text-gray-300">
+              获得积分数
+            </span>
+          </div>
+        </>
+      )}
     </div>
   );
 };

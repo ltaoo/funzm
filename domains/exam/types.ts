@@ -14,7 +14,38 @@ export interface IPartialExamSceneValues {
   startedAt: string;
   endedAt: string;
 }
-export interface ExamSceneValues {
+
+export interface IExamSceneDomain {
+  paragraphs: IParagraphValues[];
+  status: ExamStatus;
+  displayedWords: { uid: number; word: string }[];
+  curWords: string[][];
+  countdown: string;
+  index: number;
+  curParagraph: IParagraphValues;
+  curParagraphId: string;
+  inputtingWords: { uid: number; word: string }[];
+  correctParagraphs: IParagraphValues[];
+  incorrectParagraphs: IParagraphValues[];
+  skippedParagraphs: IParagraphValues[];
+  remainingParagraphsCount: number;
+  stats: {
+    score: number;
+
+    incorrect: number;
+    correct: number;
+    skipped: number;
+
+    correctRate: number;
+    correctRateText: string;
+
+    createdAt: string;
+    endAt: string;
+
+    spend: null | string;
+  };
+}
+export interface IExamSceneValues {
   id: string;
   examId: string;
   captionId: string;

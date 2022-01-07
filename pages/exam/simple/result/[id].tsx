@@ -21,12 +21,12 @@ import {
 } from "@ltaoo/icons/outline";
 import { examSceneRes2Ins } from "@/domains/exam/transformer";
 import IconWithTxt from "@/components/IconWithTxt";
-import { ExamSceneValues } from "@/domains/exam/types";
+import { IExamSceneValues } from "@/domains/exam/types";
 
 const SimpleCaptionExamPage = () => {
   const router = useRouter();
 
-  const [examScene, setExamScene] = useState<ExamSceneValues>(null);
+  const [examScene, setExamScene] = useState<IExamSceneValues>(null);
 
   const init = useCallback(async () => {
     const id = router.query.id as string;
@@ -69,7 +69,7 @@ const SimpleCaptionExamPage = () => {
   }
 
   return (
-    <div className="overflow-hidden px-4 pb-12 bg-gray-100">
+    <div className="min-h-screen overflow-hidden px-4 pb-12 bg-gray-100">
       <div className="mt-4 text-center">
         <div className="flex items-center justify-center py-2 text-3xl rounded shadow bg-white">
           <div className="inline-flex items-center">
@@ -92,7 +92,7 @@ const SimpleCaptionExamPage = () => {
           </div>
         </div>
         <div className="mt-6 py-4 bg-white rounded shadow-xl">
-          <SimpleExamStats data={examScene.stats} />
+          <SimpleExamStats data={examScene} />
         </div>
         <div className="flex justify-evenly mt-10 py-2 space-x-8 bg-white rounded shadow md:mx-auto md:w-240">
           <IconWithTxt
@@ -119,7 +119,7 @@ const SimpleCaptionExamPage = () => {
         </div>
         {examScene.incorrectSpellings.length !== 0 && (
           <div className="mt-10 py-4 text-left">
-            <div className="text-xl text-gray-800">错误句子</div>
+            <div className="text-xl text-gray-800">错误拼写</div>
             <div className="mt-2 space-y-4">
               {examScene.incorrectSpellings.map((spelling) => {
                 const {
@@ -144,6 +144,24 @@ const SimpleCaptionExamPage = () => {
             <div className="text-xl text-gray-800">跳过句子</div>
             <div className="mt-2 space-y-4">
               {examScene.skippedSpellings.map((spelling) => {
+                const {
+                  id,
+                  paragraph: { text2 },
+                } = spelling;
+                return (
+                  <div key={id} className="p-4 shadow bg-white">
+                    <div className="text-gray-800 text-lg">{text2}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {examScene.correctSpellings.length !== 0 && (
+          <div className="mt-6 py-4 text-left">
+            <div className="text-xl text-gray-800">正确拼写</div>
+            <div className="mt-2 space-y-4">
+              {examScene.correctSpellings.map((spelling) => {
                 const {
                   id,
                   paragraph: { text2 },

@@ -3,10 +3,11 @@
  * 1、数据由外部传入
  * 2、已结束状态由外部决定
  */
-import { Paragraph } from "@prisma/client";
+// import { IParagraphValues } from "@prisma/client";
 import dayjs, { Dayjs } from "dayjs";
 
-import { compareLine, splitText2Words } from "../caption/utils";
+import { IParagraphValues } from "@/domains/caption/types";
+import { compareLine, splitText2Words } from "@/domains/caption/utils";
 
 import {
   shuffle,
@@ -17,6 +18,7 @@ import {
   paddingZero,
 } from "./utils";
 import { ExamStatus, EXPECTED_SECONDS_PER_PARAGRAPH } from "./constants";
+import { IExamSceneDomain, IExamSceneValues, ISpellingValues } from "./types";
 
 function noop() {}
 
@@ -35,7 +37,7 @@ class Exam {
   /**
    * 当前看到的段落
    */
-  curParagraph: Paragraph;
+  curParagraph: IParagraphValues;
   /**
    * 当前看到的段落 id
    */
@@ -55,25 +57,25 @@ class Exam {
   /**
    * 字幕段落
    */
-  paragraphs: Paragraph[];
+  paragraphs: IParagraphValues[];
   /**
    * 字幕段落，以 id 为 key
    */
-  paragraphMap: Record<string, Paragraph>;
+  paragraphMap: Record<string, IParagraphValues>;
 
   /**
    * 跳过的段落
    */
-  skippedParagraphs: Paragraph[];
+  skippedParagraphs: IParagraphValues[];
   /**
-   * 正确的段落
+   * 正确的段落拼写
    */
-  correctParagraphs: Paragraph[];
+  correctParagraphs: IParagraphValues[];
   /**
-   * 错误的段落
+   * 错误的段落拼写
    */
-  incorrectParagraphs: (Paragraph & {
-    error: string;
+  incorrectParagraphs: (IParagraphValues & {
+    input: string;
   })[];
   /**
    * 开始时间
@@ -124,43 +126,42 @@ class Exam {
   /**
    * 实例上挂载的值发生变化时调用
    */
-  onChange: (examJSON: Record<string, any>) => void;
+  onChange: (examJSON: IExamSceneDomain) => void;
   /**
    * 调用 next 方法前的回调
    */
-  onBeforeNext?: (exam: Record<string, any>) => boolean;
+  onBeforeNext?: (exam: IExamSceneDomain) => boolean;
   /**
    * 调用 next 后的回调
    */
-  onNext: (exam: Record<string, any>) => void;
+  onNext: (exam: IExamSceneDomain) => void;
   /**
    * 调用 skip 前的回调
    */
-  onBeforeSkip?: (exam: Record<string, any>) => boolean;
+  onBeforeSkip?: (exam: IExamSceneDomain) => boolean;
   /**
    * 答题正确的回调
    */
-  onCorrect: (examJSON: Record<string, any>) => void;
+  onCorrect: (examJSON: IExamSceneDomain) => void;
   /**
    * 跳过的回调
    */
-  onSkip?: (examJSON: Record<string, any>) => void;
+  onSkip?: (examJSON: IExamSceneDomain) => void;
   /**
    * 答题错误的回调
    */
-  onIncorrect: (examJSON: Record<string, any>) => void;
+  onIncorrect: (examJSON: IExamSceneDomain) => void;
   /**
    * 完成测验的回调
    */
-  onComplete?: (examJSON: Record<string, any>) => void;
+  onComplete?: (examJSON: IExamSceneDomain) => void;
   /**
    * 失败（超时）的回调
    */
-  onFailed?: (examJSON: Record<string, any>) => void;
+  onFailed?: (examJSON: IExamSceneDomain) => void;
 
   constructor(params) {
     const {
-      level,
       title,
       status = ExamStatus.Prepare,
       curParagraphId,
@@ -330,14 +331,14 @@ class Exam {
     //   matchedIndex + 1,
     //   remainingParagraphsCount
     // );
+    if (isSkip) {
+      if (this.onSkip) {
+        this.onSkip(this.toJSON());
+      }
+    }
     const nextParagraph = this.paragraphs[matchedIndex + 1];
     // console.log("[]next", matchedIndex, nextParagraph);
     if (nextParagraph) {
-      if (isSkip) {
-        if (this.onSkip) {
-          this.onSkip(this.toJSON());
-        }
-      }
       this.curParagraphId = nextParagraph.id;
       this.curParagraph = nextParagraph;
       this.remainingParagraphsCount = remainingParagraphsCount;
@@ -454,7 +455,7 @@ class Exam {
     }
     this.incorrectParagraphs.push({
       ...this.curParagraph,
-      error: errorInputting,
+      input: errorInputting,
     });
     // console.log("Incorrect!");
     this.combo = 0;
@@ -499,8 +500,8 @@ class Exam {
   stats() {
     const {
       paragraphs,
-      correctParagraphs,
-      incorrectParagraphs,
+      correctParagraphs: correctParagraphs,
+      incorrectParagraphs: incorrectParagraphs,
       skippedParagraphs,
     } = this;
     const stats = {
@@ -510,7 +511,7 @@ class Exam {
       skippedParagraphs,
       incorrectParagraphs,
       skipped: skippedParagraphs.length,
-      startAt: this.startAt.format("YYYY-MM-DD HH:mm:ss"),
+      createdAt: this.startAt.format("YYYY-MM-DD HH:mm:ss"),
       endAt: this.endAt ? this.endAt.format("YYYY-MM-DD HH:mm:ss") : "-",
       spend: (() => {
         if (this.endAt) {
@@ -543,7 +544,7 @@ class Exam {
     return stats;
   }
 
-  toJSON() {
+  toJSON(): IExamSceneDomain {
     const {
       paragraphs,
       status,
@@ -556,16 +557,16 @@ class Exam {
       curParagraph,
       curParagraphId,
       inputtingWords,
-      correctParagraphs,
-      incorrectParagraphs,
+      correctParagraphs: correctParagraphs,
+      incorrectParagraphs: incorrectParagraphs,
       skippedParagraphs,
       remainingParagraphsCount,
     } = this;
     return {
       status,
       paragraphs,
-      combo,
-      maxCombo,
+      // combo,
+      // maxCombo,
       countdown,
       index,
       curWords,
