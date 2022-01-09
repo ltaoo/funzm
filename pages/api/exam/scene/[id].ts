@@ -4,6 +4,7 @@
 import { ExamStatus } from "@/domains/exam/constants";
 import prisma from "@/lib/prisma";
 import { ensureLogin } from "@/lib/utils";
+import dayjs from "dayjs";
 
 export default async function provideExamSceneService(req, res) {
   await ensureLogin(req, res);
@@ -34,6 +35,24 @@ export default async function provideExamSceneService(req, res) {
   }
   const { status, spellings } = data;
   if ([ExamStatus.Completed, ExamStatus.Failed].includes(status)) {
+    res.status(200).json({
+      code: 0,
+      msg: "",
+      data,
+    });
+    return;
+  }
+  // is started
+  if (status === ExamStatus.Prepare) {
+    const data = await prisma.examScene.update({
+      where: {
+        id,
+      },
+      data: {
+        status: ExamStatus.Started,
+        begin_at: dayjs().unix(),
+      },
+    });
     res.status(200).json({
       code: 0,
       msg: "",

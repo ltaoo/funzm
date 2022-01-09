@@ -22,6 +22,9 @@ export default async function provideCaptionsService(
       publisherId: userId,
       ...search,
     },
+    sort: {
+      created_at: "desc",
+    },
   });
   const [list, total] = await prisma.$transaction([
     prisma.caption.findMany(params),

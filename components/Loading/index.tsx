@@ -1,3 +1,6 @@
+/**
+ * @file 弹窗
+ */
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 
@@ -18,10 +21,7 @@ const Loading = (props) => {
           }
         }}
       >
-        <div
-          className="min-h-screen text-center md:block md:px-2 lg:px-4"
-          style={{ fontSize: 0 }}
-        >
+        <div className="min-h-screen text-center">
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -31,7 +31,7 @@ const Loading = (props) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Dialog.Overlay className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            <Dialog.Overlay className="fixed inset-0 transition-opacity" />
           </Transition.Child>
           <span
             className="hidden md:inline-block md:align-middle md:h-screen"
@@ -48,9 +48,35 @@ const Loading = (props) => {
             leaveFrom="opacity-100 translate-y-0 md:scale-100"
             leaveTo="opacity-0 translate-y-4 md:translate-y-0 md:scale-95"
           >
-            <div className="absolute bottom-0 md:relative text-base text-left transform transition w-full md:inline-block md:max-w-2xl md:px-4 md:my-8 md:align-middle lg:max-w-4xl">
-              <div className="w-full relative items-center rounded-t-xl pt-4 bg-white dark:bg-black pb-8 overflow-hidden sm:px-6 sm:pt-8 md:p-6 md:rounded-md lg:p-8">
-                Loading
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="flex flex-column items-center justify-center py-8 px-6 bg-gray-500 bg-opacity-50 rounded">
+                <div className="inline-block text-center text-white">
+                  <div className="flex items-center justify-center">
+                    <svg
+                      version="1.1"
+                      x="0px"
+                      y="0px"
+                      width="40px"
+                      height="40px"
+                      viewBox="0 0 50 50"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M43.935,25.145c0-10.318-8.364-18.683-18.683-18.683c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615c8.072,0,14.615,6.543,14.615,14.615H43.935z"
+                      >
+                        <animateTransform
+                          attributeType="xml"
+                          attributeName="transform"
+                          type="rotate"
+                          from="0 25 25"
+                          to="360 25 25"
+                          dur="0.6s"
+                          repeatCount="indefinite"
+                        />
+                      </path>
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
           </Transition.Child>

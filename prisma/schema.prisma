@@ -186,6 +186,7 @@ model ExamScene {
   spellings       SpellingResult[]
 
   created_at      Int
+  begin_at        Int?
   ended_at        Int?
 
   @@map("exam_scenes")

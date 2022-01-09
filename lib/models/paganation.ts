@@ -5,16 +5,15 @@ export function paginationFactory(params): [any, (list, total: number) => any] {
 }
 
 export function paginationParams(params) {
-  const { page = 1, pageSize = 10, start, skip = 0, search } = params;
+  const { page = 1, pageSize = 10, sort, start, skip = 0, search } = params;
   const result: Prisma.ParagraphFindManyArgs = {
     where: search,
     skip: (page - 1) * pageSize + Number(skip),
     take: Number(pageSize),
-    orderBy: {
-      // @ts-ignore
-      created_at: "desc",
-    },
   };
+  if (sort) {
+    result.orderBy = sort;
+  }
   if (start) {
     result.cursor = {
       id: start as string,

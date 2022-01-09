@@ -3,6 +3,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Head from "next/head";
 
 import {
   ChevronRightIcon,
@@ -42,6 +43,9 @@ const UserProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      <Head>
+        <title>我的 - 趣字幕</title>
+      </Head>
       <div className="flex items-center px-4 py-8 pb-12 bg-green-500">
         <div className="w-16 h-16 rounded-full border-1"></div>
         <div className="">
@@ -84,6 +88,10 @@ const UserProfilePage = () => {
       </div> */}
       <div className="px-4">
         <div className="rounded shadow bg-white divide-y">
+          <div className="flex items-center justify-between p-4">
+            <div className="text-gray-800">我的笔记</div>
+            <ChevronRightIcon className="w-4 h-4 text-gray-300" />
+          </div>
           <div className="flex items-center justify-between p-4">
             <div className="text-gray-800">我的道具</div>
             <ChevronRightIcon className="w-4 h-4 text-gray-300" />

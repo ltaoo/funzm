@@ -28,7 +28,7 @@ const SimpleCaptionExamPage = () => {
     let startedExamScene = examScenesResponse.find((scene) =>
       [ExamStatus.Prepare, ExamStatus.Started].includes(scene.status)
     );
-    console.log('started', startedExamScene, examScenesResponse)
+    // console.log('started', startedExamScene, examScenesResponse)
     if (startedExamScene) {
       setStartedScene(startedExamScene);
       setExamScenes(
@@ -86,9 +86,9 @@ const SimpleCaptionExamPage = () => {
                   <div className="text-gray-300">{examStatusTexts[status]}</div>
                   {status === ExamStatus.Completed && <span>{score}</span>}
                 </div>
-                <div className="flex text-sm text-gray-300">
+                <div className="text-sm text-gray-300">
                   <div className="">{startedAt}</div>
-                  {endedAt && <div className="text-gray-300"> - {endedAt}</div>}
+                  {endedAt && <div className="text-gray-300">{endedAt}</div>}
                 </div>
               </div>
             );
