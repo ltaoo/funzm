@@ -4,14 +4,16 @@
 import React, { useCallback, useEffect, useState } from "react";
 import router from "next/router";
 
+import { LocationMarkerIcon, UploadIcon } from "@ltaoo/icons/outline";
+
 import Layout from "@/layouts";
+import { getSession } from "@/next-auth/client";
 import { parseCaptionContent } from "@/domains/caption";
 import CaptionCard from "@/components/CaptionCard";
 import CaptionUpload from "@/components/CaptionFileUpload";
+import FakeCaptionCard from "@/components/CaptionCard/sk";
 import { addCaptionService, fetchCaptionsService } from "@/services/caption";
 import { checkInService } from "@/services";
-import { LocationMarkerIcon, UploadIcon } from "@ltaoo/icons/outline";
-import { getSession } from "@/next-auth/client";
 
 const Dashboard = (props) => {
   const { user, dataSource = [] } = props;
@@ -40,7 +42,7 @@ const Dashboard = (props) => {
   if (user === null) {
     return (
       <div className="mx-auto w-40 mt-10 text-center">
-        <p className="">No Permission</p>
+        <p className="">您还未登录</p>
         <button
           className="mt-2"
           onClick={() => {
@@ -51,6 +53,18 @@ const Dashboard = (props) => {
         >
           前往登录
         </button>
+        <div>
+          <button
+            className="mt-2"
+            onClick={() => {
+              router.push({
+                pathname: "/",
+              });
+            }}
+          >
+            首页
+          </button>
+        </div>
       </div>
     );
   }
@@ -101,12 +115,21 @@ const Dashboard = (props) => {
         <main>
           <div className="mt-8 text-center text-gray-800">我的字幕</div>
           <div className="mt-2">
-            {/* content */}
             <div className="space-y-4 sm:grid md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
-              {captions.map((caption) => {
-                const { id } = caption;
-                return <CaptionCard key={id} {...caption} onDelete={refresh} />;
-              })}
+              {captions.length > 0 ? (
+                captions.map((caption) => {
+                  const { id } = caption;
+                  return (
+                    <CaptionCard key={id} {...caption} onDelete={refresh} />
+                  );
+                })
+              ) : (
+                <>
+                  <FakeCaptionCard />
+                  <FakeCaptionCard />
+                  <FakeCaptionCard />
+                </>
+              )}
             </div>
           </div>
         </main>

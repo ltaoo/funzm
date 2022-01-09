@@ -3,11 +3,9 @@
  */
 import { Fragment } from "react";
 import cx from "classnames";
-import Link from "next/link";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { BellIcon, LogoIcon, MenuIcon, XIcon } from "@ltaoo/icons/outline";
+import { LogoIcon, MenuIcon, XIcon } from "@ltaoo/icons/outline";
 
 import { signout, useSession } from "@/next-auth/client";
 
@@ -24,6 +22,9 @@ const userNavigation = [
     name: "退出登录",
     onClick: (router) => {
       signout();
+      router.push({
+        pathname: "/",
+      });
     },
   },
 ];

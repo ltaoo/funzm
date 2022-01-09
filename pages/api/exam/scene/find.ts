@@ -77,8 +77,7 @@ export default async function provideCurExamScene(
       id: start,
     },
     skip: 1,
-    take: 1,
-    // take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
+    take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
   });
   // console.log("[API]provideCurExamScene - next paragraphs", response);
   const remainingParagraphs = response;
@@ -90,7 +89,7 @@ export default async function provideCurExamScene(
     data: {
       captionId,
       examId,
-      start: response[0].id,
+      start: response[response.length - 1].id,
       created_at: dayjs().unix(),
     },
   });

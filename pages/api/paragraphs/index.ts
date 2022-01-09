@@ -1,22 +1,17 @@
-import { getSession } from "@/next-auth/client";
+/**
+ * @file 获取句子列表
+ */
+import { NextApiRequest, NextApiResponse } from "next";
+
 import prisma from "@/lib/prisma";
-import { Prisma } from ".prisma/client";
+import { ensureLogin } from "@/lib/utils";
+import { paginationFactory } from "@/lib/models/paganation";
 
-function paginationParams(params) {
-  const { page, pageSize, skip = 0 } = params;
-  return {
-    skip: (page - 1) * pageSize + Number(skip),
-    take: Number(pageSize),
-  };
-}
-
-export default async function fetchParagraphsAPI(req, res) {
-  const session = await getSession({ req });
-  //   console.log("fetchParagraphsAPI", session);
-  if (!session) {
-    res.status(200).json({ code: 401, msg: "请先登录", data: null });
-    return;
-  }
+export default async function provideFetchParagraphsService(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  await ensureLogin(req, res);
   const {
     query: { page = 1, pageSize = 10, start, skip, captionId },
   } = req;
@@ -26,32 +21,26 @@ export default async function fetchParagraphsAPI(req, res) {
       .json({ code: 100, msg: "必须指定要获取的句子所属字幕", data: null });
     return;
   }
-  const findManyParams = {
-    where: { captionId },
-    ...paginationParams({ page, pageSize, skip }),
-  } as Prisma.ParagraphFindManyArgs;
-  if (start) {
-    findManyParams.cursor = {
-      id: start,
-    };
-  }
-  const [total, result] = await prisma.$transaction([
+  const [findManyParams, getResult] = paginationFactory({
+    page,
+    pageSize,
+    start,
+    skip,
+    search: {
+      captionId,
+    },
+  });
+
+  const [total, list] = await prisma.$transaction([
     prisma.paragraph.count({
-      where: {
-        captionId,
-      },
+      where: findManyParams.where,
     }),
     prisma.paragraph.findMany(findManyParams),
   ]);
+
   res.status(200).json({
     code: 0,
     msg: "",
-    data: {
-      page: Number(page),
-      pageSize: Number(pageSize),
-      total,
-      isEnd: result.length < pageSize,
-      list: result,
-    },
+    data: getResult(list, total),
   });
 }

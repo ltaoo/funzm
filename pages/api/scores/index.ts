@@ -1,34 +1,38 @@
+/**
+ * @file 积分变更记录列表
+ */
+
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { getSession } from "@/next-auth/client";
 import prisma from "@/lib/prisma";
+import { ensureLogin } from "@/lib/utils";
+import { paginationFactory } from "@/lib/models/paganation";
 
 export default async function provideScoreRecordsService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const session = await getSession({ req });
-  if (!session) {
-    res.status(200).json({
-      code: 401,
-      msg: "please login",
-      data: null,
-    });
-    return;
-  }
-  const userId = session.userId as string;
-  const scoreRecords = await prisma.scoreRecord.findMany({
-    where: {
+  const userId = await ensureLogin(req, res);
+
+  const {
+    query: { page, pageSize },
+  } = req;
+  const [params, getResult] = paginationFactory({
+    page,
+    pageSize,
+    search: {
       userId,
     },
   });
+
+  const [list, total] = await prisma.$transaction([
+    prisma.scoreRecord.findMany(params),
+    prisma.scoreRecord.count({ where: params.where }),
+  ]);
+
   return res.status(200).json({
     code: 0,
     msg: "",
-    data: {
-      page: 1,
-      pageSize: 10,
-      list: scoreRecords,
-    },
+    data: getResult(list, total),
   });
 }

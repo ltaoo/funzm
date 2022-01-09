@@ -2,15 +2,15 @@
  * @file 用户详情
  */
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
-import { fetchScoreRecords, fetchUserProfileService } from "@/services";
-import { useSession } from "@/next-auth/client";
 import {
-  ArrowRightIcon,
   ChevronRightIcon,
   CurrencyYenIcon,
   ShoppingCartIcon,
 } from "@ltaoo/icons/outline";
+
+import { fetchScoreRecordsService, fetchUserProfileService } from "@/services";
 
 const UserProfilePage = () => {
   const [records, setRecords] = useState([]);
@@ -18,8 +18,10 @@ const UserProfilePage = () => {
   // const [session] = useSession();
   const [user, setUser] = useState(null);
 
+  const router = useRouter();
+
   const fetchScoreRecordsAndSet = useCallback(async () => {
-    const response = await fetchScoreRecords();
+    const response = await fetchScoreRecordsService();
     console.log(response);
   }, []);
   const fetchUserProfileAndSet = useCallback(async () => {
@@ -51,7 +53,14 @@ const UserProfilePage = () => {
       </div>
       <div className="relative flex top-[-30px] px-4 space-x-4">
         <div className="flex-1 overflow-hidden relative px-4 py-2 bg-white rounded shadow">
-          <div className="flex items-center justify-between text-gray-800">
+          <div
+            className="flex items-center justify-between text-gray-800"
+            onClick={() => {
+              router.push({
+                pathname: "/scores",
+              });
+            }}
+          >
             <div>
               <p className="text-xm text-gray-500">积分数</p>
               <p className="text-3xl">{user.score}</p>
@@ -103,7 +112,7 @@ const UserProfilePage = () => {
         </div>
       </div>
       <div className="mt-8 py-2 text-center text-gray-300">
-        copyright@funzm.com{" "}
+        copyright@funzm.com
       </div>
     </div>
   );

@@ -17,6 +17,6 @@ export function checkInService(): Promise<{ msg: string; score: number }> {
 /**
  * 获取积分记录
  */
-export function fetchScoreRecords() {
+export function fetchScoreRecordsService() {
   return request.get("/api/scores");
 }
