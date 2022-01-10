@@ -1,14 +1,105 @@
 /**
  * @file 字幕查看
  */
-import React from "react";
-import { CalendarIcon, UserIcon } from "@ltaoo/icons/outline";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  CalendarIcon,
+  MusicNoteIcon,
+  PencilIcon,
+  UserIcon,
+} from "@ltaoo/icons/outline";
 
 import { ICaptionValues } from "@/domains/caption/types";
 
 interface IProps extends ICaptionValues {}
 const CaptionPreview: React.FC<IProps> = (props) => {
   const { title, paragraphs = [], author = "unknown", createdAt } = props;
+
+  const [count, setCount] = useState(0);
+  const downPosRef = useRef<null | { x: number; y: number }>(null);
+  const upPosRef = useRef<null | { x: number; y: number }>(null);
+  const isMouseDownRef = useRef(false);
+  const isMouseMoveRef = useRef(false);
+  const highlightedNodeRef = useRef(null);
+
+  useEffect(() => {
+    const mouseDownHandler = (event) => {
+      const curTarget = event.target as HTMLElement;
+      upPosRef.current = null;
+      setCount((prev) => (prev += 1));
+      // console.log(curTarget);
+      if (curTarget.className.indexOf("text2") === -1) {
+        return;
+      }
+      // console.log(event);
+      const { x, y } = event;
+      downPosRef.current = {
+        x,
+        y,
+      };
+      isMouseDownRef.current = true;
+      highlightedNodeRef.current = curTarget;
+    };
+    document.addEventListener("mousedown", mouseDownHandler);
+
+    const mouseMoveHandler = (event) => {
+      if (isMouseDownRef.current) {
+        console.log("[LOG]is select words", isMouseDownRef.current);
+        isMouseMoveRef.current = true;
+      }
+    };
+    document.addEventListener("mousemove", mouseMoveHandler);
+
+    const mouseUpHandler = (event) => {
+      console.log("[]mouseUpHandler - start", isMouseMoveRef.current, event);
+      if (!isMouseMoveRef.current) {
+        return;
+      }
+      isMouseMoveRef.current = false;
+      isMouseDownRef.current = false;
+      const curTarget = event.target;
+      if (curTarget !== highlightedNodeRef.current) {
+        return;
+      }
+      const { x, y } = event;
+      console.log("[]mouseUpHandler - mouse pos is: ", x, y);
+
+      const { commonAncestorContainer, startOffset, endOffset } = window
+        .getSelection()
+        .getRangeAt(0);
+      const text = commonAncestorContainer.textContent.slice(
+        startOffset,
+        endOffset
+      );
+      const pNode =
+        commonAncestorContainer.nodeType === 1
+          ? commonAncestorContainer
+          : commonAncestorContainer.parentElement;
+      // console.dir(commonAncestorContainer);
+      // const textNodeOffsetTop = commonAncestorContainer.offsetTop;
+      // console.log("[]mouseUpHandler - selected words is: ", text);
+      // console.dir(pNode);
+      if (!text) {
+        return;
+      }
+      const posX = (x - downPosRef.current.x) / 2 + downPosRef.current.x;
+      // @ts-ignore
+      const posY = pNode.offsetTop;
+      console.log("[]mouseUpHandler - tooltip pos is:", posX, posY);
+      upPosRef.current = {
+        x: posX,
+        y: posY,
+      };
+      setCount((prev) => prev + 1);
+    };
+    document.addEventListener("mouseup", mouseUpHandler);
+
+    return () => {
+      document.removeEventListener("mousedown", mouseDownHandler);
+      document.removeEventListener("mousemove", mouseMoveHandler);
+      document.removeEventListener("mouseup", mouseUpHandler);
+    };
+  }, []);
 
   return (
     <div className="relative">
@@ -27,11 +118,28 @@ const CaptionPreview: React.FC<IProps> = (props) => {
           </div>
         </div>
       </div>
+      {upPosRef.current && (
+        <div
+          className="#tooltip inline absolute left-0 top-0"
+          style={{
+            transform: `translate(${upPosRef.current.x}px, ${upPosRef.current.y}px)`,
+          }}
+        >
+          <div className="#inner relative top-[-60px] inline-block shadow rounded bg-white transform -translate-x-2/4">
+            <div className="#arrow absolute left-[50%] bottom-[-8px] w-0 h-0" />
+            <button className="#btn flex items-center py-2 px-4 text-gray-500 space-x-2 cursor-pointer">
+              <PencilIcon className="w-4 h-4 text-gray-500" />
+              <span>笔记</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="mt-10 px-4 pb-20 space-y-6 md:mx-auto md:w-180 md:px-0">
         {paragraphs.map((caption) => {
           const { line, text1, text2 } = caption;
           return (
-            <div key={line}>
+            <div className="paragraph" key={line}>
               <p className="text1">{text1}</p>
               <p className="text2">{text2}</p>
             </div>
