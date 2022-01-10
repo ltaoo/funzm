@@ -196,7 +196,6 @@ export default function Header(props) {
                     >
                       <div
                         onClick={() => {
-                          console.log("click");
                           if (onClick) {
                             onClick(router);
                             return;

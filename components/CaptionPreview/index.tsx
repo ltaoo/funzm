@@ -21,14 +21,18 @@ const CaptionPreview: React.FC<IProps> = (props) => {
   const isMouseDownRef = useRef(false);
   const isMouseMoveRef = useRef(false);
   const highlightedNodeRef = useRef(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (contentRef.current === null) {
+      return;
+    }
     const mouseDownHandler = (event) => {
       const curTarget = event.target as HTMLElement;
       upPosRef.current = null;
       setCount((prev) => (prev += 1));
       // console.log(curTarget);
-      if (curTarget.className.indexOf("text2") === -1) {
+      if (curTarget.className?.indexOf("text2") === -1) {
         return;
       }
       // console.log(event);
@@ -40,7 +44,7 @@ const CaptionPreview: React.FC<IProps> = (props) => {
       isMouseDownRef.current = true;
       highlightedNodeRef.current = curTarget;
     };
-    document.addEventListener("mousedown", mouseDownHandler);
+    contentRef.current.addEventListener("mousedown", mouseDownHandler);
 
     const mouseMoveHandler = (event) => {
       if (isMouseDownRef.current) {
@@ -48,7 +52,7 @@ const CaptionPreview: React.FC<IProps> = (props) => {
         isMouseMoveRef.current = true;
       }
     };
-    document.addEventListener("mousemove", mouseMoveHandler);
+    contentRef.current.addEventListener("mousemove", mouseMoveHandler);
 
     const mouseUpHandler = (event) => {
       console.log("[]mouseUpHandler - start", isMouseMoveRef.current, event);
@@ -92,17 +96,20 @@ const CaptionPreview: React.FC<IProps> = (props) => {
       };
       setCount((prev) => prev + 1);
     };
-    document.addEventListener("mouseup", mouseUpHandler);
+    contentRef.current.addEventListener("mouseup", mouseUpHandler);
 
     return () => {
-      document.removeEventListener("mousedown", mouseDownHandler);
-      document.removeEventListener("mousemove", mouseMoveHandler);
-      document.removeEventListener("mouseup", mouseUpHandler);
+      if (contentRef.current === null) {
+        return;
+      }
+      contentRef.current.removeEventListener("mousedown", mouseDownHandler);
+      contentRef.current.removeEventListener("mousemove", mouseMoveHandler);
+      contentRef.current.removeEventListener("mouseup", mouseUpHandler);
     };
   }, []);
 
   return (
-    <div className="relative">
+    <div ref={contentRef} className="relative">
       <div className="py-10 px-4 bg-gray-100 border-b dark:bg-gray-800 dark:border-gray-600">
         <div className="mx-auto md:w-180">
           <h2 className="text-3xl break-all dark:text-gray-400">{title}</h2>
@@ -125,8 +132,8 @@ const CaptionPreview: React.FC<IProps> = (props) => {
             transform: `translate(${upPosRef.current.x}px, ${upPosRef.current.y}px)`,
           }}
         >
-          <div className="#inner relative top-[-60px] inline-block shadow rounded bg-white transform -translate-x-2/4">
-            <div className="#arrow absolute left-[50%] bottom-[-8px] w-0 h-0" />
+          <div className="#inner tooltip relative top-[-60px] inline-block rounded bg-white transform -translate-x-2/4">
+            <div className="#arrow absolute left-[50%] bottom-[-8px] w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-transparent border-t-white transform -translate-x-2/4" />
             <button className="#btn flex items-center py-2 px-4 text-gray-500 space-x-2 cursor-pointer">
               <PencilIcon className="w-4 h-4 text-gray-500" />
               <span>笔记</span>
