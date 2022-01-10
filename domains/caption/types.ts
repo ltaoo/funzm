@@ -1,3 +1,17 @@
+/**
+ * 字幕
+ */
+export interface ICaptionValues {
+  id: string;
+  title: string;
+  paragraphs: IParagraphValues[];
+  author: string;
+  createdAt: string;
+}
+
+/**
+ * 句子
+ */
 export interface IParagraphValues {
   id: string;
   line: number;

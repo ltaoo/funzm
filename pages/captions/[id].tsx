@@ -19,6 +19,10 @@ import {
 import debounce from "lodash.debounce";
 
 import * as themeToggle from "@/utils/dark";
+import { downloadTxt, downloadDocx, downloadPdf, sleep } from "@/utils";
+import { localdb } from "@/utils/db";
+import { parseLocalId } from "@/utils/db/utils";
+import { parseCaptionContent } from "@/domains/caption";
 import {
   deleteCaptionService,
   fetchCaptionWithoutParagraphsService,
@@ -26,12 +30,9 @@ import {
 } from "@/services/caption";
 import CaptionPreview from "@/components/CaptionPreview";
 import Drawer from "@/components/Drawer";
-import { parseCaptionContent } from "@/domains/caption";
-import { localdb } from "@/utils/db";
-import { parseLocalId } from "@/utils/db/utils";
 import IconWithTxt from "@/components/IconWithTxt";
-import { downloadTxt, downloadDocx, downloadPdf } from "@/utils";
-import { createExamService, fetchCurExamSceneByCaption } from "@/services/exam";
+import { fetchCurExamSceneByCaption } from "@/services/exam";
+import CaptionPreviewSkeleton from "@/components/CaptionPreview/skeleton";
 
 const CaptionPreviewPage = () => {
   const router = useRouter();
@@ -51,9 +52,8 @@ const CaptionPreviewPage = () => {
     idRef.current = id;
   }, [id]);
 
-  const fetchCaptionAndSave = useCallback(async (id) => {
+  const fetchCaptionAndSet = useCallback(async (id) => {
     const response = await fetchCaptionWithoutParagraphsService({ id });
-    setCaption(response);
     // @ts-ignore
     if (response.content) {
       const paragraphs = parseCaptionContent(
@@ -86,6 +86,7 @@ const CaptionPreviewPage = () => {
     loadingRef.current = false;
     pageRef.current += 1;
     totalRef.current = total;
+    setCaption(response);
     setParagraphs(paragraphs);
     return { isEnd, total };
   }, []);
@@ -125,7 +126,7 @@ const CaptionPreviewPage = () => {
         }
       }
     }, 400);
-    fetchCaptionAndSave(id).then(({ isEnd }) => {
+    fetchCaptionAndSet(id).then(({ isEnd }) => {
       if (isEnd) {
         return;
       }
@@ -137,50 +138,26 @@ const CaptionPreviewPage = () => {
     };
   }, []);
 
-  const prepareExam = useCallback(async () => {
+  const startExam = useCallback(async () => {
     const existing = await fetchCurExamSceneByCaption({
       captionId: idRef.current,
     });
-    if (existing) {
-      router.push({
-        // @ts-ignore
-        pathname: `/exam/simple/${existing.id}`,
-      });
-      return;
-    }
-    const suggestedSceneCount = Math.ceil(totalRef.current / 20);
-    console.log("句子总数", totalRef.current);
-    console.log("划分场景数", suggestedSceneCount);
-    console.log("开始测验");
-    // 新增多条场景记录
-    //
-    const exam = await createExamService({
-      captionId: idRef.current,
-      scenes: [
-        {
-          captionId: idRef.current,
-          paragraphId: paragraphs[0].id,
-        },
-      ],
-    });
-    // console.log(exam);
     router.push({
-      // @ts-ignore
-      pathname: `/exam/simple/${exam.scenes[0].id}`,
+      pathname: `/exam/simple/${existing.id}`,
     });
-  }, [paragraphs]);
+  }, []);
 
-  if (!caption) {
-    return null;
-  }
-  const { title } = caption;
   return (
-    <div className="h-full">
+    <div className="min-h-screen h-full">
       <Head>
-        <title>{title}</title>
+        <title>{caption?.title}</title>
       </Head>
       <div className="relative dark:bg-gray-800">
-        <CaptionPreview {...caption} paragraphs={paragraphs} />
+        {caption === null ? (
+          <CaptionPreviewSkeleton />
+        ) : (
+          <CaptionPreview {...caption} paragraphs={paragraphs} />
+        )}
         <div className="fixed bottom-40 right-0 hidden space-y-4 md:block">
           <div
             className="group flex items-center py-2 px-4 rounded-l-lg bg-gray-100 cursor-pointer hover:bg-gray-200"
@@ -210,7 +187,7 @@ const CaptionPreviewPage = () => {
         <div className="fixed bottom-12 right-0 hidden space-y-4 md:block">
           <div
             className="group flex items-center py-2 px-4 rounded-l-lg bg-gray-100 cursor-pointer hover:bg-gray-200"
-            onClick={prepareExam}
+            onClick={startExam}
           >
             <HomeIcon className="w-6 h-6 text-gray-400 group-hover:text-gray-800" />
           </div>
@@ -260,21 +237,21 @@ const CaptionPreviewPage = () => {
               icon={DocumentTxtIcon}
               txt="docx"
               onClick={() => {
-                downloadTxt({ title, paragraphs });
+                downloadTxt({ title: caption?.title, paragraphs });
               }}
             />
             <IconWithTxt
               icon={DocumentDocxIcon}
               txt="docx"
               onClick={() => {
-                downloadDocx({ title, paragraphs });
+                downloadDocx({ title: caption?.title, paragraphs });
               }}
             />
             <IconWithTxt
               icon={DocumentPdfIcon}
               txt="pdf"
               onClick={() => {
-                downloadPdf({ title, paragraphs });
+                downloadPdf({ title: caption?.title, paragraphs });
               }}
             />
           </div>
