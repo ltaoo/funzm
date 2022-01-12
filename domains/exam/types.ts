@@ -63,6 +63,7 @@ export interface IExamSceneValues {
   correctParagraphs: IParagraphValues[];
   incorrectParagraphs: IParagraphValues[];
   skippedParagraphs: IParagraphValues[];
+  remainingParagraphs: IParagraphValues[];
 
   startedAt: string;
   endedAt: string;

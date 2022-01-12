@@ -21,6 +21,9 @@ export function partialExamSceneRes2Values(res): IPartialExamSceneValues {
   };
 }
 
+/**
+ * 简单测验场景响应值 转 实例值
+ */
 export function examSceneRes2Ins(res): IExamSceneValues {
   const {
     id,
@@ -34,15 +37,26 @@ export function examSceneRes2Ins(res): IExamSceneValues {
     created_at,
     ended_at,
   } = res;
-  const skippedSpellings = spellings.filter(
-    (spelling) => spelling.type === SpellingResultType.Skipped
-  );
-  const correctSpellings = spellings.filter(
-    (spelling) => spelling.type === SpellingResultType.Correct
-  );
-  const incorrectSpellings = spellings.filter(
-    (spelling) => spelling.type === SpellingResultType.Incorrect
-  );
+  const skippedSpellings = [];
+  const correctSpellings = [];
+  const incorrectSpellings = [];
+  const remainingParagraphs = [];
+  for (let i = 0; i < spellings.length; i += 1) {
+    const { type } = spellings[i];
+    if (type === SpellingResultType.Skipped) {
+      skippedSpellings.push(spellings[i]);
+      continue;
+    }
+    if (type === SpellingResultType.Correct) {
+      correctSpellings.push(spellings[i]);
+      continue;
+    }
+    if (type === SpellingResultType.Incorrect) {
+      incorrectSpellings.push(spellings[i]);
+      continue;
+    }
+    remainingParagraphs.push(spellings[i].paragraph);
+  }
   const correctRate =
     correctSpellings.length === 0
       ? 0
@@ -65,6 +79,7 @@ export function examSceneRes2Ins(res): IExamSceneValues {
     correctSpellings,
     incorrectSpellings,
     skippedSpellings,
+    remainingParagraphs,
 
     incorrectParagraphs: incorrectSpellings.map(
       (spelling) => spelling.paragraph

@@ -1,7 +1,7 @@
 /**
  * @file 低难度字幕测验结果
  */
-import { useRef, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import cx from "classnames";
 import { useRouter } from "next/router";
 
@@ -148,6 +148,24 @@ const SimpleCaptionExamPage = () => {
                   id,
                   paragraph: { text2 },
                 } = spelling;
+                return (
+                  <div key={id} className="p-4 shadow bg-white">
+                    <div className="text-gray-800 text-lg">{text2}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {examScene.skippedSpellings.length !== 0 && (
+          <div className="mt-6 py-4 text-left">
+            <div className="text-xl text-gray-800">剩余句子</div>
+            <div className="mt-2 space-y-4">
+              {examScene.remainingParagraphs.map((paragraph) => {
+                const {
+                  id,
+                  text2
+                } = paragraph;
                 return (
                   <div key={id} className="p-4 shadow bg-white">
                     <div className="text-gray-800 text-lg">{text2}</div>
