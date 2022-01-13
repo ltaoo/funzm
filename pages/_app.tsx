@@ -1,12 +1,16 @@
 import { useEffect } from "react";
 import { AppProps } from "next/app";
 import Script from "next/script";
+import dayjs from "dayjs";
+import zhCN from 'dayjs/locale/zh-cn';
 
 import { getSession, Provider } from "@/next-auth/client";
 
 import "windi.css";
 
 import "../styles/global.css";
+
+dayjs.locale('zh-CN', zhCN);
 
 //   window.addEventListener("unhandledrejection", (err) => {
 //     if (err.reason.code !== undefined) {

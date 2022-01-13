@@ -3,7 +3,7 @@
  */
 
 import { ExamStatus } from "@/domains/exam/constants";
-import { IExamSceneDomain, IExamSceneValues } from "@/domains/exam/types";
+import { IExamSceneValues } from "@/domains/exam/types";
 
 interface IProps {
   data: IExamSceneValues;

@@ -121,7 +121,7 @@ model Paragraph {
   captionId    String   @map("caption_id")
   caption      Caption  @relation(fields: [captionId], references: [id], onDelete: Cascade)
 
-  // examScenes   ExamScene[]
+  examScenes   ExamScene[]
   // 该段落被拼写（正确、错误、跳过）的记录
   spellings    SpellingResult[]
   // 该段落有哪些单词被记录进单词本
@@ -179,7 +179,7 @@ model ExamScene {
   exam            Exam?     @relation(fields: [examId], references: [id])
 
   start           String    
-  // startParagraph  Paragraph @relation(fields: [start], references: [id])
+  startParagraph  Paragraph @relation(fields: [start], references: [id])
 
   score           Int?      @default(0)
 

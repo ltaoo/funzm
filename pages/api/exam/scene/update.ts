@@ -30,7 +30,7 @@ export default async function provideUpdateExamSceneService(
     },
   });
 
-  const { spellings, created_at } = data;
+  const { spellings, created_at, begin_at } = data;
   const correctSpellings = spellings.filter(
     (spelling) => spelling.type === SpellingResultType.Correct
   );
@@ -45,7 +45,7 @@ export default async function provideUpdateExamSceneService(
     if (status === ExamStatus.Completed) {
       return computeScoreByStats({
         total: spellings.length,
-        seconds: now.clone().unix() - created_at,
+        seconds: now.clone().unix() - (begin_at || created_at),
         correct: correctSpellings.length,
         incorrect: incorrectSpellings.length,
         correctRate: (correctSpellings.length / spellings.length) * 100,

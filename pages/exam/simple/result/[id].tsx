@@ -157,7 +157,7 @@ const SimpleCaptionExamPage = () => {
             </div>
           </div>
         )}
-        {examScene.skippedSpellings.length !== 0 && (
+        {examScene.remainingParagraphs.length !== 0 && (
           <div className="mt-6 py-4 text-left">
             <div className="text-xl text-gray-800">剩余句子</div>
             <div className="mt-2 space-y-4">

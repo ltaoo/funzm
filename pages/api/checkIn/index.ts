@@ -2,31 +2,20 @@
  * @file 签到
  */
 import { NextApiRequest, NextApiResponse } from "next";
+import dayjs from "dayjs";
 
 import { getSession } from "@/next-auth/client";
 import prisma from "@/lib/prisma";
-import dayjs from "dayjs";
 import { addScore } from "@/lib/models/score";
+
 import { ScoreType } from "@/domains/exam/constants";
+import { rewardPerDay, extraRewardForSpecialDay } from './constants';
 
-enum RandomPrize {
-  Chape = 1,
-  Normal = 2,
-}
-// 6+10+20+30+42= 108
-// skip card 3
-// tip  card 5
-//                          3*2 + 5*2                      3*8 + 5*8
-const signRewards = [10, 20, 40, 50, 80, 100, 120];
-
-function getScoreBySignDates(dates, curDay) {
-  if ([2, 6].includes(curDay)) {
-    if (dates.length === curDay - 1) {
-      return signRewards[curDay];
-    }
-    return null;
+function getRewardByCheckInDay(day) {
+  if (rewardPerDay[day]) {
+    return rewardPerDay[day];
   }
-  return signRewards[curDay];
+  return 0;
 }
 
 export default async function provideCheckInService(
@@ -66,38 +55,24 @@ export default async function provideCheckInService(
       created_at: current.clone().unix(),
     },
   });
-  const scoreReward = getScoreBySignDates(signDates, currentDay);
+  const reward = getRewardByCheckInDay(currentDay);
   // score reward
-  if (typeof scoreReward === "number") {
+  if (reward) {
     await addScore(userId, {
-      value: scoreReward,
+      value: reward,
       type: ScoreType.Increment,
       desc: `${current.format("YYYY-MM-DD")} 签到`,
       createdAt: current.clone().unix(),
     });
-  } else if (scoreReward === RandomPrize.Chape) {
-    // get one skip card
-  } else if (scoreReward === RandomPrize.Normal) {
-    // get tip card
   }
   res.status(200).json({
     code: 0,
-    msg: "sign success",
+    msg: "",
     data: (() => {
-      if (typeof scoreReward === "number") {
+      if (reward) {
         return {
-          msg: `积分 ${scoreReward}`,
-          value: scoreReward,
-        };
-      }
-      if (scoreReward === RandomPrize.Chape) {
-        return {
-          msg: "skip card",
-        };
-      }
-      if (scoreReward === RandomPrize.Normal) {
-        return {
-          msg: "tip card",
+          msg: reward.text(),
+          value: reward.num,
         };
       }
     })(),

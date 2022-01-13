@@ -1,7 +1,11 @@
 import dayjs from "dayjs";
 
 import { SpellingResultType } from "./constants";
-import { IExamSceneValues, IPartialExamSceneValues } from "./types";
+import {
+  IExamSceneRes,
+  IExamSceneValues,
+  IPartialExamSceneValues,
+} from "./types";
 import { paddingZero, removeZeroAtTail } from "./utils";
 
 export function partialExamSceneRes2Values(res): IPartialExamSceneValues {
@@ -24,7 +28,7 @@ export function partialExamSceneRes2Values(res): IPartialExamSceneValues {
 /**
  * 简单测验场景响应值 转 实例值
  */
-export function examSceneRes2Ins(res): IExamSceneValues {
+export function examSceneRes2Ins(res: IExamSceneRes): IExamSceneValues {
   const {
     id,
     examId,
@@ -33,14 +37,15 @@ export function examSceneRes2Ins(res): IExamSceneValues {
     start,
     cur,
     spellings,
+    paragraphs,
     score,
     created_at,
+    begin_at = created_at,
     ended_at,
   } = res;
   const skippedSpellings = [];
   const correctSpellings = [];
   const incorrectSpellings = [];
-  const remainingParagraphs = [];
   for (let i = 0; i < spellings.length; i += 1) {
     const { type } = spellings[i];
     if (type === SpellingResultType.Skipped) {
@@ -55,8 +60,14 @@ export function examSceneRes2Ins(res): IExamSceneValues {
       incorrectSpellings.push(spellings[i]);
       continue;
     }
-    remainingParagraphs.push(spellings[i].paragraph);
   }
+  const spellingParagraphIds = spellings.map(
+    (spelling) => spelling.paragraphId
+  );
+  const remainingParagraphs = paragraphs.filter((paragraph) => {
+    const { id } = paragraph;
+    return !spellingParagraphIds.includes(id);
+  });
   const correctRate =
     correctSpellings.length === 0
       ? 0
@@ -87,7 +98,7 @@ export function examSceneRes2Ins(res): IExamSceneValues {
     correctParagraphs: correctSpellings.map((spelling) => spelling.paragraph),
     skippedParagraphs: skippedSpellings.map((spelling) => spelling.paragraph),
 
-    startedAt: dayjs(created_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
+    startedAt: dayjs(begin_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
     endedAt: dayjs(ended_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
     score,
 
@@ -99,12 +110,12 @@ export function examSceneRes2Ins(res): IExamSceneValues {
       correctRate,
       correctRateText: `${correctRate}%`,
 
-      createdAt: dayjs(created_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
+      createdAt: dayjs(begin_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
       endAt: dayjs(ended_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
       spend: (() => {
         if (ended_at) {
           const spendSeconds =
-            dayjs(ended_at * 1000).unix() - dayjs(created_at * 1000).unix();
+            dayjs(ended_at * 1000).unix() - dayjs(begin_at * 1000).unix();
           const remainingSeconds = spendSeconds % 60;
           const spendMinutes = ((spendSeconds - remainingSeconds) / 60).toFixed(
             0

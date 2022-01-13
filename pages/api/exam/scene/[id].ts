@@ -1,7 +1,7 @@
 /**
- * @file 根据 id 获取指定字幕
+ * @file 根据 id 获取指定测验详情（结果）
  */
-import { ExamStatus } from "@/domains/exam/constants";
+import { ExamStatus, PARAGRAPH_COUNT_PER_EXAM_SCENE } from "@/domains/exam/constants";
 import prisma from "@/lib/prisma";
 import { ensureLogin } from "@/lib/utils";
 import dayjs from "dayjs";
@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 export default async function provideExamSceneService(req, res) {
   await ensureLogin(req, res);
   const { query } = req;
-  const { id, profile } = query as { id: string; profile: string };
+  const { id } = query as { id: string; profile: string };
   const data = await prisma.examScene.findUnique({
     where: {
       id,
@@ -33,12 +33,24 @@ export default async function provideExamSceneService(req, res) {
     });
     return;
   }
-  const { status, spellings } = data;
+  const { captionId, start, status, spellings } = data;
+  const paragraphs = await prisma.paragraph.findMany({
+    where: {
+      captionId,
+    },
+    cursor: {
+      id: start,
+    },
+    take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
+  });
   if ([ExamStatus.Completed, ExamStatus.Failed].includes(status)) {
     res.status(200).json({
       code: 0,
       msg: "",
-      data,
+      data: {
+        ...data,
+        paragraphs,
+      },
     });
     return;
   }
@@ -56,7 +68,10 @@ export default async function provideExamSceneService(req, res) {
     res.status(200).json({
       code: 0,
       msg: "",
-      data,
+      data: {
+        ...data,
+        paragraphs,
+      },
     });
     return;
   }
@@ -68,6 +83,7 @@ export default async function provideExamSceneService(req, res) {
     data: {
       ...data,
       cur: lastOne?.paragraphId,
+      paragraphs,
     },
   });
 }

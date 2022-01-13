@@ -45,6 +45,25 @@ export interface IExamSceneDomain {
     spend: null | string;
   };
 }
+
+export interface IExamSceneRes {
+  id: string;
+  examId: string;
+  captionId: string;
+  status: ExamStatus;
+  start: string;
+  cur?: string;
+  spellings: {
+    id: string;
+    type: SpellingResultType;
+    paragraphId: string;
+  }[];
+  paragraphs: IParagraphValues[];
+  score: number;
+  created_at: number;
+  begin_at?: number;
+  ended_at?: number;
+}
 export interface IExamSceneValues {
   id: string;
   examId: string;

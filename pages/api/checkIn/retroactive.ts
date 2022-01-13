@@ -3,9 +3,14 @@
  */
 import { NextApiRequest, NextApiResponse } from "next";
 import dayjs from "dayjs";
+import zhCN from 'dayjs/locale/zh-cn';
 
 import { ensureLogin } from "@/lib/utils";
 import prisma from "@/lib/prisma";
+
+import { fillMissingCheckInDays } from "./utils";
+
+dayjs.locale('zh-CN', zhCN);
 
 export default async function provideRetroactiveService(
   req: NextApiRequest,
@@ -16,6 +21,7 @@ export default async function provideRetroactiveService(
   const day = Number(req.query.day);
   const today = dayjs();
   const todayDay = today.clone().day();
+  const firstDay = today.startOf("week");
 
   if (Number.isNaN(day) || day < 1 || day > 7) {
     res.status(200).json({
@@ -34,9 +40,6 @@ export default async function provideRetroactiveService(
     return;
   }
 
-  const firstDay = today.clone().day(1);
-  const lastDay = today.clone().day(6).subtract(1, "day");
-
   const checkInRecordsBetweenThisWeeks = await prisma.signRecord.findMany({
     where: {
       userId,
@@ -46,32 +49,10 @@ export default async function provideRetroactiveService(
       },
     },
   });
-  const records = checkInRecordsBetweenThisWeeks.map((record) => {
-    const { day } = record;
-    return {
-      day,
-      hasCheckIn: true,
-      expired: false,
-      canCheckIn: false,
-    };
-  });
+  
+  const days = fillMissingCheckInDays(checkInRecordsBetweenThisWeeks, todayDay);
 
-  for (let i = 1; i <= 7; i += 1) {
-    const theDayHasCheckIn = records.find((record) => record.day === i);
-    if (theDayHasCheckIn === undefined) {
-      records.push({
-        day: i,
-        hasCheckIn: false,
-        expired: i < todayDay,
-        canCheckIn: i === todayDay,
-      });
-    }
-  }
-  const result = records.sort((a, b) => {
-    return a.day - b.day;
-  });
-
-  const theDayWantToRetroactiveTo = result.find((record) => record.day === day);
+  const theDayWantToRetroactiveTo = days.find((record) => record.day === day);
   if (theDayWantToRetroactiveTo === undefined) {
     res.status(200).json({
       code: 1200,
@@ -101,7 +82,7 @@ export default async function provideRetroactiveService(
 
   res.status(200).json({
     code: 0,
-    msg: "",
+    msg: "签到成功",
     data: null,
   });
 }
