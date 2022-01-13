@@ -1,47 +1,45 @@
-import { NextApiRequest, NextApiResponse } from "next";
-
-import { getSession } from "@/next-auth/client";
-import prisma from "@/lib/prisma";
-
 /**
  * @file 删除句子
  */
+import { NextApiRequest, NextApiResponse } from "next";
+
+import prisma from "@/lib/prisma";
+import { ensureLogin } from "@/lib/utils";
 export default async function provideParagraphDeletingService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const session = await getSession({ req });
-  if (!session) {
-    return;
-  }
-  const userId = session.user?.id as string;
+  const userId = await ensureLogin(req, res);
   const { query } = req;
-  const id = query.id as string;
+  const { id } = query as { id: string };
 
   const theParagraphPrepareDeleted = await prisma.paragraph.findUnique({
     where: { id },
   });
   if (!theParagraphPrepareDeleted) {
-    res.status(200).json({ code: 100, msg: "要删除的句子不存在", data: null });
+    res.status(200).json({ code: 100, msg: "句子不存在", data: null });
     return;
   }
   const owner = await prisma.caption.findUnique({
     where: {
-      id: theParagraphPrepareDeleted.captionId,
+      id: theParagraphPrepareDeleted.caption_id,
     },
   });
   if (!owner) {
-    res.status(200).json({ code: 100, msg: "要删除的句子不存在", data: null });
+    res.status(200).json({ code: 100, msg: "句子不存在", data: null });
     return;
   }
-  if (owner.publisherId !== userId) {
-    res.status(200).json({ code: 100, msg: "不能删除别人的句子", data: null });
+  if (owner.publisher_id !== userId) {
+    res.status(200).json({ code: 100, msg: "操作失败", data: null });
     return;
   }
 
-  await prisma.paragraph.delete({
+  await prisma.paragraph.update({
     where: {
       id,
+    },
+    data: {
+      deleted: true,
     },
   });
 

@@ -1,3 +1,6 @@
+/**
+ * @file 获取当前未开始/已开始的测验
+ */
 import { NextApiRequest, NextApiResponse } from "next";
 import dayjs from "dayjs";
 
@@ -8,50 +11,39 @@ import {
   PARAGRAPH_COUNT_PER_EXAM_SCENE,
 } from "@/domains/exam/constants";
 
-export default async function provideCurExamScene(
+export default async function provideCurExamSceneService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  console.log('[LOG]provideCurExamSceneService');
   const userId = await ensureLogin(req, res);
-  const captionId = req.query.captionId as string;
+
+  const { captionId } = req.query as { captionId: string };
   const initialized = await prisma.examScene.findFirst({
     where: {
-      captionId: captionId as string,
-      // status: ExamStatus.Started
+      caption_id: captionId,
     },
-    take: -1,
   });
+  console.log('[LOG]provideCurExamSceneService - check has initialize', initialized);
   if (!initialized) {
     const firstParagraph = await prisma.paragraph.findFirst({
       where: {
-        captionId,
+        caption_id: captionId,
+        deleted: false,
       },
     });
-    const theNewOne = await prisma.exam.create({
+    const created = await prisma.examScene.create({
       data: {
-        userId,
-        captionId,
-        scenes: {
-          create: [
-            {
-              captionId,
-              start: firstParagraph.id,
-              created_at: dayjs().unix(),
-            },
-          ],
-        },
+        user_id: userId,
+        caption_id: captionId,
+        start_id: firstParagraph.id,
         created_at: dayjs().unix(),
       },
-      include: {
-        scenes: true,
-      },
     });
-    const { scenes } = theNewOne;
-    res.status(200).json({ code: 0, msg: "", data: scenes[0] });
+    res.status(200).json({ code: 0, msg: "", data: created });
     return;
   }
-  const { id, status, examId, start } = initialized;
-  console.log("[API]provideCurExamScene", id, status, start);
+  const { status, start_id } = initialized;
   if ([ExamStatus.Prepare, ExamStatus.Started].includes(status)) {
     res.status(200).json({ code: 0, msg: "", data: initialized });
     return;
@@ -59,9 +51,9 @@ export default async function provideCurExamScene(
   if ([ExamStatus.Failed].includes(status)) {
     const data = await prisma.examScene.create({
       data: {
-        captionId,
-        examId,
-        start,
+        caption_id: captionId,
+        user_id: userId,
+        start_id,
         created_at: dayjs().unix(),
       },
     });
@@ -71,14 +63,16 @@ export default async function provideCurExamScene(
   // create a new exam scene
   const response = await prisma.paragraph.findMany({
     where: {
-      captionId,
+      caption_id: captionId,
+      deleted: false,
     },
     cursor: {
-      id: start,
+      id: start_id,
     },
     skip: 1,
     take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
   });
+  console.log('[LOG]search paragraph for create a new scene', start_id, response[response.length - 1]);
   // console.log("[API]provideCurExamScene - next paragraphs", response);
   const remainingParagraphs = response;
   if (remainingParagraphs.length === 0) {
@@ -87,9 +81,9 @@ export default async function provideCurExamScene(
   }
   const createdNewExamScene = await prisma.examScene.create({
     data: {
-      captionId,
-      examId,
-      start: response[response.length - 1].id,
+      caption_id: captionId,
+      user_id: userId,
+      start_id: response[response.length - 1].id,
       created_at: dayjs().unix(),
     },
   });

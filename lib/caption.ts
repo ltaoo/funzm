@@ -23,8 +23,7 @@ export async function fetchCaptionsServer(
   }
   return prisma.caption.findMany({
     where: {
-      // @ts-ignore
-      publisherId: extra?.id,
+      publisher_id: extra?.id,
     },
     take: params?.pageSize ?? 5,
   });
@@ -41,52 +40,11 @@ export async function addCaptionService({ title, paragraphs, publisherId }) {
       paragraphs: {
         create: paragraphs,
       },
-      publisherId,
+      publisher_id: publisherId,
       created_at: utils.seconds(),
       last_updated: null,
     },
   });
-}
-
-/**
- * 根据 id 获取指定字幕
- * @param {string} id - 字幕 id
- * @param {boolean} paragraph - 是否包含句子
- */
-export async function fetchCaptionById({ id, paragraph }) {
-  const countTask = !paragraph
-    ? prisma.paragraph.count({
-        where: {
-          captionId: id,
-        },
-      })
-    : undefined;
-  const result = await prisma.$transaction(
-    [
-      countTask,
-      prisma.caption.findUnique({
-        where: {
-          id,
-        },
-        include: {
-          paragraphs: paragraph,
-          // @ts-ignore
-          exams: true,
-        },
-      }),
-    ].filter(Boolean)
-  );
-  if (result.length === 1) {
-    const { paragraphs } = result[0] as Caption & { paragraphs: Paragraph[] };
-    return {
-      ...(result[0] as Caption),
-      count: paragraphs.length,
-    };
-  }
-  return {
-    ...(result[1] as Caption),
-    count: result[0],
-  };
 }
 
 /**

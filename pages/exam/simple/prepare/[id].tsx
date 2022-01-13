@@ -1,5 +1,5 @@
 /**
- * @file 低难度字幕预备
+ * @file 低难度字幕测验预备
  */
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
@@ -20,8 +20,8 @@ const SimpleCaptionExamPage = () => {
   const [startedScene, setStartedScene] =
     useState<IPartialExamSceneValues>(null);
 
+  const id = router.query.id as string;
   const init = useCallback(async () => {
-    const id = router.query.id as string;
     console.log("[PAGE]exam/simple/prepare/[id] - init", id);
     const examScenesResponse = await fetchExamScenesByCaptionService({ id });
 
@@ -48,7 +48,7 @@ const SimpleCaptionExamPage = () => {
     init();
   }, []);
 
-  console.log("[PAGE]exam/simple/[id] - render", examScenes);
+  // console.log("[PAGE]exam/simple/[id] - render", examScenes);
 
   if (examScenes === null) {
     return null;
@@ -59,12 +59,7 @@ const SimpleCaptionExamPage = () => {
       <div className="bg-gray-100">
         <Link href={`/exam/simple/${startedScene.id}`}>
           <div className="py-4 text-center text-xl rounded bg-white cursor-pointer shadow">
-            {startedScene.start}
-          </div>
-        </Link>
-        <Link href={`/captions/${startedScene.captionId}`}>
-          <div className="mt-4 py-4 text-center text-xl rounded bg-white cursor-pointer shadow">
-            复习
+            {startedScene.start.text2}
           </div>
         </Link>
         <div className="mt-8 text-gray-800">历史({examScenes.length})</div>
@@ -81,7 +76,7 @@ const SimpleCaptionExamPage = () => {
                   });
                 }}
               >
-                <div className="text-gray-300">{start}</div>
+                <div className="text-gray-300">{start.text2}</div>
                 <div className="flex justify-between items-center mt-2">
                   <div className="text-gray-300">{examStatusTexts[status]}</div>
                   {status === ExamStatus.Completed && <span>{score}</span>}

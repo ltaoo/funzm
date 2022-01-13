@@ -22,16 +22,16 @@ const CaptionPreviewSkeleton = () => {
       <div className="mt-10 px-4 pb-20 space-y-6 md:mx-auto md:w-180 md:px-0">
         <div className="space-y-1">
           <p className="text1 w-48 h-6 bg-gray-100"></p>
-          <p className="text2 h-8 bg-gray-200"></p>
+          <p className="text2 h-8 bg-gray-100"></p>
         </div>
         <div className="space-y-1">
           <p className="text1 w-12 h-6 bg-gray-100"></p>
-          <p className="text2 w-20 h-8 bg-gray-200"></p>
+          <p className="text2 w-20 h-8 bg-gray-100"></p>
         </div>
         <div className="space-y-1">
           <p className="text1 h-6 bg-gray-100"></p>
-          <p className="text2 h-8 bg-gray-200"></p>
-          <p className="text2 w-60 h-8 bg-gray-200"></p>
+          <p className="text2 h-8 bg-gray-100"></p>
+          <p className="text2 w-60 h-8 bg-gray-100"></p>
         </div>
       </div>
     </div>

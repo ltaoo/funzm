@@ -31,10 +31,10 @@ export function partialExamSceneRes2Values(res): IPartialExamSceneValues {
 export function examSceneRes2Ins(res: IExamSceneRes): IExamSceneValues {
   const {
     id,
-    examId,
-    captionId,
+    caption_id,
     status,
     start,
+    start_id,
     cur,
     spellings,
     paragraphs,
@@ -62,7 +62,7 @@ export function examSceneRes2Ins(res: IExamSceneRes): IExamSceneValues {
     }
   }
   const spellingParagraphIds = spellings.map(
-    (spelling) => spelling.paragraphId
+    (spelling) => spelling.paragraph_id
   );
   const remainingParagraphs = paragraphs.filter((paragraph) => {
     const { id } = paragraph;
@@ -80,10 +80,10 @@ export function examSceneRes2Ins(res: IExamSceneRes): IExamSceneValues {
   return {
     id,
 
-    examId,
-    captionId,
+    captionId: caption_id,
 
     start,
+    startId: start_id,
     cur,
 
     status,

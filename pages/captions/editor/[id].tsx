@@ -14,11 +14,13 @@ import {
   fetchCaptionWithoutParagraphsService,
   fetchParagraphsService,
   updateParagraphService,
+  recoverParagraphService,
 } from "@/services/caption";
 import { parseCaptionContent } from "@/domains/caption";
 import { localdb } from "@/utils/db";
 import { parseLocalId } from "@/utils/db/utils";
 import { splitMergedParagraphs } from "@/domains/caption/utils";
+import FixedFooter from "@/components/FixedFooter";
 
 const CaptionEditorPage = () => {
   const router = useRouter();
@@ -28,6 +30,9 @@ const CaptionEditorPage = () => {
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
   const totalRef = useRef(0);
+
+  const prevParagraphsRef = useRef(null);
+  const [deletedParagraphId, setDeletedParagraphsId] = useState(null);
 
   const id = parseLocalId(router.query.id) as string;
   const idRef = useRef(id);
@@ -76,7 +81,7 @@ const CaptionEditorPage = () => {
   }, []);
 
   useEffect(() => {
-    const handler = debounce(async (event) => {
+    const handler = debounce(async () => {
       if (
         document.documentElement.scrollTop +
           document.documentElement.clientHeight +
@@ -129,7 +134,6 @@ const CaptionEditorPage = () => {
         return;
       }
       await updateCaptionService({ id, title: nextTitle });
-      alert("更新成功");
     },
     [caption]
   );
@@ -141,7 +145,6 @@ const CaptionEditorPage = () => {
         return;
       }
       await updateParagraphService({ id, text1: nextText1 });
-      alert("更新成功");
     };
   }, []);
   const updateText2 = useCallback(
@@ -153,7 +156,6 @@ const CaptionEditorPage = () => {
           return;
         }
         await updateParagraphService({ id, text2: nextText2 });
-        alert("更新成功");
       };
     },
     [paragraphs]
@@ -167,12 +169,22 @@ const CaptionEditorPage = () => {
         const nextParagraphs = paragraphs.filter((paragraph) => {
           return paragraph.id !== deletedLine.id;
         });
+        prevParagraphsRef.current = paragraphs;
         setParagraphs(nextParagraphs);
         await deleteParagraphService({ id: deletedLine.id });
+        setDeletedParagraphsId(deletedLine.id);
       };
     },
     [caption, paragraphs]
   );
+  const recoverDeletedParagraph = useCallback(async () => {
+    await recoverParagraphService({ id: deletedParagraphId });
+    setDeletedParagraphsId(null);
+    if (prevParagraphsRef.current) {
+      setParagraphs(prevParagraphsRef.current);
+      prevParagraphsRef.current = null;
+    }
+  }, [deletedParagraphId]);
 
   const splitMergedLines = useCallback(
     (mergedLine) => {
@@ -289,6 +301,11 @@ const CaptionEditorPage = () => {
           <CogIcon className="w-6 h-6 text-gray-400 group-hover:text-gray-800" />
         </div>
       </div>
+      {deletedParagraphId && (
+        <FixedFooter>
+          <div onClick={recoverDeletedParagraph}>撤销删除</div>
+        </FixedFooter>
+      )}
     </div>
   );
 };

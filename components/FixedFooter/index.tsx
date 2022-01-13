@@ -3,21 +3,10 @@
  */
 
 const FixedFooter = (props) => {
-  const { dataSource } = props;
+  const { children } = props;
   return (
-    <div className="flex justify-end sticky bottom-0 py-4 px-4 bg-white dark:bg-black space-x-2 border-t-1 dark:border-gray-800">
-      {dataSource.map((menu) => {
-        const { id, text, onClick } = menu;
-        return (
-          <p
-            key={id}
-            className="text-base text-sm cursor-pointer text-black dark:text-white"
-            onClick={onClick}
-          >
-            {text}
-          </p>
-        );
-      })}
+    <div className="flex justify-end sticky bottom-0 min-h-16 py-4 px-4 bg-white space-x-2 border-t-1 dark:bg-black dark:border-gray-800">
+      {children}
     </div>
   );
 };

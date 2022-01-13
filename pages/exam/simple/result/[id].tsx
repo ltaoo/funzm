@@ -51,11 +51,10 @@ const SimpleCaptionExamPage = () => {
       alert("异常操作，请等待页面加载完成");
       return;
     }
-    const { examId, captionId, start } = examScene;
+    const { captionId, startId } = examScene;
     const { id } = await createExamSceneService({
       captionId,
-      examId,
-      start,
+      start: startId,
     });
     router.push({
       pathname: `/exam/simple/${id}`,

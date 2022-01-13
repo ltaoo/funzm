@@ -39,7 +39,7 @@ const SimpleCaptionExamPage = () => {
     const id = router.query.id as string;
     // console.log("[PAGE]exam/simple/[id] - init", id);
     const res = await fetchExamSceneService({ id });
-    const { examId, captionId, status, start, cur } = res;
+    const { caption_id, status, start_id, cur } = res;
 
     if ([ExamStatus.Completed, ExamStatus.Failed].includes(status)) {
       router.replace({
@@ -48,20 +48,16 @@ const SimpleCaptionExamPage = () => {
       return;
     }
     const { list: paragraphs } = await fetchParagraphsService({
-      captionId,
-      start,
+      captionId: caption_id,
+      start_id,
       pageSize: PARAGRAPH_COUNT_PER_EXAM_SCENE,
       page: 1,
     });
     const curParagraphIndex = cur
       ? paragraphs.findIndex((paragraph) => paragraph.id === cur)
       : undefined;
-    // console.log(
-    //   "[PAGE]exam/simple/[id] - init result",
-    //   paragraphs,
-    //   cur,
-    //   curParagraphIndex
-    // );
+    
+    console.log(paragraphs, curParagraphIndex, start_id);
     examRef.current = new Exam({
       title: "",
       status: ExamStatus.Started,
@@ -69,7 +65,7 @@ const SimpleCaptionExamPage = () => {
         if (curParagraphIndex && curParagraphIndex !== -1) {
           return paragraphs[curParagraphIndex + 1].id;
         }
-        return start;
+        return start_id;
       })(),
       canComplete: true,
       paragraphs,
@@ -79,7 +75,7 @@ const SimpleCaptionExamPage = () => {
       onCorrect({ curParagraphId }) {
         setCorrectVisible(true);
         createExamSpellingService({
-          examId: id,
+          examSceneId: id,
           paragraphId: curParagraphId,
           type: SpellingResultType.Correct,
         });
@@ -90,7 +86,7 @@ const SimpleCaptionExamPage = () => {
       onIncorrect({ curParagraphId, inputtingWords }) {
         setIncorrectVisible(true);
         createExamSpellingService({
-          examId: id,
+          examSceneId: id,
           paragraphId: curParagraphId,
           type: SpellingResultType.Incorrect,
           input: inputtingWords.map((w) => w.word).join(" "),
@@ -101,8 +97,7 @@ const SimpleCaptionExamPage = () => {
       },
       onSkip({ curParagraphId }) {
         createExamSpellingService({
-          // examSceneId
-          examId: id,
+          examSceneId: id,
           paragraphId: curParagraphId,
           type: SpellingResultType.Skipped,
         });

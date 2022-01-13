@@ -1,6 +1,6 @@
 import { Caption } from ".prisma/client";
 
-import { IParagraphValues } from "@/domains/caption/types";
+import { ICaptionValues, IParagraphValues } from "@/domains/caption/types";
 import { localdb } from "@/utils/db";
 import { isLocalId, parseLocalId } from "@/utils/db/utils";
 
@@ -42,7 +42,7 @@ export function fetchCaptionService({ id }) {
  * @param {number} params.page - 页码
  * @returns
  */
-export function fetchCaptionsService(params) {
+export function fetchCaptionsService(params): Promise<{ list: ICaptionValues[] }> {
   return request.get("/api/captions", params);
 }
 
@@ -68,7 +68,7 @@ export function deleteCaptionService({ id }) {
 export async function fetchParagraphsService(params: {
   page?: number;
   pageSize?: number;
-  start?: string;
+  start_id?: string;
   skip?: number;
   captionId: string;
 }): Promise<{
@@ -103,6 +103,13 @@ export async function fetchParagraphsService(params: {
  */
 export function deleteParagraphService({ id }) {
   return request.delete("/api/paragraphs/delete", { params: { id } });
+}
+
+/**
+ * 恢复删除的句子
+ */
+export function recoverParagraphService({ id }) {
+  return request.delete("/api/paragraphs/recover", { params: { id } });
 }
 
 /**

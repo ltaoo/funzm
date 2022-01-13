@@ -10,6 +10,9 @@ export function parseLocalId(id) {
 }
 
 export function isLocalId(id) {
+  if (id === undefined) {
+    return false;
+  }
   if (typeof id === "string") {
     return id.includes("@id");
   }

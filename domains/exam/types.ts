@@ -9,7 +9,7 @@ export interface IPartialExamSceneValues {
   score: number;
   status: ExamStatus;
 
-  start: string;
+  start: IParagraphValues;
 
   startedAt: string;
   endedAt: string;
@@ -48,15 +48,16 @@ export interface IExamSceneDomain {
 
 export interface IExamSceneRes {
   id: string;
-  examId: string;
-  captionId: string;
+  caption_id: string;
+  start_id: string;
+  // user_id: string;
   status: ExamStatus;
-  start: string;
+  start: IParagraphValues;
   cur?: string;
   spellings: {
     id: string;
     type: SpellingResultType;
-    paragraphId: string;
+    paragraph_id: string;
   }[];
   paragraphs: IParagraphValues[];
   score: number;
@@ -64,15 +65,27 @@ export interface IExamSceneRes {
   begin_at?: number;
   ended_at?: number;
 }
+export interface IExamSceneRes {
+  id: string;
+  caption_id: string;
+  user_id: string;
+
+  status: ExamStatus;
+  start_id: string;
+  cur?: string;
+
+  created_at: number;
+  start_at: number;
+}
 export interface IExamSceneValues {
   id: string;
-  examId: string;
   captionId: string;
 
   status: ExamStatus;
   score: number;
 
-  start: string;
+  startId: string;
+  start: IParagraphValues;
   cur?: string;
 
   correctSpellings: ISpellingValues[];

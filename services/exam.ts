@@ -1,17 +1,8 @@
-import { Exam, SpellingResult } from ".prisma/client";
-
 import { SpellingResultType } from "@/domains/exam/constants";
 import { partialExamSceneRes2Values } from "@/domains/exam/transformer";
-import { IExamSceneRes, IExamSceneValues, IPartialExamSceneValues } from "@/domains/exam/types";
+import { IExamSceneRes, IExamSceneValues, IPartialExamSceneValues, ISpellingValues } from "@/domains/exam/types";
 
 import request from "./request";
-
-/**
- * 根据字幕 id 获取对应的测验（一个字幕只能存在一个测验）
- */
-export function fetchExamService(params: { id: string }): Promise<Exam> {
-  return request.get(`/api/exam/${params.id}`, {});
-}
 
 /**
  * 创建测验记录
@@ -54,7 +45,7 @@ export function fetchExamResultStatsService({
 }: {
   id: string;
   type?: SpellingResultType;
-}): Promise<SpellingResult[]> {
+}): Promise<ISpellingValues[]> {
   return request.get(`/api/exam/result/${id}`, {
     params: { type },
   });
@@ -69,7 +60,7 @@ export function fetchExamResultByTypeService({
 }: {
   id: string;
   type?: SpellingResultType;
-}): Promise<SpellingResult[]> {
+}): Promise<ISpellingValues[]> {
   return request.get(`/api/exam/result/${id}`, {
     params: { type, includeParagraph: 1 },
   });
@@ -109,7 +100,7 @@ export async function fetchExamScenesByCaptionService(params: {
  */
 export function fetchExamSceneService(params: {
   id: string;
-}): Promise<IExamSceneValues> {
+}): Promise<IExamSceneRes> {
   return request.get(`/api/exam/scene/${params.id}`);
 }
 
@@ -119,7 +110,7 @@ export function fetchExamSceneService(params: {
  * @returns
  */
 export function fetchExamSceneProfileService({ id }): Promise<IExamSceneRes> {
-  return request.get(`/api/exam/scene/${id}?profile=1`);
+  return request.get(`/api/exam/scene/${id}`);
 }
 
 /**

@@ -14,20 +14,39 @@ import CaptionUpload from "@/components/CaptionFileUpload";
 import FakeCaptionCard from "@/components/CaptionCard/sk";
 import { addCaptionService, fetchCaptionsService } from "@/services/caption";
 import { checkInService } from "@/services";
+import { ICaptionValues } from "@/domains/caption/types";
 
 const Dashboard = (props) => {
   const { user, dataSource = [] } = props;
 
-  const [captions, setCaptions] = useState(dataSource);
+  const [loading, setLoading] = useState(true);
+  const [captions, setCaptions] = useState<ICaptionValues[]>(dataSource);
 
   const refresh = useCallback(async () => {
+    setLoading(true);
     const nextCaptions = await fetchCaptionsService({ pageSize: 5 });
-    // @ts-ignore
+    setLoading(false);
     setCaptions(nextCaptions.list);
   }, []);
 
   useEffect(() => {
     refresh();
+  }, []);
+
+  const handleUploadCaption = useCallback(async (caption) => {
+    const { title, content, type } = caption;
+    const p = await parseCaptionContent(content, type);
+    const { id } = await addCaptionService({
+      title,
+      type,
+      paragraphs: p.map((p) => {
+        return {
+          ...p,
+          line: String(p.line),
+        };
+      }),
+    });
+    router.push({ pathname: `/captions/${id}` });
   }, []);
 
   const checkIn = useCallback(async () => {
@@ -85,23 +104,7 @@ const Dashboard = (props) => {
               </div>
             </div>
             <div className="flex-1 overflow-hidden relative px-4 py-2 bg-white rounded shadow">
-              <CaptionUpload
-                onChange={async (caption) => {
-                  const { title, content, type } = caption;
-                  const p = await parseCaptionContent(content, type);
-                  const { id } = await addCaptionService({
-                    title,
-                    type,
-                    paragraphs: p.map((p) => {
-                      return {
-                        ...p,
-                        line: String(p.line),
-                      };
-                    }),
-                  });
-                  router.push({ pathname: `/captions/${id}` });
-                }}
-              >
+              <CaptionUpload onChange={handleUploadCaption}>
                 <div className="flex items-center justify-between text-gray-800">
                   <div>
                     <p className="text-xm text-gray-500">上传</p>
@@ -116,20 +119,38 @@ const Dashboard = (props) => {
           <div className="mt-8 text-center text-gray-800">我的字幕</div>
           <div className="mt-2">
             <div className="space-y-4 sm:grid md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
-              {captions.length > 0 ? (
-                captions.map((caption) => {
-                  const { id } = caption;
+              {(() => {
+                if (loading) {
                   return (
-                    <CaptionCard key={id} {...caption} onDelete={refresh} />
+                    <>
+                      <FakeCaptionCard />
+                      <FakeCaptionCard />
+                      <FakeCaptionCard />
+                    </>
                   );
-                })
-              ) : (
-                <>
-                  <FakeCaptionCard />
-                  <FakeCaptionCard />
-                  <FakeCaptionCard />
-                </>
-              )}
+                }
+                if (captions.length) {
+                  return captions.map((caption) => {
+                    const { id } = caption;
+                    return (
+                      <CaptionCard key={id} {...caption} onDelete={refresh} />
+                    );
+                  });
+                }
+                return (
+                  <CaptionUpload onChange={handleUploadCaption}>
+                    <div className="flex items-center justify-center mt-8">
+                      <div className="text-center">
+                        <p className="text-center text-gray-500">暂无字幕</p>
+                        <div className="space-x-4">
+                          <div className="btn mt-4">点击添加字幕</div>
+                          <div className="btn mt-4">浏览公开字幕</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CaptionUpload>
+                );
+              })()}
             </div>
           </div>
         </main>

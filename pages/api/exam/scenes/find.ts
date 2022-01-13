@@ -11,13 +11,16 @@ export default async function provideExamScenesService(
   res: NextApiResponse
 ) {
   await ensureLogin(req, res);
-  const captionId = req.query.id as string;
+  const { id } = req.query as { id: string };
   const data = await prisma.examScene.findMany({
     where: {
-      captionId,
+      caption_id: id,
     },
     orderBy: {
       created_at: "desc",
+    },
+    include: {
+      start: true,
     },
   });
   res.status(200).json({

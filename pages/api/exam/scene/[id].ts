@@ -33,13 +33,14 @@ export default async function provideExamSceneService(req, res) {
     });
     return;
   }
-  const { captionId, start, status, spellings } = data;
+  const { caption_id, start_id, status, spellings } = data;
   const paragraphs = await prisma.paragraph.findMany({
     where: {
-      captionId,
+      caption_id,
+      deleted: false,
     },
     cursor: {
-      id: start,
+      id: start_id,
     },
     take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
   });
@@ -82,7 +83,7 @@ export default async function provideExamSceneService(req, res) {
     msg: "",
     data: {
       ...data,
-      cur: lastOne?.paragraphId,
+      cur: lastOne?.paragraph_id,
       paragraphs,
     },
   });

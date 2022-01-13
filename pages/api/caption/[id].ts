@@ -1,33 +1,37 @@
 /**
  * @file 根据 id 获取指定字幕
  */
-import { getSession } from "@/next-auth/client";
+import { NextApiRequest, NextApiResponse } from "next";
 
-import { fetchCaptionById } from "@/lib/caption";
+import { ensureLogin } from "@/lib/utils";
+import prisma from "@/lib/prisma";
 
-export default async function addCaption(req, res) {
+export default async function provideFetchCaptionService(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  await ensureLogin(req, res);
   const { query } = req;
-  const session = await getSession({ req });
-  if (!session) {
-    res.status(200).json({
-      code: 401,
-      msg: "Please complete authorize before save caption",
-      data: null,
-    });
+  const { id } = query as { id: string; paragraph?: string };
+
+  const [paragraphCount, data] = await prisma.$transaction(
+    [
+      prisma.paragraph.count({
+        where: {
+          caption_id: id,
+        },
+      }),
+      prisma.caption.findUnique({
+        where: {
+          id,
+        },
+      }),
+    ].filter(Boolean)
+  );
+
+  if (data === null) {
+    res.status(200).json({ code: 130, msg: "id 不存在", data: null });
     return;
   }
-  try {
-    const { id, paragraph } = query as { id: string; paragraph?: string };
-    const data = await fetchCaptionById({
-      id,
-      paragraph: paragraph === "1",
-    });
-    if (data === null) {
-      res.status(200).json({ code: 130, msg: "Not Existing", data: null });
-      return;
-    }
-    res.status(200).json({ code: 0, msg: "", data });
-  } catch (err) {
-    res.status(200).json({ code: 100, msg: err.message, data: null });
-  }
+  res.status(200).json({ code: 0, msg: "", data });
 }

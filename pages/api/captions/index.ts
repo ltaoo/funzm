@@ -19,7 +19,7 @@ export default async function provideCaptionsService(
     page,
     pageSize,
     search: {
-      publisherId: userId,
+      publisher_id: userId,
       ...search,
     },
     sort: {

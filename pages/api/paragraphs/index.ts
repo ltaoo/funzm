@@ -27,7 +27,8 @@ export default async function provideFetchParagraphsService(
     start,
     skip,
     search: {
-      captionId,
+      caption_id: captionId,
+      deleted: false,
     },
   });
 

@@ -8,17 +8,16 @@ import { ensureLogin } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 import { ExamStatus } from "@/domains/exam/constants";
 
-export default async function provideExamScene(
+export default async function provideExamSceneAddingService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  await ensureLogin(req, res);
+  const userId = await ensureLogin(req, res);
   const { body } = req;
-  const { captionId, examId, start } = body;
+  const { captionId, start } = body as { captionId: string; start: string };
 
   const existing = await prisma.examScene.findFirst({
     where: {
-      examId,
       status: { in: [ExamStatus.Prepare, ExamStatus.Started] },
     },
   });
@@ -30,9 +29,9 @@ export default async function provideExamScene(
   // console.log("[API]examScene create", examId);
   const { id } = await prisma.examScene.create({
     data: {
-      captionId,
-      examId,
-      start,
+      user_id: userId,
+      caption_id: captionId,
+      start_id: start,
       created_at: dayjs().unix(),
     },
   });

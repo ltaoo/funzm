@@ -1,34 +1,22 @@
 /**
  * @file 新增测验拼写记录
  */
+import { NextApiRequest, NextApiResponse } from "next";
+import dayjs from "dayjs";
+
+import { ensureLogin } from "@/lib/utils";
 import prisma from "@/lib/prisma";
-import { getSession } from "@/next-auth/client";
 
-import * as utils from "@/lib/utils";
-// import { SpellingResultType } from "@/domains/exam/constants";
-
-export default async function addExamSpellingErrorAPI(req, res) {
-  const session = await getSession({ req });
-  if (!session) {
-    res.status(200).json({
-      code: 401,
-      msg: "请先登录",
-      data: null,
-    });
-    return;
-  }
+export default async function provideSpellingAddingService(req: NextApiRequest, res: NextApiResponse) {
+  const userId = await ensureLogin(req, res);
   const {
-    body: { paragraphId, examId, input, type },
+    body: { paragraphId, examSceneId, input, type },
   } = req;
-  try {
-    const {
-      // @ts-ignore
-      user: { id: userId },
-    } = session;
+    
     const existing = await prisma.spellingResult.findFirst({
       where: {
-        paragraphId,
-        examSceneId: examId,
+        paragraph_id: paragraphId,
+        exam_scene_id: examSceneId,
       },
     });
     if (existing) {
@@ -38,16 +26,13 @@ export default async function addExamSpellingErrorAPI(req, res) {
     }
     const { id } = await prisma.spellingResult.create({
       data: {
-        userId,
-        paragraphId,
-        examSceneId: examId,
+        user_id: userId,
+        paragraph_id: paragraphId,
+        exam_scene_id: examSceneId,
         type,
         input,
-        created_at: utils.seconds(),
+        created_at: dayjs().unix(),
       },
     });
     res.status(200).json({ code: 0, msg: "", data: { id } });
-  } catch (err) {
-    res.status(200).json({ code: 100, msg: err.message, data: null });
-  }
 }

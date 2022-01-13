@@ -1,5 +1,5 @@
 /**
- * @file 字幕展示
+ * @file 字幕详情
  */
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Head from "next/head";
@@ -15,11 +15,12 @@ import {
   SunIcon,
   TrashIcon,
   XIcon,
+  BookOpenIcon,
 } from "@ltaoo/icons/outline";
 import debounce from "lodash.debounce";
 
 import * as themeToggle from "@/utils/dark";
-import { downloadTxt, downloadDocx, downloadPdf, sleep } from "@/utils";
+import { downloadTxt, downloadDocx, downloadPdf } from "@/utils";
 import { localdb } from "@/utils/db";
 import { parseLocalId } from "@/utils/db/utils";
 import { parseCaptionContent } from "@/domains/caption";
@@ -34,7 +35,7 @@ import IconWithTxt from "@/components/IconWithTxt";
 import { fetchCurExamSceneByCaption } from "@/services/exam";
 import CaptionPreviewSkeleton from "@/components/CaptionPreview/skeleton";
 
-const CaptionPreviewPage = () => {
+const CaptionProfilePage = () => {
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
@@ -126,6 +127,7 @@ const CaptionPreviewPage = () => {
         }
       }
     }, 400);
+
     fetchCaptionAndSet(id).then(({ isEnd }) => {
       if (isEnd) {
         return;
@@ -189,7 +191,7 @@ const CaptionPreviewPage = () => {
             className="group flex items-center py-2 px-4 rounded-l-lg bg-gray-100 cursor-pointer hover:bg-gray-200"
             onClick={startExam}
           >
-            <HomeIcon className="w-6 h-6 text-gray-400 group-hover:text-gray-800" />
+            <BookOpenIcon className="w-6 h-6 text-gray-400 group-hover:text-gray-800" />
           </div>
         </div>
       </div>
@@ -329,4 +331,4 @@ const CaptionPreviewPage = () => {
   );
 };
 
-export default CaptionPreviewPage;
+export default CaptionProfilePage;

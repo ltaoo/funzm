@@ -8,46 +8,46 @@ datasource db {
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String  @map("user_id")
-  type               String
-  provider           String
-  providerAccountId  String  @map("provider_account_id")
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
+  id                   String  @id @default(cuid())
+  user_id              String  @map("user_id")
+  type                 String
+  provider             String
+  provider_account_id  String
+  refresh_token        String?
+  access_token         String?
+  expires_at           Int?
+  token_type           String?
+  scope                String?
+  id_token             String?
+  session_state        String?
 
-  user               User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                 User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
+  @@unique([provider, provider_account_id])
   @@map("accounts")
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime? @map("email_verified")
-  avatar        String?
-  password      String
-  salt          String
+  id               String    @id @default(cuid())
+  name             String?
+  email            String?   @unique
+  email_verified   DateTime?
+  avatar           String?
+  password         String
+  salt             String
 
-  score         Int       @default(0)
+  score            Int       @default(0)
 
-  subscription    Subscription?
-  accounts        Account[]
-  sessions        Session[]
-  captions        Caption[]
-  exams           Exam[]
-  notebooks       Notebook[]
-  spellingResults SpellingResult[]
-  scoreRecords    ScoreRecord[]
-  packages        Package[]
-  sign            SignRecord[]
+  subscription     Subscription?
+  accounts         Account[]
+  sessions         Session[]
+  captions         Caption[]
+  exam_scenes      ExamScene[]
+  notebooks        Notebook[]
+  spelling         SpellingResult[]
+  score_records    ScoreRecord[]
+  packages         Package[]
+  sign             SignRecord[]
 
   created_at    Int
   last_updated  Int?
@@ -56,11 +56,11 @@ model User {
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique @map("session_token")
-  userId       String   @map("user_id")
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  session_token String   @unique
+  userId        String   @map("user_id")
+  expires       DateTime
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
 }
@@ -80,33 +80,31 @@ model Subscription {
 
   type            Int          @default(1)
 
-  user            User         @relation(fields: [userId], references: [id])
-  userId          String       @map("user_id")
+  user            User         @relation(fields: [user_id], references: [id])
+  user_id          String      
 
   // 到期时间
   expired_at      Int
-
   created_at      Int
 
   @@map("roles")
 }
 
 model Caption {
-  id            String        @id @default(cuid())
-  title         String
-  content       String?       @db.LongText
-  published     Boolean       @default(false)
-  publisher     User?         @relation(fields: [publisherId], references: [id])
-  publisherId   String?       @map("publisher_id")
+  id             String        @id @default(cuid())
+  title          String
+  content        String?       @db.LongText
+  published      Boolean       @default(false)
+  publisher      User          @relation(fields: [publisher_id], references: [id])
+  publisher_id   String
 
-  movieId       String?       @map("movie_id")
+  movie_id       String?      
 
-  paragraphs    Paragraph[]
-  exams         Exam[]
-  examScenes    ExamScene[]
+  paragraphs     Paragraph[]
+  exam_scenes    ExamScene[]
 
-  created_at    Int
-  last_updated  Int?
+  created_at     Int
+  last_updated   Int?
 }
 
 model Paragraph {
@@ -117,11 +115,12 @@ model Paragraph {
   start        String
   end          String
   language     String?
+  caption_id   String  
+  deleted      Boolean  @default(false)
 
-  captionId    String   @map("caption_id")
-  caption      Caption  @relation(fields: [captionId], references: [id], onDelete: Cascade)
+  caption      Caption  @relation(fields: [caption_id], references: [id], onDelete: Cascade)
 
-  examScenes   ExamScene[]
+  exam_scenes  ExamScene[]
   // 该段落被拼写（正确、错误、跳过）的记录
   spellings    SpellingResult[]
   // 该段落有哪些单词被记录进单词本
@@ -148,42 +147,22 @@ model Reading {
   @@map("readings")
 }
 
-model Exam {
-  id              String    @id @default(cuid())
-
-  status          Int       @default(1)
-
-  captionId       String    
-  caption         Caption   @relation(fields: [captionId], references: [id], onDelete: Cascade)
-
-  user            User?     @relation(fields: [userId], references: [id])
-  userId          String?   @map("publisher_id")
-
-  scenes          ExamScene[]
-
-  created_at      Int
-  last_updated    Int?
-
-  @@map("exams")
-}
-
 model ExamScene {
-  id              String    @id @default(cuid())
+  id              String               @id @default(cuid())
 
-  status          Int @default(1)
+  status          Int                  @default(1)
 
-  captionId       String    
-  caption         Caption   @relation(fields: [captionId], references: [id])
+  caption_id      String    
+  user_id         String
 
-  examId          String?   @map("exam_id")
-  exam            Exam?     @relation(fields: [examId], references: [id])
+  start_id        String    
 
-  start           String    
-  startParagraph  Paragraph @relation(fields: [start], references: [id])
-
-  score           Int?      @default(0)
+  score           Int?                 @default(0)
 
   spellings       SpellingResult[]
+  caption         Caption              @relation(fields: [caption_id], references: [id])
+  user            User                @relation(fields: [user_id], references: [id])
+  start           Paragraph            @relation(fields: [start_id], references: [id])
 
   created_at      Int
   begin_at        Int?
@@ -193,24 +172,23 @@ model ExamScene {
 }
 
 model SpellingResult {
-  id           String     @id @default(cuid())
-  type         Int
+  id             String      @id @default(cuid())
+  type           Int
 
-  userId       String?   @map("user_id")
-  user         User?     @relation(fields: [userId], references: [id])
+  user_id        String?
 
-  paragraphId  String     @map("paragraph_id")
-  paragraph    Paragraph  @relation(fields: [paragraphId], references: [id], onDelete: Cascade)
+  paragraph_id   String    
 
-  // examId  String?     @map("exam_id")
-  // exam    Exam?       @relation(fields: [examId], references: [id], onDelete: Cascade)
 
-  examSceneId  String?     @map("exam_scene_id")
-  examScene    ExamScene?       @relation(fields: [examSceneId], references: [id], onDelete: Cascade)
+  exam_scene_id  String?    
 
-  input   String?
+  user           User?       @relation(fields: [user_id], references: [id])
+  exam_scene     ExamScene?  @relation(fields: [exam_scene_id], references: [id], onDelete: Cascade)
+  paragraph      Paragraph   @relation(fields: [paragraph_id], references: [id], onDelete: Cascade)
 
-  created_at    Int
+  input          String?
+
+  created_at     Int
 
   @@map("spelling_results")
 }
@@ -220,8 +198,8 @@ model Notebook {
 
   title             String?
 
-  user              User?     @relation(fields: [userId], references: [id])
-  userId            String?   @map("publisher_id")
+  user              User?     @relation(fields: [user_id], references: [id])
+  user_id            String?  
 
   words             Word[]
 
@@ -236,11 +214,11 @@ model Word {
 
   text                  String
 
-  notebookId            String        @map("notebook_id")
-  notebook              Notebook?     @relation(fields: [notebookId], references: [id])
+  notebook_id            String       
+  notebook              Notebook?     @relation(fields: [notebook_id], references: [id])
 
-  paragraphId           String        @map("paragraph_id")
-  paragraph             Paragraph     @relation(fields: [paragraphId], references: [id])
+  paragraph_id           String       
+  paragraph             Paragraph     @relation(fields: [paragraph_id], references: [id])
 
   created_at            Int
 
@@ -251,8 +229,8 @@ model Word {
 model ScoreRecord {
   id                    String     @id @default(cuid())
 
-  user              User?     @relation(fields: [userId], references: [id])
-  userId            String?   @map("user_id")
+  user              User?     @relation(fields: [user_id], references: [id])
+  user_id            String?  
 
   type              Int
   number            Int
@@ -267,8 +245,8 @@ model ScoreRecord {
 model SignRecord {
   id                    String    @id @default(cuid())
 
-  user                  User?     @relation(fields: [userId], references: [id])
-  userId                String?   @map("user_id")
+  user                  User?     @relation(fields: [user_id], references: [id])
+  user_id                String?  
 
   day                   Int
   // 是否补签
@@ -299,12 +277,12 @@ model Item {
 model Package {
   id                    String     @id @default(cuid())
 
-  item                  Item      @relation(fields: [itemId], references: [id])
-  itemId                String       @map("item_id")
+  item                  Item      @relation(fields: [item_id], references: [id])
+  item_id                String    
   num                   Int
 
-  user                  User     @relation(fields: [userId], references: [id])
-  userId                String   @map("user_id")
+  user                  User     @relation(fields: [user_id], references: [id])
+  user_id                String  
 
   created_at            Int
 
