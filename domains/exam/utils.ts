@@ -100,6 +100,11 @@ export function computeScoreByStats(stats) {
   const remainingSeconds = seconds ? estimated - seconds : 0;
   score += remainingSeconds * REWARD_SCORES_FOR_REMAINING_PER_SECOND;
   score -= incorrect * DECREMENT_SCORES_FOR_INCORRECT_SPELLING;
+
+  if (score < 0) {
+    return 0;
+  }
+
   return score;
 }
 

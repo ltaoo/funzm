@@ -15,7 +15,7 @@ export default async function provideCurExamSceneService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  console.log('[LOG]provideCurExamSceneService');
+  console.log("[LOG]provideCurExamSceneService");
   const userId = await ensureLogin(req, res);
 
   const { captionId } = req.query as { captionId: string };
@@ -23,8 +23,15 @@ export default async function provideCurExamSceneService(
     where: {
       caption_id: captionId,
     },
+    include: {
+      start: true,
+    },
+    take: -1,
   });
-  console.log('[LOG]provideCurExamSceneService - check has initialize', initialized);
+  console.log(
+    "[LOG]provideCurExamSceneService - check has initialize",
+    initialized
+  );
   if (!initialized) {
     const firstParagraph = await prisma.paragraph.findFirst({
       where: {
@@ -38,6 +45,9 @@ export default async function provideCurExamSceneService(
         caption_id: captionId,
         start_id: firstParagraph.id,
         created_at: dayjs().unix(),
+      },
+      include: {
+        start: true,
       },
     });
     res.status(200).json({ code: 0, msg: "", data: created });
@@ -56,6 +66,9 @@ export default async function provideCurExamSceneService(
         start_id,
         created_at: dayjs().unix(),
       },
+      include: {
+        start: true,
+      },
     });
     res.status(200).json({ code: 0, msg: "", data });
     return;
@@ -72,7 +85,11 @@ export default async function provideCurExamSceneService(
     skip: 1,
     take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
   });
-  console.log('[LOG]search paragraph for create a new scene', start_id, response[response.length - 1]);
+  console.log(
+    "[LOG]search paragraph for create a new scene",
+    start_id,
+    response[response.length - 1]
+  );
   // console.log("[API]provideCurExamScene - next paragraphs", response);
   const remainingParagraphs = response;
   if (remainingParagraphs.length === 0) {
@@ -85,6 +102,9 @@ export default async function provideCurExamSceneService(
       user_id: userId,
       start_id: response[response.length - 1].id,
       created_at: dayjs().unix(),
+    },
+    include: {
+      start: true,
     },
   });
   res.status(200).json({ code: 0, msg: "", data: createdNewExamScene });

@@ -21,7 +21,7 @@ export default async function provideScoreRecordsService(
     page,
     pageSize,
     search: {
-      userId,
+      user_id: userId,
     },
   });
 

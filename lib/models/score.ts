@@ -61,7 +61,7 @@ export async function addScore(
       type,
       number: value,
       created_at: createdAt,
-      userId: id,
+      user_id: id,
     },
   });
   return true;

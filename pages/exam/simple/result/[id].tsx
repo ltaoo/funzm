@@ -70,7 +70,7 @@ const SimpleCaptionExamPage = () => {
   return (
     <div className="min-h-screen overflow-hidden px-4 pb-12 bg-gray-100">
       <div className="mt-4 text-center">
-        <div className="flex items-center justify-center py-2 text-3xl rounded shadow bg-white">
+        <div className="flex items-center justify-center py-4 text-3xl">
           <div className="inline-flex items-center">
             {examScene.status === ExamStatus.Completed && (
               <CheckIcon className="w-10 h-10 text-green-500" />

@@ -26,13 +26,15 @@ export default async function provideExamSceneAddingService(
       .status(200)
       .json({ code: 0, msg: "已经存在进行中的测验", data: existing });
   }
+  const now = dayjs();
   // console.log("[API]examScene create", examId);
   const { id } = await prisma.examScene.create({
     data: {
       user_id: userId,
       caption_id: captionId,
       start_id: start,
-      created_at: dayjs().unix(),
+      created_at: now.unix(),
+      // begin_at: now.unix(),
     },
   });
   res.status(200).json({ code: 0, msg: "", data: { id } });

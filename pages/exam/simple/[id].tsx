@@ -39,7 +39,7 @@ const SimpleCaptionExamPage = () => {
     const id = router.query.id as string;
     // console.log("[PAGE]exam/simple/[id] - init", id);
     const res = await fetchExamSceneService({ id });
-    const { caption_id, status, start_id, cur } = res;
+    const { caption_id, status, paragraphs, start_id, cur } = res;
 
     if ([ExamStatus.Completed, ExamStatus.Failed].includes(status)) {
       router.replace({
@@ -47,17 +47,9 @@ const SimpleCaptionExamPage = () => {
       });
       return;
     }
-    const { list: paragraphs } = await fetchParagraphsService({
-      captionId: caption_id,
-      start_id,
-      pageSize: PARAGRAPH_COUNT_PER_EXAM_SCENE,
-      page: 1,
-    });
     const curParagraphIndex = cur
       ? paragraphs.findIndex((paragraph) => paragraph.id === cur)
       : undefined;
-    
-    console.log(paragraphs, curParagraphIndex, start_id);
     examRef.current = new Exam({
       title: "",
       status: ExamStatus.Started,
@@ -105,10 +97,6 @@ const SimpleCaptionExamPage = () => {
       async onComplete({ stats }: IExamSceneDomain) {
         await updateExamSceneService({
           id,
-          status:
-            stats.correctRate > CORRECT_RATE_NEEDED_FOR_COMPLETE
-              ? ExamStatus.Completed
-              : ExamStatus.Failed,
         });
         router.replace({
           pathname: `/exam/simple/result/${id}`,
@@ -117,7 +105,6 @@ const SimpleCaptionExamPage = () => {
       async onFailed() {
         await updateExamSceneService({
           id,
-          status: ExamStatus.Failed,
         });
         alert("测验失败");
         router.replace({
