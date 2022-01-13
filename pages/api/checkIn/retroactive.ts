@@ -42,13 +42,12 @@ export default async function provideRetroactiveService(
       userId,
       created_at: {
         gte: firstDay.hour(0).minute(0).second(0).unix(),
-        lt: lastDay.hour(23).minute(59).second(59).unix(),
+        lt: today.clone().unix(),
       },
     },
   });
   const records = checkInRecordsBetweenThisWeeks.map((record) => {
-    const { created_at } = record;
-    const day = dayjs(created_at * 1000).day();
+    const { day } = record;
     return {
       day,
       hasCheckIn: true,
@@ -56,6 +55,7 @@ export default async function provideRetroactiveService(
       canCheckIn: false,
     };
   });
+
   for (let i = 1; i <= 7; i += 1) {
     const theDayHasCheckIn = records.find((record) => record.day === i);
     if (theDayHasCheckIn === undefined) {
