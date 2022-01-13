@@ -10,8 +10,8 @@ export default async function provideSpellingsService(req, res) {
     page,
     pageSize,
     search: {
-      status,
-      userId,
+      type: status ? Number(status) : undefined,
+      user_id: userId,
     },
     sort: {
       created_at: "desc",
@@ -19,7 +19,12 @@ export default async function provideSpellingsService(req, res) {
   });
 
   const [list, total] = await prisma.$transaction([
-    prisma.spellingResult.findMany(params),
+    prisma.spellingResult.findMany({
+      ...params,
+      include: {
+        paragraph: true,
+      }
+    }),
     prisma.spellingResult.count({
       where: params.where,
     }),

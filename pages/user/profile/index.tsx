@@ -100,7 +100,11 @@ const UserProfilePage = () => {
             <div className="text-gray-800">我的字幕</div>
             <ChevronRightIcon className="w-4 h-4 text-gray-300" />
           </div>
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between p-4" onClick={() => {
+            router.push({
+              pathname: '/spellings',
+            });
+          }}>
             <div className="text-gray-800">测验回顾</div>
             <ChevronRightIcon className="w-4 h-4 text-gray-300" />
           </div>

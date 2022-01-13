@@ -117,6 +117,14 @@ export interface IExamSceneValues {
   };
 }
 
+export interface ISpellingRes {
+  id: string;
+  type: SpellingResultType;
+  input?: string;
+  exam_scene_id: string;
+  paragraph: IParagraphValues;
+  created_at: number;
+}
 export interface ISpellingValues {
   id: string;
   // 拼写结果（类型）
