@@ -4,12 +4,12 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import dayjs from "dayjs";
 
-import { getSession } from "@/next-auth/client";
 import prisma from "@/lib/prisma";
 import { addScore } from "@/lib/models/score";
 
 import { ScoreType } from "@/domains/exam/constants";
-import { rewardPerDay, extraRewardForSpecialDay } from './constants';
+import { rewardPerDay } from "./constants";
+import { ensureLogin, resp } from "@/lib/utils";
 
 function getRewardByCheckInDay(day) {
   if (rewardPerDay[day]) {
@@ -18,29 +18,33 @@ function getRewardByCheckInDay(day) {
   return 0;
 }
 
+const pendingRequestMap = {};
+
 export default async function provideCheckInService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const session = await getSession({ req });
-  if (!session) {
-    res.status(200).json({ code: 401, msg: "请先登录", data: null });
-    return;
-  }
-  const userId = session.user.id as string;
+  const user_id = await ensureLogin(req, res);
   const current = dayjs();
-  const currentDay = current.clone().day();
-  const endSecond = dayjs().hour(23).minute(59).second(59).unix();
-  const signRecords = await prisma.signRecord.findMany({
+  const currentDay = (() => {
+    const t = current.clone().day();
+    if (t === 0) {
+      return 7;
+    }
+    return t;
+  })();
+  const endSecond = dayjs().hour(23).minute(59).second(59).toDate();
+
+  const checkInRecords = await prisma.checkInRecord.findMany({
     where: {
-      userId,
+      user_id,
       created_at: {
-        gte: dayjs().day(0).hour(0).minute(0).second(0).unix(),
+        gte: current.clone().hour(0).minute(0).second(0).toDate(),
         lt: endSecond,
       },
     },
   });
-  const signDates = signRecords.map((record) => record.day);
+  const signDates = checkInRecords.map((record) => record.day);
   const hasSign = signDates.find((day) => {
     return day === currentDay;
   });
@@ -48,33 +52,35 @@ export default async function provideCheckInService(
     res.status(200).json({ code: 130, msg: "今天已签到哦~", data: null });
     return;
   }
-  await prisma.signRecord.create({
+  // 并发问题怎么解决？
+  await prisma.checkInRecord.create({
     data: {
-      userId,
-      day: current.clone().day(),
-      created_at: current.clone().unix(),
+      user_id,
+      day: currentDay,
     },
   });
   const reward = getRewardByCheckInDay(currentDay);
   // score reward
   if (reward) {
-    await addScore(userId, {
-      value: reward,
+    await addScore(user_id, {
+      value: reward.num,
       type: ScoreType.Increment,
       desc: `${current.format("YYYY-MM-DD")} 签到`,
-      createdAt: current.clone().unix(),
     });
   }
-  res.status(200).json({
-    code: 0,
-    msg: "",
-    data: (() => {
+
+  return resp(
+    (() => {
       if (reward) {
         return {
           msg: reward.text(),
           value: reward.num,
         };
       }
+      return {
+        msg: "未知错误",
+      };
     })(),
-  });
+    res
+  );
 }

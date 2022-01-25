@@ -1,6 +1,8 @@
 /**
  * @file 字幕领域
  */
+import { readContentFromFile } from "@/utils/bom";
+
 import { CaptionFile } from "./types";
 
 /**
@@ -19,7 +21,7 @@ export function getExt(name) {
 export async function parseCaptionFile(file) {
   const segments = file.name.split(".");
   const ext = getExt(file.name);
-  const content = await readTextFromFile(file);
+  const content = await readContentFromFile(file);
   const result = parseCaptionContent(content, ext);
   return {
     title: segments.slice(0, -1).join("."),
@@ -27,27 +29,6 @@ export async function parseCaptionFile(file) {
     paragraphs: result,
   };
 }
-
-/**
- * 从本地文件中读取文本内容
- * @param file
- * @param encoding
- * @returns
- */
-export function readTextFromFile(file, encoding = "utf-8"): Promise<string> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target.result instanceof ArrayBuffer) {
-        resolve(String(e.target.result));
-        return;
-      }
-      resolve(e.target.result);
-    };
-    reader.readAsText(file, encoding);
-  });
-}
-
 function invertText(text, invert) {
   if (!invert) return text;
   return text
@@ -109,7 +90,7 @@ export function parseCaptionContent(
   }
   return [
     {
-      id: '1',
+      id: "1",
       line: 1,
       start: "",
       end: "",

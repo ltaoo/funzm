@@ -1,6 +1,6 @@
 import { ensureLogin } from "@/lib/utils";
 import prisma from "@/lib/prisma";
-import { paginationFactory } from "@/lib/models/paganation";
+import { paginationFactory } from "@/lib/models/pagination";
 
 export default async function provideSpellingsService(req, res) {
   const userId = await ensureLogin(req, res);

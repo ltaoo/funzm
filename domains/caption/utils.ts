@@ -1,10 +1,11 @@
 import * as diff from "diff";
 
-import { DiffNode } from "./types";
+import { INoteValues } from "@/domains/note/types";
+
+import { DiffNode, IParagraphValues } from "./types";
 
 /**
  * 将一段英文分割成单词
- * @param text2
  */
 export function splitText2Words(text2: string): string[][] {
   const words = text2.split(" ");
@@ -91,6 +92,9 @@ export function compareInputting(inputting, originalContent) {
   return errors;
 }
 
+/**
+ * 打乱数组顺序
+ */
 function shuffle(arr) {
   let m = arr.length;
   while (m > 1) {
@@ -106,18 +110,33 @@ function uid() {
   return _uid;
 }
 
+/**
+ * 将一段文本按空格切割并打乱顺序
+ */
 export function splitAndRandomTextSegments(text2) {
   if (!text2) {
     return [];
   }
   const segments = text2.split(" ");
-  // 打乱顺序
   return shuffle(segments).map((str) => {
     return {
       uid: uid(),
       text: str,
     };
   });
+}
+
+export function mergeMultipleLines(prevParagraph, cur) {
+  const { line: prevLine, text1: prevText1, text2: prevText2 } = prevParagraph;
+  const { line, start, end, text1, text2 } = cur;
+  // const lastChar = prevText2.charAt(prevText2.length - 1);
+  const copy = { ...prevParagraph };
+  copy.line = `${prevLine}+${line}`;
+  copy.end = end;
+  copy.text1 = prevText1 + ` ${text1}`;
+  copy.text2 = prevText2 + ` ${text2}`;
+  // copy.indexes = [].join(',');
+  return copy;
 }
 
 /**
@@ -171,4 +190,197 @@ export function splitMergedParagraphs(paragraphs, mergedLine) {
     return nextOptimizedParagraphs;
   }
   return paragraphs;
+}
+
+function isBetween(value, range) {
+  if (value >= range[0] && value <= range[1]) {
+    return true;
+  }
+  return false;
+}
+
+interface TmpNode {
+  text: string;
+  type: "text" | "note";
+  range: [number, number];
+  note?: INoteValues;
+  children?: TmpNode[];
+}
+
+/**
+ * 解析文本，转换成抽象对象，能够渲染出高亮标签
+ */
+export function splitTextHasNotes(content, notes) {
+  const result: TmpNode[] = [
+    {
+      type: "text",
+      text: content,
+      range: [0, content.length],
+    },
+  ];
+
+  let startANote = false;
+
+  for (let i = 0; i < notes.length; i += 1) {
+    const note = notes[i];
+    const { start, end } = note;
+    for (let j = 0; j < result.length; j += 1) {
+      const { type, text, range, note: prevNote } = result[j];
+      if (isBetween(start, range) && isBetween(end, range)) {
+        // 最普通的场景，在普通文本内添加笔记
+        if (type === "text") {
+          result.splice(
+            j,
+            1,
+            {
+              type: "text",
+              text: text.slice(0, start - range[0]),
+              range: [range[0], start],
+            },
+            {
+              type: "note",
+              text: text.slice(start - range[0], end - range[0]),
+              range: [start, end],
+              note: notes[i],
+            },
+            {
+              type: "text",
+              text: text.slice(end - range[0]),
+              range: [end, range[1]],
+            }
+          );
+          j += 2;
+        }
+        // 在笔记内添加笔记
+        if (type === "note") {
+          result.splice(
+            j,
+            1,
+            ...[
+              {
+                type: "note" as const,
+                text: text.slice(0, start - range[0]),
+                range: [range[0], start] as [number, number],
+                note: prevNote,
+                children: [
+                  {
+                    type: "note" as const,
+                    text: text.slice(start - range[0], end - range[0]),
+                    range: [start, end] as [number, number],
+                    note,
+                  },
+                ],
+              },
+              {
+                type: "note" as const,
+                text: text.slice(end - range[1]),
+                range: [end, range[1]] as [number, number],
+                note: prevNote,
+              },
+            ]
+          );
+          j += 1;
+        }
+      } else if (isBetween(start, range) && start !== range[1]) {
+        // start !== range[1] 是为了避免 if my career in 有 my career 笔记包含在 my career in，但先被 `if ` 这个节点捕获的情况
+        startANote = true;
+        if (type === "text") {
+          result.splice(
+            j,
+            1,
+            ...[
+              {
+                type: "text" as const,
+                text: text.slice(0, start - range[0]),
+                range: [range[0], start] as [number, number],
+              },
+              {
+                type: "note" as const,
+                text: text.slice(end - range[1]),
+                range: [end, range[1]] as [number, number],
+                note,
+              },
+            ]
+          );
+          j += 1;
+        }
+        if (type === "note") {
+          result.splice(
+            j,
+            1,
+            ...[
+              {
+                type: "note" as const,
+                text: text.slice(0, start - range[0]),
+                range: [range[0], range[1]] as [number, number],
+                note: prevNote,
+                children: [
+                  {
+                    type: "note" as const,
+                    text: text.slice(start - range[0], end - range[0]),
+                    range: [start, range[1]] as [number, number],
+                    note,
+                  },
+                ],
+              },
+              // {
+              //   type: "note" as const,
+              //   text: text.slice(end - range[1]),
+              //   range: [end, range[1]] as [number, number],
+              //   note,
+              // },
+            ]
+          );
+          // j += 1;
+        }
+      } else if (isBetween(end, range)) {
+        if (!startANote) {
+          continue;
+        }
+        if (type === "text") {
+          result.splice(
+            j,
+            1,
+            ...[
+              {
+                type: "note" as const,
+                text: text.slice(0, end - range[0]),
+                range: [range[0], end] as [number, number],
+                note,
+              },
+              {
+                type: "text" as const,
+                text: text.slice(end - range[0]),
+                range: [end, range[1]] as [number, number],
+              },
+            ]
+          );
+          j += 1;
+        }
+      } else {
+        if (startANote) {
+          //
+        }
+      }
+    }
+    startANote = false;
+  }
+  return result;
+}
+
+export function hasTowLanguage(paragraph: IParagraphValues) {
+  const { text1, text2 } = paragraph;
+
+  if (text1 === undefined) {
+    return false;
+  }
+  if (text2 === undefined) {
+    return false;
+  }
+
+  if (!/[a-z]/.test(text2)) {
+    return false;
+  }
+
+  return true;
 }

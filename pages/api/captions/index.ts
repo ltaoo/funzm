@@ -5,13 +5,13 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 import prisma from "@/lib/prisma";
 import { ensureLogin } from "@/lib/utils";
-import { paginationFactory } from "@/lib/models/paganation";
+import { paginationFactory } from "@/lib/models/pagination";
 
 export default async function provideCaptionsService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const userId = await ensureLogin(req, res);
+  const user_id = await ensureLogin(req, res);
   const {
     query: { page, pageSize, ...search },
   } = req;
@@ -19,7 +19,7 @@ export default async function provideCaptionsService(
     page,
     pageSize,
     search: {
-      publisher_id: userId,
+      user_id,
       ...search,
     },
     sort: {

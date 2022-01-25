@@ -9,9 +9,11 @@ export default async function provideParagraphDeletingService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const userId = await ensureLogin(req, res);
+  const user_id = await ensureLogin(req, res);
   const { query } = req;
-  const { id } = query as { id: string };
+  const { id: i } = query as { id: string };
+
+  const id = Number(i);
 
   const theParagraphPrepareDeleted = await prisma.paragraph.findUnique({
     where: { id },
@@ -29,7 +31,7 @@ export default async function provideParagraphDeletingService(
     res.status(200).json({ code: 100, msg: "句子不存在", data: null });
     return;
   }
-  if (owner.publisher_id !== userId) {
+  if (owner.user_id !== user_id) {
     res.status(200).json({ code: 100, msg: "操作失败", data: null });
     return;
   }

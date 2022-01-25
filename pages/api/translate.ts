@@ -1,19 +1,13 @@
-import { getSession } from "@/next-auth/client";
+import { NextApiRequest, NextApiResponse } from "next";
 
 import { translate } from "@/lib/utils/youdao";
+import { ensureLogin } from "@/lib/utils";
 
-export default async function translateWord(req, res) {
-  const session = await getSession({ req });
-  if (!session) {
-    res.status(200).json({
-      code: 401,
-      msg: "请先登录",
-      data: null,
-    });
-    return;
-  }
-  const { query } = req;
-  if (!query.word) {
+export default async function provideTranslateService(req: NextApiRequest, res: NextApiResponse) {
+  await ensureLogin(req, res)
+
+  const { word } = req.query;
+  if (!word) {
     res.status(200).json({
       code: 130,
       msg: "请传入要翻译的单测",
@@ -23,7 +17,7 @@ export default async function translateWord(req, res) {
   }
 
   try {
-    const data = await translate(query.word);
+    const data = await translate(word);
     res.status(200).json({
       code: 0,
       msg: "",

@@ -1,3 +1,12 @@
+export enum ExamType {
+  // 选择
+  Selection = 1,
+  // 拼写
+  Spelling = 2,
+  // 语音
+  Speak = 3,
+}
+
 export enum ScoreType {
   Increment = 1,
   Decrement = 2,

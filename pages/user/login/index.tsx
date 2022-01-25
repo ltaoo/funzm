@@ -8,11 +8,14 @@ import Form from "rc-field-form";
 
 import { LogoIcon } from "@ltaoo/icons/outline";
 
-import { getCsrfToken, signin } from "@/next-auth/client";
+// import { getCsrfToken, signin } from "@/next-auth/client";
 import Loading from "@/components/Loading";
-import { sleep } from "@/utils";
+import { sleep, tabTitle } from "@/utils";
+import { SLOGAN } from "@/constants";
+import { login } from "@/services/auth";
+import WeappLoginModal from "@/components/WeappLoginModal";
 
-const LoginPage = (props) => {
+const UserLoginPage = (props) => {
   const [form] = Form.useForm();
   const router = useRouter();
 
@@ -32,24 +35,20 @@ const LoginPage = (props) => {
     try {
       const values = await form.validateFields();
       const { email, password, csrfToken } = values;
-      console.log(email, password, csrfToken);
-      const [{ error, msg }] = await Promise.all([
-        signin("credentials", {
+      // console.log(email, password, csrfToken);
+      await Promise.all([
+        login({
           email,
           password,
           csrfToken,
-          redirect: false,
+          // redirect: false,
         }),
         sleep(2000),
       ]);
-      if (!error) {
-        alert("登录成功");
-        router.replace({
-          pathname: "/dashboard",
-        });
-        return;
-      }
-      throw new Error(msg);
+      router.replace({
+        pathname: "/dashboard",
+      });
+      return;
     } catch (err) {
       alert(err.message);
       // message.error(err.message);
@@ -60,30 +59,27 @@ const LoginPage = (props) => {
   return (
     <>
       <Head>
-        <title>登录 - 趣字幕 让英语学习变得有趣</title>
+        <title>{tabTitle("登录")}</title>
       </Head>
       <div className="min-h-screen bg-gray-50">
         <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-md w-full space-y-8">
+          <div className="w-100 w-full space-y-8 py-12 px-8 bg-white rounded shadow-xl">
             <div className="flex justify-center">
               <div className="#logo flex items-center text-center">
-                <LogoIcon className="w-12 h-12 text-green-500" />
-                <h2 className="ml-2 text-center text-3xl font-extrabold text-green-500">
+                <LogoIcon className="w-12 h-12 text-green-600" />
+                <h2 className="ml-2 text-center text-3xl font-extrabold text-green-600">
                   趣字幕
                 </h2>
               </div>
             </div>
-            <div className="text-center font-extrabold text-green-500">
-              让英语学习变得有趣
+            <div className="text-center font-extrabold text-green-600">
+              {SLOGAN}
             </div>
             <Form form={form}>
               <div className="mt-8 space-y-6">
-                <Form.Field name="remember" initialValue={true}>
-                  <input type="hidden" name="remember" />
-                </Form.Field>
-                <Form.Field name="csrfToken" initialValue={props.csrfToken}>
+                {/* <Form.Field name="csrfToken" initialValue={props.csrfToken}>
                   <input type="hidden" name="csrfToken" />
-                </Form.Field>
+                </Form.Field> */}
                 <div className="rounded-md shadow-sm -space-y-px">
                   <div>
                     <label htmlFor="email-address" className="sr-only">
@@ -91,16 +87,16 @@ const LoginPage = (props) => {
                     </label>
                     <Form.Field
                       name="email"
-                      rules={[
-                        {
-                          required: true,
-                          message: "请输入邮箱",
-                        },
-                      ]}
+                      // rules={[
+                      //   {
+                      //     required: true,
+                      //     message: "请输入邮箱",
+                      //   },
+                      // ]}
+                      initialValue=""
                     >
                       <input
                         className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                        type="email"
                         autoComplete="email"
                         placeholder="邮箱"
                       />
@@ -118,6 +114,7 @@ const LoginPage = (props) => {
                           message: "请输入密码",
                         },
                       ]}
+                      initialValue=""
                     >
                       <input
                         className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
@@ -129,23 +126,9 @@ const LoginPage = (props) => {
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    {/* <input
-                      id="remember-me"
-                      name="remember-me"
-                      type="checkbox"
-                      className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                    />
-                    <label
-                      htmlFor="remember-me"
-                      className="ml-2 block text-sm text-gray-900"
-                    >
-                      Remember me
-                    </label> */}
-                  </div>
                   <div className="text-sm">
                     <a
-                      href="#"
+                      href="/user/forgot"
                       className="font-medium text-green-600 hover:text-green-500"
                     >
                       忘记密码
@@ -164,7 +147,7 @@ const LoginPage = (props) => {
                 </div>
               </div>
             </Form>
-            <p className="mt-2 text-center text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-600">
               没有账号？
               <a
                 href="/user/register"
@@ -173,6 +156,10 @@ const LoginPage = (props) => {
                 点击这里注册
               </a>
             </p>
+
+            <WeappLoginModal>
+              <div className="mt-4 text-sm text-gray-500 cursor-pointer">小程序登录</div>
+            </WeappLoginModal>
           </div>
         </div>
         <Loading visible={loading} />
@@ -181,11 +168,11 @@ const LoginPage = (props) => {
   );
 };
 
-export default LoginPage;
+export default UserLoginPage;
 
-export async function getServerSideProps(context) {
-  const csrfToken = await getCsrfToken(context);
-  return {
-    props: { csrfToken },
-  };
-}
+// export async function getServerSideProps(context) {
+//   const csrfToken = await getCsrfToken(context);
+//   return {
+//     props: { csrfToken },
+//   };
+// }

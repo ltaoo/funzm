@@ -1,132 +1,130 @@
 /**
  * @file 用户详情
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
+import Form, { Field } from "rc-field-form";
+import Upload from "rc-upload";
 
-import {
-  ChevronRightIcon,
-  CurrencyYenIcon,
-  ShoppingCartIcon,
-} from "@ltaoo/icons/outline";
-
-import { fetchScoreRecordsService, fetchUserProfileService } from "@/services";
+import Layout from "@/layouts";
+import { tabTitle } from "@/utils";
+import { useUser } from "@/domains/user/hooks";
+import { updateUserProfileService } from "@/services/user";
+import { uploadFileService } from "@/services/upload";
+import Avatar from "@/components/Avatar";
 
 const UserProfilePage = () => {
-  const [records, setRecords] = useState([]);
-
   // const [session] = useSession();
-  const [user, setUser] = useState(null);
+  const user = useUser();
 
   const router = useRouter();
+  const [form] = Form.useForm();
 
-  const fetchScoreRecordsAndSet = useCallback(async () => {
-    const response = await fetchScoreRecordsService();
-    console.log(response);
-  }, []);
-  const fetchUserProfileAndSet = useCallback(async () => {
-    const profile = await fetchUserProfileService();
-    setUser(profile);
-    // console.log(profile);
+  const updateProfile = useCallback(async () => {
+    const values = await form.validateFields();
+    await updateUserProfileService(values);
+    alert("更新成功");
   }, []);
 
-  useEffect(() => {
-    fetchScoreRecordsAndSet();
-    fetchUserProfileAndSet();
+  const handleUploadFile = useCallback(async ({ file }) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const { url } = await uploadFileService(formData);
+    form.setFieldsValue({ avatar: url });
   }, []);
 
-  // console.log("[PAGE]user/profile - render", session.user);
   if (user === null) {
     return null;
   }
 
+  console.log("[PAGE]user/profile - render", user);
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Head>
-        <title>我的 - 趣字幕</title>
-      </Head>
-      <div className="flex items-center px-4 py-8 pb-12 bg-green-500">
-        <div className="w-16 h-16 rounded-full border-1"></div>
+    <Layout>
+      <div className="min-h-screen bg-gray-100">
+        <Head>
+          <title>{tabTitle("修改个人信息")}</title>
+        </Head>
         <div className="">
-          <div className="ml-4 text-xl text-white">{user.name}</div>
-          <div className="inline-block ml-4 px-1 text-sm text-white bg-green-1000 rounded border-1">
-            试用 - 2022年01月07日
-          </div>
-        </div>
-      </div>
-      <div className="relative flex top-[-30px] px-4 space-x-4">
-        <div className="flex-1 overflow-hidden relative px-4 py-2 bg-white rounded shadow">
-          <div
-            className="flex items-center justify-between text-gray-800"
-            onClick={() => {
-              router.push({
-                pathname: "/scores",
-              });
-            }}
-          >
-            <div>
-              <p className="text-xm text-gray-500">积分数</p>
-              <p className="text-3xl">{user.score}</p>
+          <Form form={form}>
+            <div className="px-4 py-5 bg-white space-y-6 sm:p-6">
+              <div className="grid grid-cols-3 gap-6">
+                <div className="col-span-3 sm:col-span-2">
+                  <label
+                    htmlFor="nickname"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    昵称
+                  </label>
+                  <div className="mt-1 flex rounded-md shadow-sm">
+                    <Field name="nickname" initialValue={user.nickname}>
+                      <input
+                        type="text"
+                        className="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                        placeholder="你的昵称"
+                      />
+                    </Field>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label
+                  htmlFor="about"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  About
+                </label>
+                <div className="mt-1">
+                  <Field name="about" initialValue="">
+                    <textarea
+                      id="about"
+                      name="about"
+                      rows={3}
+                      className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
+                      placeholder="you@example.com"
+                    />
+                  </Field>
+                </div>
+                <p className="mt-2 text-sm text-gray-500">
+                  Brief description for your profile. URLs are hyperlinked.
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  头像
+                </label>
+                <div className="mt-1 flex items-center">
+                  <Field name="avatar" initialValue={user?.avatar}>
+                    <div />
+                  </Field>
+                  <span className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
+                    <Avatar url={user?.avatar} />
+                  </span>
+                  <Upload customRequest={handleUploadFile}>
+                    <button
+                      type="button"
+                      className="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                      上传
+                    </button>
+                  </Upload>
+                </div>
+              </div>
+              <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                <button
+                  type="submit"
+                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  onClick={updateProfile}
+                >
+                  保存
+                </button>
+              </div>
             </div>
-            <CurrencyYenIcon className="absolute -bottom-6 -right-6 w-20 h-20 text-gray-100" />
-          </div>
-        </div>
-        <div className="flex-1 overflow-hidden relative px-4 py-2 bg-white rounded shadow">
-          <div className="flex items-center justify-between text-gray-800">
-            <div>
-              <p className="text-xm text-gray-500">道具商城</p>
-            </div>
-            <ShoppingCartIcon className="absolute -bottom-6 -right-6 w-20 h-20 text-gray-100" />
-          </div>
+          </Form>
         </div>
       </div>
-      {/* <div className="px-4">
-        <div className="py-2 bg-yellow-500 text-center rounded text-white">
-          成为会员
-        </div>
-      </div> */}
-      <div className="px-4">
-        <div className="rounded shadow bg-white divide-y">
-          <div className="flex items-center justify-between p-4">
-            <div className="text-gray-800">我的笔记</div>
-            <ChevronRightIcon className="w-4 h-4 text-gray-300" />
-          </div>
-          <div className="flex items-center justify-between p-4">
-            <div className="text-gray-800">我的道具</div>
-            <ChevronRightIcon className="w-4 h-4 text-gray-300" />
-          </div>
-          <div className="flex items-center justify-between p-4">
-            <div className="text-gray-800">我的字幕</div>
-            <ChevronRightIcon className="w-4 h-4 text-gray-300" />
-          </div>
-          <div className="flex items-center justify-between p-4" onClick={() => {
-            router.push({
-              pathname: '/spellings',
-            });
-          }}>
-            <div className="text-gray-800">测验回顾</div>
-            <ChevronRightIcon className="w-4 h-4 text-gray-300" />
-          </div>
-          <div className="flex items-center justify-between p-4">
-            <div className="text-gray-800">单词本</div>
-            <ChevronRightIcon className="w-4 h-4 text-gray-300" />
-          </div>
-          <div className="flex items-center justify-between p-4">
-            <div className="text-gray-800">错题本</div>
-            <ChevronRightIcon className="w-4 h-4 text-gray-300" />
-          </div>
-        </div>
-      </div>
-      <div className="mt-8 px-4">
-        <div className="py-3 text-center text-white bg-red-500 rounded">
-          退出登录
-        </div>
-      </div>
-      <div className="mt-8 py-2 text-center text-gray-300">
-        copyright@funzm.com
-      </div>
-    </div>
+    </Layout>
   );
 };
 

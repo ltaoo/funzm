@@ -1,11 +1,11 @@
 /**
  * @file 字幕文件上传
  */
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback } from "react";
 import Upload from "rc-upload";
 
-import { getExt, readTextFromFile } from "@/domains/caption";
-import { CaptionFile } from "@/domains/caption/types";
+import { getExt } from "@/domains/caption";
+import { readContentFromFile } from "@/utils/bom";
 
 interface IProps {
   /**
@@ -28,24 +28,20 @@ interface IProps {
 const CaptionUpload: React.FC<IProps> = (props) => {
   const { children, onChange } = props;
 
-  const onChangeRef = useRef(onChange);
-  useEffect(() => {
-    if (onChange && onChangeRef.current !== onChange) {
-      onChangeRef.current = onChange;
-    }
-  }, [onChange]);
-
-  const handleUploadFile = useCallback(async ({ file }) => {
-    const content = await readTextFromFile(file);
-    if (onChangeRef.current) {
-      const segments = file.name.split(".");
-      onChangeRef.current({
-        title: segments.slice(0, -1).join("."),
-        type: getExt(file.name),
-        content,
-      });
-    }
-  }, []);
+  const handleUploadFile = useCallback(
+    async ({ file }) => {
+      const content = await readContentFromFile(file);
+      if (onChange) {
+        const segments = file.name.split(".");
+        onChange({
+          title: segments.slice(0, -1).join("."),
+          type: getExt(file.name),
+          content,
+        });
+      }
+    },
+    [onChange]
+  );
   return <Upload customRequest={handleUploadFile}>{children}</Upload>;
 };
 

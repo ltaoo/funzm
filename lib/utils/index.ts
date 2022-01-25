@@ -1,6 +1,12 @@
-import { getSession } from "@/next-auth/client";
 import crypto from "crypto";
+
+import { serialize } from "cookie";
 import { NextApiRequest, NextApiResponse } from "next";
+
+import { TOKEN_NAME } from "@/next-auth/constants";
+import { getToken } from "@/next-auth/jwt";
+
+import { SERVER_ERROR_CODES } from "../constants";
 
 export type UID<N extends number> = { 0: string; length: N } & string;
 
@@ -351,18 +357,41 @@ export function byteLength(input?: string): number {
 export const seconds = (): TIMESTAMP => (Date.now() / 1e3) | 0;
 
 export async function ensureLogin(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getSession({ req });
-  if (!session) {
-    res.status(200).json({
-      code: 401,
-      msg: "请先登录",
-      data: null,
+  const token = await getToken({ req });
+
+  // console.log("[]ensureLogin", token);
+
+  if (!token) {
+    const cookie = serialize(TOKEN_NAME, "", {
+      maxAge: -1,
+      path: "/",
     });
-    return Promise.reject({
-      code: 401,
-      message: "请先登录",
+    res.setHeader("Set-Cookie", cookie);
+    resp(401, res);
+    throw new Error("请先登录");
+    // return Promise.reject({
+    //   code: 401,
+    //   message: "请先登录",
+    //   data: null,
+    // });
+  }
+  return token.id as number;
+}
+
+/**
+ * 请求成功并响应
+ */
+export function resp(data, res, message?: string) {
+  if (typeof data === "number") {
+    return res.status(200).json({
+      code: data,
+      msg: SERVER_ERROR_CODES[data] || message,
       data: null,
     });
   }
-  return session.user.id as string;
+  return res.status(200).json({
+    code: 0,
+    msg: "",
+    data,
+  });
 }

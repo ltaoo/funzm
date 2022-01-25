@@ -9,10 +9,10 @@ export function fillMissingCheckInDays(
     const { day, retroactive } = record;
     return {
       day,
-      hasCheckIn: true,
+      has_check_in: true,
       expired: false,
       retroactive,
-      canCheckIn: false,
+      can_check_in: false,
     };
   });
   for (let i = 1; i <= 7; i += 1) {
@@ -20,9 +20,9 @@ export function fillMissingCheckInDays(
     if (theDayHasCheckIn === undefined) {
       records.push({
         day: i,
-        hasCheckIn: false,
+        has_check_in: false,
         expired: i < todayDay,
-        canCheckIn: i === todayDay,
+        can_check_in: i === todayDay,
         retroactive: false,
       });
     }

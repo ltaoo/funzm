@@ -1,4 +1,4 @@
-import { User } from ".prisma/client";
+import { User, Credential } from ".prisma/client";
 
 import * as utils from "@/lib/utils";
 import { PBKDF2 } from "@/lib/utils/crypto";
@@ -28,7 +28,7 @@ export function hash(password: string, salt: SALT): Promise<PASSWORD> {
  * Determine if the incoming `password` matches the `User.password` value.
  */
 export async function compare(
-  user: User,
+  user: Credential,
   password: PASSWORD | string
 ): Promise<boolean> {
   return (await hash(password, user.salt as SALT)) === user.password;

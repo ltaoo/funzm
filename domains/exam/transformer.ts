@@ -5,6 +5,8 @@ import {
   IExamSceneRes,
   IExamSceneValues,
   IPartialExamSceneValues,
+  ISpellingRes,
+  ISpellingValues,
 } from "./types";
 import { paddingZero, removeZeroAtTail } from "./utils";
 
@@ -20,8 +22,8 @@ export function partialExamSceneRes2Values(res): IPartialExamSceneValues {
     start,
     score,
 
-    startedAt: dayjs(created_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
-    endedAt: dayjs(ended_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
+    startedAt: dayjs(created_at).format("MM/DD HH:mm"),
+    endedAt: dayjs(ended_at).format("MM/DD HH:mm"),
   };
 }
 
@@ -98,8 +100,8 @@ export function examSceneRes2Ins(res: IExamSceneRes): IExamSceneValues {
     correctParagraphs: correctSpellings.map((spelling) => spelling.paragraph),
     skippedParagraphs: skippedSpellings.map((spelling) => spelling.paragraph),
 
-    startedAt: dayjs(begin_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
-    endedAt: dayjs(ended_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
+    startedAt: dayjs(begin_at).format("YYYY-MM-DD HH:mm:ss"),
+    endedAt: dayjs(ended_at).format("YYYY-MM-DD HH:mm:ss"),
     score,
 
     stats: {
@@ -110,12 +112,11 @@ export function examSceneRes2Ins(res: IExamSceneRes): IExamSceneValues {
       correctRate,
       correctRateText: `${correctRate}%`,
 
-      createdAt: dayjs(begin_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
-      endAt: dayjs(ended_at * 1000).format("YYYY-MM-DD HH:mm:ss"),
+      createdAt: dayjs(begin_at).format("YYYY-MM-DD HH:mm:ss"),
+      endAt: dayjs(ended_at).format("YYYY-MM-DD HH:mm:ss"),
       spend: (() => {
         if (ended_at) {
-          const spendSeconds =
-            dayjs(ended_at * 1000).unix() - dayjs(begin_at * 1000).unix();
+          const spendSeconds = dayjs(ended_at).unix() - dayjs(begin_at).unix();
           const remainingSeconds = spendSeconds % 60;
           const spendMinutes = ((spendSeconds - remainingSeconds) / 60).toFixed(
             0
@@ -129,5 +130,17 @@ export function examSceneRes2Ins(res: IExamSceneRes): IExamSceneValues {
 
       score,
     },
+  };
+}
+
+export function spellingResultRes2Values(res: ISpellingRes): ISpellingValues {
+  const { id, type, paragraph, input, created_at } = res;
+
+  return {
+    id,
+    type,
+    paragraph,
+    input,
+    createdAt: dayjs(created_at).format("YYYY-MM-DD HH:mm:ss"),
   };
 }

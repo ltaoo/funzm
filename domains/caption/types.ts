@@ -1,10 +1,16 @@
-/**
- * 字幕
- */
+export interface ICaptionRes {
+  id: number;
+  title: string;
+
+  count: number;
+
+  created_at: string;
+}
 export interface ICaptionValues {
-  id: string;
+  id: number;
   title: string;
   paragraphs: IParagraphValues[];
+  count: number;
   author: string;
   createdAt: string;
 }
@@ -14,11 +20,13 @@ export interface ICaptionValues {
  */
 export interface IParagraphValues {
   id: string;
-  line: number;
+  line: string;
   start: string;
   end: string;
   text1: string;
   text2: string;
+
+  valid: boolean;
 }
 
 export interface CaptionFile {
@@ -33,3 +41,5 @@ export interface DiffNode {
   removed?: boolean;
   added?: boolean;
 }
+
+export type SplittedWord = [string, string, string];

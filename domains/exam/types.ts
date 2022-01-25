@@ -1,6 +1,30 @@
-import { IParagraphValues } from "@/domains/caption/types";
+import { ICaptionValues, IParagraphValues } from "@/domains/caption/types";
 
-import { ExamStatus, SpellingResultType } from "./constants";
+import { ExamStatus, ExamType, SpellingResultType } from "./constants";
+
+type ExamCallback = (examJSON: IExamSceneDomain) => void;
+export interface IExamBaseParams {
+  title: string;
+  status: ExamStatus;
+  curParagraphId: string;
+  combo?: number;
+  maxCombo?: number;
+  paragraphs: IParagraphValues[];
+  canComplete?: boolean;
+
+  secondsPerParagraph?: number;
+
+  onChange?: ExamCallback;
+  onSkip?: ExamCallback;
+  onCorrect?: ExamCallback;
+  onIncorrect?: ExamCallback;
+  onComplete?: ExamCallback;
+  onFailed?: ExamCallback;
+  onBeforeSkip?: (value: IExamSceneDomain) => boolean;
+  onBeforeNext?: (value: IExamSceneDomain) => boolean;
+  onNext?: ExamCallback;
+}
+export interface IInputExamParams extends IExamBaseParams {}
 
 export interface IPartialExamSceneValues {
   id: string;
@@ -18,6 +42,7 @@ export interface IPartialExamSceneValues {
 export interface IExamSceneDomain {
   paragraphs: IParagraphValues[];
   status: ExamStatus;
+  inputting: string;
   displayedWords: { uid: number; word: string }[];
   curWords: string[][];
   countdown: string;
@@ -52,6 +77,7 @@ export interface IExamSceneRes {
   start_id: string;
   // user_id: string;
   status: ExamStatus;
+  type?: ExamType;
   start: IParagraphValues;
   cur?: string;
   spellings: {
@@ -81,6 +107,7 @@ export interface IExamSceneValues {
   id: string;
   captionId: string;
 
+  type?: ExamType;
   status: ExamStatus;
   score: number;
 
@@ -132,10 +159,10 @@ export interface ISpellingValues {
   // 该次拼写输入的内容
   input: string;
   // 属于哪个测验场景
-  examSceneId: string;
+  // examSceneId: string;
   // 拼写的那段句子
-  // paragraphId: string;
   paragraph: IParagraphValues;
   // 属于哪个用户
-  userId: string;
+  // userId: string;
+  createdAt: string;
 }

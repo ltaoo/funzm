@@ -7,11 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// 这个是指「三方账户」
 model Account {
-  id                   String  @id @default(cuid())
-  user_id              String  @map("user_id")
+  id                   Int  @id @default(autoincrement())
+  user_id              Int
   type                 String
   provider             String
+  // 唯一 id
   provider_account_id  String
   refresh_token        String?
   access_token         String?
@@ -28,116 +30,210 @@ model Account {
 }
 
 model User {
-  id               String    @id @default(cuid())
-  name             String?
-  email            String?   @unique
+  id               Int          @id @default(autoincrement())
+  email            String?      @unique
   email_verified   DateTime?
-  avatar           String?
-  password         String
-  salt             String
 
-  score            Int       @default(0)
-
-  subscription     Subscription?
+  profile          Profile?
+  // 账号
   accounts         Account[]
-  sessions         Session[]
+  credential       Credential?
+  subscription     Subscription?
   captions         Caption[]
   exam_scenes      ExamScene[]
-  notebooks        Notebook[]
+  notes            Note[]
+  words            Word[]
   spelling         SpellingResult[]
   score_records    ScoreRecord[]
-  packages         Package[]
-  sign             SignRecord[]
+  // packages         Package[]
+  check_in_records CheckInRecord[]
+  score            Score?
+  rank             Rank?
 
-  created_at    Int
-  last_updated  Int?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @default(now())
 
   @@map("users")
 }
 
-model Session {
-  id            String   @id @default(cuid())
-  session_token String   @unique
-  userId        String   @map("user_id")
-  expires       DateTime
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
-}
-
 model VerificationToken {
   identifier String
-  token      String   @unique
+  token      String          @unique
   expires    DateTime
+
+  status     Int             @default(1)
+  user_id    Int?
 
   @@unique([identifier, token])
   @@map("verificationtokens")
 }
+model Credential {
+  user_id          Int          @unique
+  user             User         @relation(fields: [user_id], references: [id])
 
-// 订阅（试用、会员）
-model Subscription {
-  id              String       @id @default(cuid())
+  password         String?
+  salt             String?
 
-  type            Int          @default(1)
-
-  user            User         @relation(fields: [user_id], references: [id])
-  user_id          String      
-
-  // 到期时间
-  expired_at      Int
-  created_at      Int
-
-  @@map("roles")
+  @@map("credentials")
 }
 
+// 产品，从三方平台同步过来，或自己初始化
+model Product {
+  id          Int          @id @default(autoincrement())
+
+  active      Boolean      @default(false)
+  name        String
+  description String?
+  image       String?
+  metadata    Json?
+  created_at  DateTime     @default(now())
+  updated_at  DateTime?
+
+  prices      Price[]
+
+  @@map("products")
+}
+
+model Price {
+  id                Int         @id @default(autoincrement())
+  active            Boolean        @default(false)
+
+  product_id        Int        
+  product           Product        @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  interval          PriceInterval?
+
+  unit_amount       Int?
+  interval_count    Int?
+  type              PriceType?
+  created_at        DateTime       @default(now())
+  updated_at        DateTime?
+
+  subscriptions     Subscription[]
+  @@map("prices")
+}
+
+enum PriceInterval {
+  month
+  year
+}
+enum PriceType {
+  recurring
+  one_time
+}
+
+// 订阅
+model Subscription {
+  id              Int          @id @default(autoincrement())
+
+  type            SubscriptionStatus
+  price_id        Int
+  price           Price              @relation(fields: [price_id], references: [id])
+
+  // 订阅开始时间
+  start_date           DateTime?
+  // 订阅结束时间
+  ended_at             DateTime?
+  // 试用开始
+  trial_start          DateTime?
+  // 试用结束
+  trial_end            DateTime?
+  // 取消时间
+  cancel_at            DateTime?
+  // 是否在周期内取消
+  cancel_at_period_end Boolean?
+  // 实际取消时间
+  canceled_at          DateTime?
+
+  user_id         Int      
+  user            User         @relation(fields: [user_id], references: [id])
+
+  created_at      DateTime     @default(now())
+  expired_at      DateTime?
+
+  @@map("subscriptions")
+}
+
+enum SubscriptionStatus {
+  active
+  canceled
+  incomplete
+  incomplete_expired
+  past_due
+  trialing
+  unpaid
+}
+
+
+model Profile {
+  nickname        String?
+  avatar          String?
+  user_id         Int      
+  user            User         @relation(fields: [user_id], references: [id])
+
+  @@map("profiles")
+}
+
+// 用户拥有的积分
+model Score {
+  value           Int          @default(0)
+  user_id         Int      
+  user            User         @relation(fields: [user_id], references: [id])
+
+  @@map("score")
+}
+
+model Rank {
+  // 等级
+  level           Int          @default(1)
+  // 经验
+  exp             Int          @default(0)
+
+  user_id         Int      
+  user            User         @relation(fields: [user_id], references: [id])
+
+  @@map("rank")
+}
+
+// 字幕
 model Caption {
-  id             String        @id @default(cuid())
+  id             Int           @id @default(autoincrement())
   title          String
-  content        String?       @db.LongText
-  published      Boolean       @default(false)
-  publisher      User          @relation(fields: [publisher_id], references: [id])
-  publisher_id   String
+  public         Boolean       @default(false)
+  user_id        Int
+  movie_id       Int?      
 
-  movie_id       String?      
+  created_at     DateTime      @default(now())
+  updated_at     DateTime?
 
+  user           User          @relation(fields: [user_id], references: [id])
   paragraphs     Paragraph[]
   exam_scenes    ExamScene[]
-
-  created_at     Int
-  last_updated   Int?
+  notes          Note[]
 }
 
 model Paragraph {
-  id           String   @id @default(cuid())
+  id           Int      @id @default(autoincrement())
   line         String
   text1        String   @db.LongText
   text2        String   @db.LongText
   start        String
   end          String
   language     String?
-  caption_id   String  
+  caption_id   Int  
+
+  // 合并的句子切割点
+  indexes       String?
   deleted      Boolean  @default(false)
 
   caption      Caption  @relation(fields: [caption_id], references: [id], onDelete: Cascade)
 
   exam_scenes  ExamScene[]
-  // 该段落被拼写（正确、错误、跳过）的记录
   spellings    SpellingResult[]
-  // 该段落有哪些单词被记录进单词本
   words        Word[]
+  notes        Note[]
 
   @@map("paragraphs")
-}
-
-model Scene {
-  id           String   @id @default(cuid())
-
-  // 场景开始段落
-  start        String
-  // 场景结束段落
-  end          String
-
-  @@map("scenes")
 }
 
 // 阅读记录
@@ -148,39 +244,43 @@ model Reading {
 }
 
 model ExamScene {
-  id              String               @id @default(cuid())
+  id              Int               @id @default(autoincrement())
 
-  status          Int                  @default(1)
+// 该测验属于整个测验的第几个
+  index           Int               
+  status          Int               @default(1)
+  type            Int               @default(1)
 
-  caption_id      String    
-  user_id         String
+  caption_id      Int    
+  user_id         Int
 
-  start_id        String    
+// 开始句子
+  start_id        Int    
 
   score           Int?                 @default(0)
 
   spellings       SpellingResult[]
   caption         Caption              @relation(fields: [caption_id], references: [id])
-  user            User                @relation(fields: [user_id], references: [id])
+  user            User                 @relation(fields: [user_id], references: [id])
   start           Paragraph            @relation(fields: [start_id], references: [id])
 
-  created_at      Int
-  begin_at        Int?
-  ended_at        Int?
+  created_at      DateTime   @default(now())
+  begin_at        DateTime?
+  ended_at        DateTime?
 
   @@map("exam_scenes")
 }
 
 model SpellingResult {
-  id             String      @id @default(cuid())
+  id             Int      @id @default(autoincrement())
   type           Int
 
-  user_id        String?
+  user_id        Int
 
-  paragraph_id   String    
+  paragraph_id   Int    
 
 
-  exam_scene_id  String?    
+  exam_scene_id  Int?    
 
   user           User?       @relation(fields: [user_id], references: [id])
   exam_scene     ExamScene?  @relation(fields: [exam_scene_id], references: [id], onDelete: Cascade)
@@ -188,103 +288,104 @@ model SpellingResult {
 
   input          String?
 
-  created_at     Int
+  created_at     DateTime   @default(now())
 
   @@map("spelling_results")
 }
 
-model Notebook {
-  id                String     @id @default(cuid())
+model Note {
+  id                    Int       @id @default(autoincrement())
 
-  title             String?
+  content               String    @db.LongText
+  text                  String?   @db.LongText
+  start                 Int?
+  end                   Int?
 
-  user              User?     @relation(fields: [user_id], references: [id])
-  user_id            String?  
+  caption_id            Int
+  caption               Caption @relation(fields: [caption_id], references: [id])
 
-  words             Word[]
+  paragraph_id          Int
+  paragraph             Paragraph @relation(fields: [paragraph_id], references: [id])
 
-  created_at    Int
-  last_updated  Int?
+  user_id               Int  
+  user                  User     @relation(fields: [user_id], references: [id])
 
-  @@map("notebooks")
+  created_at            DateTime  @default(now())
+
+  @@map("noets")
 }
 
 model Word {
-  id                    String     @id @default(cuid())
+  id                    Int     @id @default(autoincrement())
 
   text                  String
 
-  notebook_id            String       
-  notebook              Notebook?     @relation(fields: [notebook_id], references: [id])
+  user_id               Int       
+  user                  User     @relation(fields: [user_id], references: [id])
 
-  paragraph_id           String       
-  paragraph             Paragraph     @relation(fields: [paragraph_id], references: [id])
+  paragraph_id          Int?       
+  paragraph             Paragraph?     @relation(fields: [paragraph_id], references: [id])
 
-  created_at            Int
+  created_at            DateTime   @default(now())
 
   @@map("words")
 }
 
 // 积分记录
 model ScoreRecord {
-  id                    String     @id @default(cuid())
+  id                    Int     @id @default(autoincrement())
 
-  user              User?     @relation(fields: [user_id], references: [id])
-  user_id            String?  
+  user_id               Int?  
+  user                  User?     @relation(fields: [user_id], references: [id])
 
-  type              Int
-  number            Int
-  desc              String?
+  type                  Int
+  number                Int
+  desc                  String?
 
-  created_at            Int
+  created_at            DateTime @default(now())
 
   @@map("score_records")
 }
 
 // 签到记录
-model SignRecord {
-  id                    String    @id @default(cuid())
+model CheckInRecord {
+  id                    Int    @id @default(autoincrement())
 
+  user_id               Int?  
   user                  User?     @relation(fields: [user_id], references: [id])
-  user_id                String?  
 
   day                   Int
   // 是否补签
   retroactive           Boolean?  @default(false)
-  created_at            Int
+  created_at            DateTime  @default(now())
 
-  @@map("sign_records")
+  @@map("check_in_records")
 }
 
 
 // 游戏道具
 model Item {
-  id                    String     @id @default(cuid())
+  id                    Int     @id @default(autoincrement())
 
-  type                  Int
+  // type                  Int
 
   name                  String
+  desc                  String?
   price                 Int
-
-  packages              Package[]
-
-  created_at            Int
 
   @@map("items")
 }
 
 // user package
-model Package {
-  id                    String     @id @default(cuid())
+// model Package {
+//   id                    Int     @id @default(autoincrement())
 
-  item                  Item      @relation(fields: [item_id], references: [id])
-  item_id                String    
-  num                   Int
+//   item_id               Int    
+//   item                  Item      @relation(fields: [item_id], references: [id])
+//   num                   Int
 
-  user                  User     @relation(fields: [user_id], references: [id])
-  user_id                String  
+//   user_id               Int  
+//   user                  User     @relation(fields: [user_id], references: [id])
 
-  created_at            Int
-
-  @@map("packages")
-}
+//   @@map("packages")
+// }

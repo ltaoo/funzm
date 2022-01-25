@@ -23,27 +23,9 @@ export async function fetchCaptionsServer(
   }
   return prisma.caption.findMany({
     where: {
-      publisher_id: extra?.id,
+      user_id: extra?.id,
     },
     take: params?.pageSize ?? 5,
-  });
-}
-
-/**
- * 新增字幕
- */
-export async function addCaptionService({ title, paragraphs, publisherId }) {
-  // console.log("[]addCaptionService", publisherId);
-  return prisma.caption.create({
-    data: {
-      title,
-      paragraphs: {
-        create: paragraphs,
-      },
-      publisher_id: publisherId,
-      created_at: utils.seconds(),
-      last_updated: null,
-    },
   });
 }
 

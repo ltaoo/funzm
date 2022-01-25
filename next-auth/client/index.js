@@ -85,6 +85,12 @@ export function useSession(session) {
   return _useSessionHook(session);
 }
 
+// export function useUser() {
+//   const context = useContext(SessionContext);
+//   if (context) return context;
+//   return null;
+// }
+
 function _useSessionHook(session) {
   const [data, setData] = useState(session);
   const [loading, setLoading] = useState(!data);
@@ -303,13 +309,9 @@ export function setOptions({
   }
 }
 
-export function Provider({ children, session, options }) {
+export function Provider({ children, user, options }) {
   setOptions(options);
-  return createElement(
-    SessionContext.Provider,
-    { value: useSession(session) },
-    children
-  );
+  return createElement(SessionContext.Provider, { value: user }, children);
 }
 
 /**

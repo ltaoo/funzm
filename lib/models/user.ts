@@ -1,6 +1,7 @@
 /**
  * @file 用户服务
  */
+import Joi from "joi";
 import { User } from ".prisma/client";
 
 import prisma from "@/lib/prisma";
@@ -22,9 +23,18 @@ export function findUserService(id: string) {
     where: { id },
   });
 }
-export function findUserByEmailService(email) {
+
+/**
+ * @param {string} email - 邮箱
+ * @returns
+ */
+export function findUserByEmail(email) {
   return prisma.user.findUnique({
     where: { email },
+    include: {
+      // profile: true,
+      credential: true,
+    },
   });
 }
 
@@ -34,26 +44,40 @@ export function findUserByEmailService(email) {
  * @TODO throw w/ message instead of early returns?
  */
 type UserValues = Omit<Partial<User>, "email" | "password"> & Credentials;
-export async function addUserService(values: UserValues): Promise<User> {
-  const { password, salt } = await Password.prepare(values.password);
-
-  const user = {
-    email: values.email,
-    emailVerified: values.emailVerified,
-    name: values.name || values.email,
-    avatar: null,
-    password,
-    salt,
-    created_at: utils.seconds(),
-    last_updated: null,
-  };
-
-  // Create the new User record
-  const createdUser = await prisma.user.create({
-    data: user,
+export async function addUser(values: UserValues): Promise<User> {
+  const schema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string()
+      .pattern(new RegExp("^[a-zA-Z0-9]{8,30}$"))
+      .required(),
   });
-  // if (!createdUser) return;
-
+  const { email, password: pw } = values;
+  await schema.validateAsync(values);
+  const { password, salt } = await Password.prepare(pw);
+  const createdUser = await prisma.user.create({
+    data: {
+      email,
+    },
+  });
+  await prisma.credential.create({
+    data: {
+      user_id: createdUser.id,
+      password,
+      salt,
+    },
+  });
+  await prisma.profile.create({
+    data: {
+      user_id: createdUser.id,
+      nickname: email.split("@").shift(),
+    },
+  });
+  await prisma.score.create({
+    data: {
+      user_id: createdUser.id,
+      value: 0,
+    },
+  });
   return createdUser;
 }
 

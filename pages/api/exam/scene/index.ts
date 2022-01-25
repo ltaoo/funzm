@@ -3,18 +3,22 @@
  */
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { getSession } from "@/next-auth/client";
 import prisma from "@/lib/prisma";
+import { ensureLogin, resp } from "@/lib/utils";
 
 export default async function provideExamSceneProfileService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const session = await getSession({ req });
-  if (!session) {
-    return;
+  await ensureLogin(req, res);
+  const { id: i } = req.query as { id: string };
+
+  const id = Number(i);
+
+  if (Number.isNaN(id) || typeof id !== "number") {
+    return resp(10001, res);
   }
-  const id = req.query.id as string;
+
   const exam = await prisma.examScene.findUnique({
     where: { id },
     include: {
@@ -22,11 +26,5 @@ export default async function provideExamSceneProfileService(
     },
   });
 
-  console.log(exam);
-
-  res.status(200).json({
-    code: 0,
-    msg: "",
-    data: exam,
-  });
+  resp(exam, res);
 }

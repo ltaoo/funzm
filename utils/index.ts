@@ -1,6 +1,8 @@
 import { Packer, Document, Paragraph, TextRun } from "docx";
 import { jsPDF } from "jspdf";
 import { saveAs } from "file-saver";
+import { TAB_TITLE_SUFFIX } from "@/constants";
+import dayjs from "dayjs";
 
 export function sleep(delay) {
   return new Promise((resolve) => {
@@ -227,4 +229,32 @@ function getWidthAndHeight(text, doc, { maxWidth }) {
     lines: 1,
   };
   // text.length * w
+}
+
+export function tabTitle(title) {
+  return `${title} - ${TAB_TITLE_SUFFIX}`;
+}
+
+export function buffer2ImgUrl(buffer) {
+  const bytes = new Uint8Array(buffer.data);
+  let data = "";
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    data += String.fromCharCode(bytes[i]);
+  }
+
+  return "data:image/png;base64," + window.btoa(data);
+}
+
+/**
+ * 时间格式化
+ * @param time
+ * @param short
+ * @returns
+ */
+export function df(time, short: boolean = false) {
+  if (short) {
+    return dayjs(time).format("MM-DD HH:mm:ss");
+  }
+  return dayjs(time).format("YYYY-MM-DD HH:mm:ss");
 }

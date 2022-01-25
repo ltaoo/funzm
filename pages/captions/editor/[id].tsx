@@ -3,122 +3,54 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import cx from "classnames";
-import Head from "next/head";
 import { useRouter } from "next/router";
-import { CogIcon, TrashIcon } from "@ltaoo/icons/outline";
-import debounce from "lodash.debounce";
+import {
+  ChevronDoubleDownIcon,
+  ExclamationIcon,
+  ReplyIcon,
+  TrashIcon,
+  UserIcon,
+} from "@ltaoo/icons/outline";
 
+import useHelper from "@list/hooks";
+
+import Layout from "@/layouts";
 import {
   deleteParagraphService,
   updateCaptionService,
-  fetchCaptionWithoutParagraphsService,
   fetchParagraphsService,
   updateParagraphService,
   recoverParagraphService,
-} from "@/services/caption";
-import { parseCaptionContent } from "@/domains/caption";
-import { localdb } from "@/utils/db";
-import { parseLocalId } from "@/utils/db/utils";
-import { splitMergedParagraphs } from "@/domains/caption/utils";
-import FixedFooter from "@/components/FixedFooter";
+  fetchCaptionProfileService,
+} from "@/domains/caption/services";
+import { mergeMultipleLines } from "@/domains/caption/utils";
+import { IParagraphValues } from "@/domains/caption/types";
+import ScrollView from "@/components/ScrollView";
+import CaptionPreviewSkeleton from "@/components/CaptionPreview/skeleton";
+import Tooltip from "@/components/Tooltip";
 
 const CaptionEditorPage = () => {
   const router = useRouter();
+  const id = router.query.id as string;
 
+  const [{ dataSource, initial, noMore }, helper] = useHelper<IParagraphValues>(
+    fetchParagraphsService
+  );
   const [caption, setCaption] = useState(null);
-  const [paragraphs, setParagraphs] = useState([]);
-  const pageRef = useRef(1);
-  const loadingRef = useRef(false);
-  const totalRef = useRef(0);
-
+  const [deletedParagraph, setDeletedParagraph] = useState(null);
   const prevParagraphsRef = useRef(null);
-  const [deletedParagraphId, setDeletedParagraphsId] = useState(null);
-
-  const id = parseLocalId(router.query.id) as string;
-  const idRef = useRef(id);
+  const dTimerRef = useRef(null);
 
   useEffect(() => {
-    idRef.current = id;
-  }, [id]);
-
-  const fetchCaptionAndSave = useCallback(async (id) => {
-    const response = await fetchCaptionWithoutParagraphsService({ id });
-    setCaption(response);
-    // @ts-ignore
-    if (response.content) {
-      const paragraphs = parseCaptionContent(
-        response.content,
-        // @ts-ignore
-        response.type
-      ).map((paragraph) => {
-        return {
-          ...paragraph,
-          captionId: id,
-        };
+    if (id && initial) {
+      fetchCaptionProfileService({ id }).then((resp) => {
+        setCaption(resp);
       });
-      localdb.table("paragraphs").bulkAdd(paragraphs);
-      const newCaption = { ...response };
-      delete newCaption.content;
-      localdb.table("captions").put(newCaption, id);
-      setParagraphs(paragraphs);
-      totalRef.current = paragraphs.length;
-      return { idEnd: true, total: paragraphs.length };
+      helper.init({
+        captionId: id,
+      });
     }
-    loadingRef.current = true;
-    const {
-      list: paragraphs,
-      total,
-      isEnd,
-    } = await fetchParagraphsService({
-      captionId: id,
-      page: pageRef.current,
-    });
-    loadingRef.current = false;
-    pageRef.current += 1;
-    totalRef.current = total;
-    setParagraphs(paragraphs);
-    return { isEnd, total };
-  }, []);
-
-  useEffect(() => {
-    const handler = debounce(async () => {
-      if (
-        document.documentElement.scrollTop +
-          document.documentElement.clientHeight +
-          200 >=
-        document.body.clientHeight
-      ) {
-        // console.log("load more", loadingRef.current, pageRef.current);
-        if (loadingRef.current) {
-          return;
-        }
-        loadingRef.current = true;
-        const { isEnd, list: paragraphs } = await fetchParagraphsService({
-          captionId: id,
-          page: pageRef.current,
-        });
-        loadingRef.current = false;
-        pageRef.current += 1;
-        setParagraphs((prev) => {
-          return prev.concat(paragraphs);
-        });
-        if (isEnd) {
-          document.removeEventListener("scroll", handler);
-          return;
-        }
-      }
-    }, 400);
-    fetchCaptionAndSave(id).then(({ isEnd }) => {
-      if (isEnd) {
-        return;
-      }
-      document.addEventListener("scroll", handler);
-    });
-    pageRef.current = 1;
-    return () => {
-      document.removeEventListener("scroll", handler);
-    };
-  }, []);
+  }, [id]);
 
   const updateTitle = useCallback(
     async (event) => {
@@ -147,166 +79,175 @@ const CaptionEditorPage = () => {
       await updateParagraphService({ id, text1: nextText1 });
     };
   }, []);
-  const updateText2 = useCallback(
-    (updatedParagraph) => {
-      return async (event) => {
-        const { id, text2 } = updatedParagraph;
-        const nextText2 = event.target.innerText;
-        if (text2 === nextText2) {
-          return;
-        }
-        await updateParagraphService({ id, text2: nextText2 });
-      };
-    },
-    [paragraphs]
-  );
-
-  const deleteParagraph = useCallback(
-    (deletedLine) => {
-      return async () => {
-        console.log("[]deleteParagraph ", caption);
-        // const { paragraphs } = caption;
-        const nextParagraphs = paragraphs.filter((paragraph) => {
-          return paragraph.id !== deletedLine.id;
-        });
-        prevParagraphsRef.current = paragraphs;
-        setParagraphs(nextParagraphs);
-        await deleteParagraphService({ id: deletedLine.id });
-        setDeletedParagraphsId(deletedLine.id);
-      };
-    },
-    [caption, paragraphs]
-  );
-  const recoverDeletedParagraph = useCallback(async () => {
-    await recoverParagraphService({ id: deletedParagraphId });
-    setDeletedParagraphsId(null);
-    if (prevParagraphsRef.current) {
-      setParagraphs(prevParagraphsRef.current);
-      prevParagraphsRef.current = null;
-    }
-  }, [deletedParagraphId]);
-
-  const splitMergedLines = useCallback(
-    (mergedLine) => {
-      if (!caption) {
+  const updateText2 = useCallback((updatedParagraph) => {
+    return async (event) => {
+      const { id, text2 } = updatedParagraph;
+      const nextText2 = event.target.innerText;
+      if (text2 === nextText2) {
         return;
       }
-      const nextOptimizedParagraphs = splitMergedParagraphs(
-        caption.paragraphs,
-        mergedLine
-      );
-      setCaption({
-        ...caption,
-        paragraphs: nextOptimizedParagraphs,
-      });
-    },
-    [caption, caption]
-  );
-  const editCaption = useCallback(async () => {
-    const savedCaption = await updateCaptionService({
-      ...caption,
-      paragraphs: caption.paragraphs.map((p) => {
+      await updateParagraphService({ id, text2: nextText2 });
+    };
+  }, []);
+  const mergeNextLine = useCallback((curLine) => {
+    return () => {
+      helper.modifyResponse((resp) => {
+        const { dataSource: prevDataSource, ...rest } = resp;
+        const matchedLineIndex = prevDataSource.findIndex(
+          (pa) => pa.line === curLine
+        );
+        if (matchedLineIndex === -1) {
+          return;
+        }
+        const nextParagraph = prevDataSource[matchedLineIndex + 1];
+        if (!nextParagraph) {
+          return;
+        }
+        const curParagraph = prevDataSource[matchedLineIndex];
+        const merged = mergeMultipleLines(curParagraph, nextParagraph);
+        prevDataSource.splice(matchedLineIndex, 2, merged);
+        updateParagraphService({
+          ...merged,
+        });
+        deleteParagraphService({ id: nextParagraph.id });
         return {
-          ...p,
-          line: String(p.line),
+          ...rest,
+          dataSource: [...prevDataSource],
         };
-      }),
+      });
+    };
+  }, []);
+  const deleteParagraph = useCallback((deletedParagraph) => {
+    return async () => {
+      await deleteParagraphService({ id: deletedParagraph.id });
+      setDeletedParagraph(deletedParagraph);
+      if (dTimerRef.current) {
+        clearTimeout(dTimerRef.current);
+      }
+      dTimerRef.current = setTimeout(() => {
+        setDeletedParagraph(null);
+      }, 3000);
+      helper.modifyResponse((resp) => {
+        const { dataSource: prevDataSource, ...rest } = resp;
+        prevParagraphsRef.current = prevDataSource;
+        const nextParagraphs = prevDataSource.filter((paragraph) => {
+          return paragraph.id !== deletedParagraph.id;
+        });
+        return {
+          ...rest,
+          dataSource: nextParagraphs,
+        };
+      });
+    };
+  }, []);
+  const recoverDeletedParagraph = useCallback(async () => {
+    if (deletedParagraph === null) {
+      return;
+    }
+    if (prevParagraphsRef.current === null) {
+      return;
+    }
+    await recoverParagraphService({ id: deletedParagraph.id });
+    setDeletedParagraph(null);
+    helper.modifyResponse((resp) => {
+      const { dataSource: prevDataSource, ...rest } = resp;
+      return {
+        ...rest,
+        dataSource: prevParagraphsRef.current,
+      };
     });
-  }, [caption]);
+  }, [deletedParagraph]);
 
-  if (!caption) {
-    return null;
-  }
-  const { title } = caption;
+  console.log("[PAGE]caption/editor/[id] - render", dataSource);
+
   return (
-    <div className="h-full">
-      <Head>
-        <title>{title}</title>
-      </Head>
-      <div className="relative dark:bg-gray-800">
-        <div className="py-10 px-4 bg-gray-100 border-b">
-          <div className="mx-auto md:px-60">
-            <h2
-              className="text-3xl break-all dark:text-gray-400"
-              contentEditable
-              suppressContentEditableWarning
-              onBlur={updateTitle}
-            >
-              {title}
-            </h2>
-          </div>
-        </div>
-        <div className="mx-auto mt-20 px-4 space-y-6 pb-20 md:px-60">
-          {paragraphs.map((paragraph) => {
-            const { line, text1, text2 } = paragraph;
+    <Layout title={caption?.title}>
+      <ScrollView noMore={noMore} onLoadMore={helper.loadMoreWithLastItem}>
+        <div className="">
+          {(() => {
+            if (initial) {
+              return <CaptionPreviewSkeleton />;
+            }
             return (
-              <div
-                key={line}
-                className={cx(
-                  "relative group",
-                  String(line).includes("+")
-                    ? "border-1 border-dashed border-gray-500"
-                    : "",
-                  !text2 ? "border-1 border-dashed border-red-500" : "",
-                  "rounded-md"
-                )}
-              >
-                <div className="absolute top-2 left-[-36px] hidden space-y-2 group-hover:block">
-                  <p
-                    className="text-sm px-2"
-                    onClick={deleteParagraph(paragraph)}
+              <div className="relative">
+                <div className="#title pb-10 border-b">
+                  <h2
+                    className="text-5xl break-all"
+                    contentEditable
+                    suppressContentEditableWarning
+                    onBlur={updateTitle}
                   >
-                    <TrashIcon className="w-4 h-4 text-gray-500 cursor-pointer" />
-                  </p>
-                  <p
-                    className={cx(
-                      "text-sm px-2",
-                      String(line).includes("+") ? "block" : "hidden"
-                    )}
-                    onClick={() => {
-                      splitMergedLines(line);
-                    }}
-                  >
-                    <TrashIcon className="w-4 h-4 text-gray-500 cursor-pointer" />
-                  </p>
+                    {caption?.title}
+                  </h2>
+                  <div className="flex items-center mt-4 space-x-8">
+                    <div className="flex items-center">
+                      <UserIcon className="w-4 h-4 mr-2 text-gray-400" />
+                      <span className="text-gray-400">unknown</span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p
-                    className="text1"
-                    suppressContentEditableWarning
-                    contentEditable
-                    onBlur={updateText1(paragraph)}
-                  >
-                    {text1}
-                  </p>
-                  <p
-                    className="text2"
-                    suppressContentEditableWarning
-                    contentEditable
-                    onBlur={updateText2(paragraph)}
-                  >
-                    {text2}
-                  </p>
+                <div className="mt-14 pb-20 space-y-16">
+                  {dataSource.map((paragraph) => {
+                    const { line, text1, text2, valid } = paragraph;
+                    return (
+                      <div
+                        key={line}
+                        className={cx("relative group rounded-md")}
+                      >
+                        <div className="#tool absolute -top-9 flex p-2 space-x-2 bg-gray-800 rounded">
+                          <TrashIcon
+                            className="w-4 h-4 text-gray-100 cursor-pointer"
+                            onClick={deleteParagraph(paragraph)}
+                          />
+                          <ChevronDoubleDownIcon
+                            className={cx(
+                              "w-4 h-4 text-gray-100 cursor-pointer"
+                            )}
+                            onClick={mergeNextLine(line)}
+                          />
+                          {!valid && (
+                            <Tooltip content="该段落缺少中文或英文，建议删除">
+                              <ExclamationIcon className="w-4 h-4 text-gray-100 cursor-pointer" />
+                            </Tooltip>
+                          )}
+                        </div>
+                        <div>
+                          <p
+                            className="text1"
+                            suppressContentEditableWarning
+                            contentEditable
+                            onBlur={updateText1(paragraph)}
+                          >
+                            {text1}
+                          </p>
+                          <p
+                            className="text2"
+                            suppressContentEditableWarning
+                            contentEditable
+                            onBlur={updateText2(paragraph)}
+                          >
+                            {text2}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
-          })}
+          })()}
+          {deletedParagraph && (
+            <div className="fixed bottom-12 right-12">
+              <div className="py-3 px-5 bg-gray-800 rounded-xl shadow-xl">
+                <div onClick={recoverDeletedParagraph}>
+                  <ReplyIcon className="w-6 h-6 text-gray-200 cursor-pointer" />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
-      <div className="fixed bottom-40 right-0 hidden space-y-4 md:block">
-        <div
-          className="group flex items-center py-2 px-4 rounded-l-lg bg-gray-100 cursor-pointer hover:bg-gray-200"
-          onClick={editCaption}
-        >
-          <CogIcon className="w-6 h-6 text-gray-400 group-hover:text-gray-800" />
-        </div>
-      </div>
-      {deletedParagraphId && (
-        <FixedFooter>
-          <div onClick={recoverDeletedParagraph}>撤销删除</div>
-        </FixedFooter>
-      )}
-    </div>
+      </ScrollView>
+    </Layout>
   );
 };
 

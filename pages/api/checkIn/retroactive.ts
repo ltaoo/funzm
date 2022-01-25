@@ -3,14 +3,14 @@
  */
 import { NextApiRequest, NextApiResponse } from "next";
 import dayjs from "dayjs";
-import zhCN from 'dayjs/locale/zh-cn';
+import zhCN from "dayjs/locale/zh-cn";
 
 import { ensureLogin } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 
 import { fillMissingCheckInDays } from "./utils";
 
-dayjs.locale('zh-CN', zhCN);
+dayjs.locale("zh-CN", zhCN);
 
 export default async function provideRetroactiveService(
   req: NextApiRequest,
@@ -40,16 +40,16 @@ export default async function provideRetroactiveService(
     return;
   }
 
-  const checkInRecordsBetweenThisWeeks = await prisma.signRecord.findMany({
+  const checkInRecordsBetweenThisWeeks = await prisma.checkInRecord.findMany({
     where: {
-      userId,
+      user_id: userId,
       created_at: {
-        gte: firstDay.hour(0).minute(0).second(0).unix(),
-        lt: today.clone().unix(),
+        gte: firstDay.hour(0).minute(0).second(0).toDate(),
+        lt: today.clone().toDate(),
       },
     },
   });
-  
+
   const days = fillMissingCheckInDays(checkInRecordsBetweenThisWeeks, todayDay);
 
   const theDayWantToRetroactiveTo = days.find((record) => record.day === day);
@@ -71,12 +71,11 @@ export default async function provideRetroactiveService(
     return;
   }
 
-  await prisma.signRecord.create({
+  await prisma.checkInRecord.create({
     data: {
-      userId,
+      user_id: userId,
       day,
       retroactive: true,
-      created_at: today.clone().unix(),
     },
   });
 

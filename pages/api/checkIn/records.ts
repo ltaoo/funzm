@@ -20,15 +20,16 @@ export default async function provideCheckInRecordsService(
   const userId = await ensureLogin(req, res);
 
   const today = dayjs();
-  const todayDay = today.clone().day();
+  let todayDay = today.clone().day();
+  todayDay = todayDay === 0 ? 7 : todayDay;
   const firstDay = today.startOf("week");
 
-  const checkInRecordsBetweenThisWeeks = await prisma.signRecord.findMany({
+  const checkInRecordsBetweenThisWeeks = await prisma.checkInRecord.findMany({
     where: {
-      userId,
+      user_id: userId,
       created_at: {
-        gte: firstDay.hour(0).minute(0).second(0).unix(),
-        lt: today.clone().unix(),
+        gte: firstDay.hour(0).minute(0).second(0).toDate(),
+        lt: today.clone().toDate(),
       },
     },
   });
@@ -42,8 +43,10 @@ export default async function provideCheckInRecordsService(
       const { day } = record;
       return {
         ...record,
-        rewardText: rewardPerDay[day] ? rewardPerDay[day].text() : undefined,
-        extraRewardText: extraRewardForSpecialDay[day] ? extraRewardForSpecialDay[day].text() : undefined,
+        reward_text: rewardPerDay[day] ? rewardPerDay[day].text() : undefined,
+        extra_reward_text: extraRewardForSpecialDay[day]
+          ? extraRewardForSpecialDay[day].text()
+          : undefined,
       };
     }),
   });

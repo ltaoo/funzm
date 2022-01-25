@@ -1,26 +1,33 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { getSession } from "@/next-auth/client";
 import prisma from "@/lib/prisma";
+import { ensureLogin, resp } from "@/lib/utils";
 
 export default async function provideUserProfileService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const session = await getSession({ req });
-  if (!session) {
-    return;
-  }
-
-  const userId = session.user.id as string;
+  const user_id = await ensureLogin(req, res);
   const user = await prisma.user.findUnique({
     where: {
-      id: userId,
+      id: user_id,
+    },
+    include: {
+      profile: true,
+      score: true,
     },
   });
-  res.status(200).json({
-    code: 0,
-    msg: "",
-    data: user,
-  });
+
+  if (!user) {
+    return resp(12000, res);
+  }
+  return resp(
+    {
+      email: user.email,
+      nickname: user.profile?.nickname,
+      avatar: user.profile?.avatar,
+      score: user.score?.value,
+    },
+    res
+  );
 }

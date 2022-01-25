@@ -3,7 +3,6 @@
  * 1、数据由外部传入
  * 2、已结束状态由外部决定
  */
-// import { IParagraphValues } from "@prisma/client";
 import dayjs, { Dayjs } from "dayjs";
 
 import { IParagraphValues } from "@/domains/caption/types";
@@ -18,7 +17,7 @@ import {
   paddingZero,
 } from "./utils";
 import { ExamStatus, EXPECTED_SECONDS_PER_PARAGRAPH } from "./constants";
-import { IExamSceneDomain, IExamSceneValues, ISpellingValues } from "./types";
+import { IExamSceneDomain } from "./types";
 
 function noop() {}
 
@@ -413,12 +412,6 @@ class Exam {
       return;
     }
     this.inputtingWords.push(word);
-    // console.log(
-    //   "[DOMAIN]exam - write",
-    //   this.inputtingWords,
-    //   this.curWords,
-    //   word
-    // );
 
     const curWords = this.curWords.map(([, word]) => word).filter(Boolean);
     if (this.inputtingWords.length === curWords.length) {
@@ -439,7 +432,6 @@ class Exam {
     // console.log("[DOMAIN]exam - compare", inputtingWords, words);
     const diffNodes = compareLine(words.join(" "), inputting);
 
-    const errorInputting = this.inputtingWords.map((w) => w.word).join(" ");
     if (diffNodes === null) {
       this.correctParagraphs.push(this.curParagraph);
       // console.log("Correct!");
@@ -453,16 +445,18 @@ class Exam {
       }, 600);
       return;
     }
+    const errorInputting = this.inputtingWords.map((w) => w.word).join(" ");
     this.incorrectParagraphs.push({
       ...this.curParagraph,
       input: errorInputting,
     });
-    // console.log("Incorrect!");
     this.combo = 0;
     this.onIncorrect(this.toJSON());
     this.inputtingWords = [];
     this.next();
   }
+
+  setA() {}
 
   enableComplete() {
     this.canComplete = true;

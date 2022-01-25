@@ -16,6 +16,8 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
+      "@list/core": ["./utils/list/core/src/index"],
+      "@list/hooks": ["./utils/list/hook/src/index"],
       "@/*": ["./*"]
     }
   },

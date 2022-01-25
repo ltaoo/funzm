@@ -1,26 +1,24 @@
 /**
  * @file 编辑字幕
  */
-import { getSession } from "@/next-auth/client";
+import { NextApiRequest, NextApiResponse } from "next";
+
+import { ensureLogin, resp } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 
-export default async function provideCaptionEditingService(req, res) {
-  const { body } = req;
-  const session = await getSession({ req });
+export default async function provideCaptionEditingService(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  await ensureLogin(req, res);
 
-  if (!session) {
-    res.status(200).json({ code: 401, msg: "请先登录", data: null });
-    return;
-  }
-
-  // const userId = session.user?.id as string;
-
-  const { id, title } = body;
+  const { id, title } = req.body;
   await prisma.caption.update({
-    where: { id },
+    where: { id: Number(id) },
     data: {
       title,
     },
   });
-  res.status(200).json({ code: 0, msg: "", data: null });
+
+  return resp(null, res);
 }

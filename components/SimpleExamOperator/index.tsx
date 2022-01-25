@@ -2,12 +2,7 @@
  * @file 测验操作栏（跳过、清除等操作）
  */
 
-import {
-  ChartBarIcon,
-  LightBulbIcon,
-  SkipIcon,
-  ClearIcon,
-} from "@ltaoo/icons/outline";
+import { SkipIcon, ClearIcon, LogoutIcon } from "@ltaoo/icons/outline";
 
 import IconWithTxt from "@/components/IconWithTxt";
 import Exam from "@/domains/exam";
@@ -21,17 +16,17 @@ const SimpleExamOperator: React.FC<IProps> = (props) => {
   return (
     <div className="inline-flex space-x-4 text-center">
       <IconWithTxt
-        icon={ChartBarIcon}
+        icon={LogoutIcon}
         onClick={() => {
           if (!instance) {
             return;
           }
-          instance.clear();
+          instance.onFailed(instance.toJSON());
         }}
       >
-        统计
+        退出
       </IconWithTxt>
-      <IconWithTxt icon={LightBulbIcon}>提示</IconWithTxt>
+      {/* <IconWithTxt icon={LightBulbIcon}>提示</IconWithTxt> */}
       <IconWithTxt
         icon={SkipIcon}
         disabled={Number(instance.countdown) >= 95}

@@ -1,16 +1,27 @@
-import { CheckIcon } from "@ltaoo/icons/outline";
+import Layout from "@/layouts";
+
+import { CheckCircleIcon } from "@ltaoo/icons/outline";
 
 /**
  * @file 操作成功提示页面
  */
 const SuccessTipPage = () => {
   return (
-    <div className="overflow-hidden min-h-screen h-full bg-gray-100">
-      <div className="flex justify-center mt-24">
-        <CheckIcon className="inline-block w-16 h-16 text-green-500" />
-        <p className="inline-block mt-4 text-green-500">成功</p>
+    <Layout title="操作成功">
+      <div className="flex flex-col items-center">
+        <div className="mt-24">
+          <CheckCircleIcon className="inline-block w-16 h-16 text-green-500" />
+          <div>
+            <p className="mt-4 text-3xl text-green-500 text-center">成功</p>
+          </div>
+        </div>
+        <div className="mt-12">
+          <div className="inline-block py-2 px-4 text-gray-100 bg-gray-800 rounded shadow">
+            返回首页
+          </div>
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

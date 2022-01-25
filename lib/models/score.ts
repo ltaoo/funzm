@@ -27,40 +27,47 @@ export async function addScore(
     value,
     desc,
     type,
-    createdAt,
   }: {
     value: number;
     desc: string;
     type: ScoreType;
-    createdAt: number;
   }
 ) {
-  console.log("[lib]add score", id, value, desc, type, createdAt);
-  const prevScore = await prisma.user.findUnique({
-    where: { id },
+  // console.log("[lib]add score", id, value, desc, type, createdAt);
+  const prevScore = await prisma.score.findUnique({
+    where: { user_id: id },
   });
-  let nextScore = prevScore.score;
+  let nextScore = prevScore?.value || 0;
   if (type === ScoreType.Increment) {
     nextScore += value;
   }
   if (type === ScoreType.Decrement) {
     nextScore -= value;
   }
+  // 兼容，大部分情况不会到这里
+  if (!prevScore) {
+    await prisma.score.create({
+      data: {
+        user_id: id,
+        value: nextScore,
+      },
+    });
+  } else {
+    await prisma.score.update({
+      data: {
+        value: nextScore,
+      },
+      where: {
+        user_id: id,
+      },
+    });
+  }
 
-  await prisma.user.update({
-    where: {
-      id,
-    },
-    data: {
-      score: nextScore,
-    },
-  });
   await prisma.scoreRecord.create({
     data: {
       desc,
       type,
       number: value,
-      created_at: createdAt,
       user_id: id,
     },
   });

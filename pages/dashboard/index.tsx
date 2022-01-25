@@ -4,20 +4,22 @@
 import React, { useCallback, useEffect, useState } from "react";
 import router from "next/router";
 
-import { LocationMarkerIcon, UploadIcon } from "@ltaoo/icons/outline";
+import { CalendarIcon, PaperClipIcon, UploadIcon } from "@ltaoo/icons/outline";
 
 import Layout from "@/layouts";
-import { getSession } from "@/next-auth/client";
 import { parseCaptionContent } from "@/domains/caption";
 import CaptionCard from "@/components/CaptionCard";
 import CaptionUpload from "@/components/CaptionFileUpload";
 import FakeCaptionCard from "@/components/CaptionCard/sk";
-import { addCaptionService, fetchCaptionsService } from "@/services/caption";
-import { checkInService } from "@/services";
+import {
+  addCaptionService,
+  fetchCaptionsService,
+} from "@/domains/caption/services";
 import { ICaptionValues } from "@/domains/caption/types";
+import CheckInInput from "@/components/CheckInInput";
 
 const Dashboard = (props) => {
-  const { user, dataSource = [] } = props;
+  const { dataSource = [] } = props;
 
   const [loading, setLoading] = useState(true);
   const [captions, setCaptions] = useState<ICaptionValues[]>(dataSource);
@@ -38,7 +40,6 @@ const Dashboard = (props) => {
     const p = await parseCaptionContent(content, type);
     const { id } = await addCaptionService({
       title,
-      type,
       paragraphs: p.map((p) => {
         return {
           ...p,
@@ -49,123 +50,91 @@ const Dashboard = (props) => {
     router.push({ pathname: `/captions/${id}` });
   }, []);
 
-  const checkIn = useCallback(async () => {
-    try {
-      const res = await checkInService();
-      alert(`签到成功，获得${res.msg}`);
-    } catch (err) {
-      alert(err.message);
-    }
-  }, []);
-
-  if (user === null) {
-    return (
-      <div className="mx-auto w-40 mt-10 text-center">
-        <p className="">您还未登录</p>
-        <button
-          className="mt-2"
-          onClick={() => {
-            router.push({
-              pathname: "/user/login",
-            });
-          }}
-        >
-          前往登录
-        </button>
-        <div>
-          <button
-            className="mt-2"
-            onClick={() => {
-              router.push({
-                pathname: "/",
-              });
-            }}
-          >
-            首页
-          </button>
-        </div>
-      </div>
-    );
-  }
   return (
-    <Layout>
-      <div className="min-h-screen">
-        <header className="">
-          <div className="relative flex space-x-4">
-            <div
-              className="flex-1 overflow-hidden relative px-4 py-2 bg-white rounded shadow"
-              onClick={checkIn}
-            >
-              <div className="flex items-center justify-between text-gray-800">
-                <div>
-                  <p className="text-xm text-gray-500">签到</p>
-                </div>
-                <LocationMarkerIcon className="absolute -bottom-2 -right-2 w-14 h-14 text-gray-100" />
-              </div>
-            </div>
-            <div className="flex-1 overflow-hidden relative px-4 py-2 bg-white rounded shadow">
-              <CaptionUpload onChange={handleUploadCaption}>
-                <div className="flex items-center justify-between text-gray-800">
-                  <div>
-                    <p className="text-xm text-gray-500">上传</p>
-                  </div>
-                  <UploadIcon className="absolute -bottom-2 -right-2 w-14 h-14 text-gray-100" />
-                </div>
-              </CaptionUpload>
-            </div>
-          </div>
-        </header>
-        <main>
-          <div className="mt-8 text-center text-gray-800">我的字幕</div>
-          <div className="mt-2">
-            <div className="space-y-4 sm:grid md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+    <Layout title="首页">
+      <div className="flex">
+        <main className="flex-1 mr-12">
+          <div className="mt-4">
+            <div className="text-2xl text-gray-800">进行中的测验</div>
+            <div className="">
               {(() => {
                 if (loading) {
                   return (
                     <>
-                      <FakeCaptionCard />
-                      <FakeCaptionCard />
-                      <FakeCaptionCard />
+                      <div className="mt-8 text-2xl text-gray-800">
+                        我的字幕
+                      </div>
+                      <div className="mt-4 space-y-4">
+                        <FakeCaptionCard />
+                      </div>
                     </>
                   );
                 }
                 if (captions.length) {
-                  return captions.map((caption) => {
-                    const { id } = caption;
-                    return (
-                      <CaptionCard key={id} {...caption} onDelete={refresh} />
-                    );
-                  });
+                  return (
+                    <>
+                      <div className="mt-8 text-2xl text-gray-800">
+                        我的字幕
+                      </div>
+                      <div className="mt-4 space-y-4">
+                        {captions.map((caption) => {
+                          const { id } = caption;
+                          return (
+                            <CaptionCard
+                              key={id}
+                              {...caption}
+                              onDelete={refresh}
+                            />
+                          );
+                        })}
+                      </div>
+                    </>
+                  );
                 }
                 return (
-                  <CaptionUpload onChange={handleUploadCaption}>
-                    <div className="flex items-center justify-center mt-8">
-                      <div className="text-center">
-                        <p className="text-center text-gray-500">暂无字幕</p>
-                        <div className="space-x-4">
-                          <div className="btn mt-4">点击添加字幕</div>
-                          <div className="btn mt-4">浏览公开字幕</div>
+                  <>
+                    <div className="mt-8 text-2xl text-gray-800">我的字幕</div>
+                    <CaptionUpload onChange={handleUploadCaption}>
+                      <div className="flex items-center justify-center mt-8">
+                        <div className="text-center">
+                          <p className="text-center text-gray-500">暂无字幕</p>
+                          <div className="space-x-4">
+                            <div className="btn mt-4">点击添加字幕</div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CaptionUpload>
+                    </CaptionUpload>
+                  </>
                 );
               })()}
             </div>
           </div>
         </main>
+        <div className="w-80 px-8 border-l-1">
+          <div>
+            <div className="#check-in mt-2">
+              <div className="flex items-center mb-2 text-gray-800">
+                <CalendarIcon className="w-5 h-5 mr-2 text-gray-800" />
+                <span>签到</span>
+              </div>
+              <CheckInInput />
+            </div>
+            <div className="mt-8">
+              <div className="flex items-center mb-2 text-gray-800">
+                <PaperClipIcon className="w-5 h-5 mr-2 text-gray-800" />
+                <span>工具栏</span>
+              </div>
+              <div className="mt-2 py-4 px-6 relative flex space-x-4 rounded-xl shadow bg-gray-800">
+                <CaptionUpload onChange={handleUploadCaption}>
+                  <UploadIcon className="w-6 h-6 text-gray-100" />
+                </CaptionUpload>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </Layout>
   );
-};
-
-export const getServerSideProps = async (context) => {
-  const session = await getSession(context);
-  return {
-    props: {
-      user: session?.user ?? null,
-    },
-  };
 };
 
 export default Dashboard;

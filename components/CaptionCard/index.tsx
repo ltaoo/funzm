@@ -2,18 +2,10 @@
  * @file 字幕卡片
  */
 import { useCallback, useEffect, useRef } from "react";
-import Link from "next/link";
 import { useRouter } from "next/router";
 
-import {
-  AcademicCapIcon,
-  BookOpenIcon,
-  PencilAltIcon,
-  TranslateIcon,
-  TrashIcon,
-} from "@ltaoo/icons/outline";
-import { deleteCaptionService } from "@/services/caption";
-import { fetchCurExamSceneByCaption } from "@/services/exam";
+import { BookOpenIcon, PencilAltIcon, TrashIcon } from "@ltaoo/icons/outline";
+import { deleteCaptionService } from "@/domains/caption/services";
 
 const CaptionCard = (props) => {
   const { id, title, onDelete } = props;
@@ -31,13 +23,12 @@ const CaptionCard = (props) => {
     //   captionId: idRef.current,
     // });
     router.push({
-      pathname: `/exam/simple/prepare/${idRef.current}`,
+      pathname: `/exam/prepare/${idRef.current}`,
     });
   }, []);
 
   const deleteCaption = useCallback(async () => {
     await deleteCaptionService(idRef.current);
-    alert("删除成功");
     if (onDelete) {
       onDelete();
     }
@@ -50,9 +41,9 @@ const CaptionCard = (props) => {
   }, []);
 
   return (
-    <div className="p-4 rounded border bg-white shadow-md shadow-green-500">
+    <div className="p-4 rounded-xl bg-gray-100 cursor-pointer shadow hover:shadow-xl">
       <p
-        className="text-xl text-gray-800 line-clamp-2 break-all cursor-pointer"
+        className="text-2xl text-gray-800 line-clamp-2 break-all cursor-pointer"
         onClick={() => {
           router.push({
             pathname: `/captions/${id}`,
@@ -61,18 +52,18 @@ const CaptionCard = (props) => {
       >
         {title}
       </p>
-      <div className="flex justify-space-between mt-4 space-x-4">
+      <div className="inline-flex justify-space-between mt-4 py-2 px-4 space-x-4 bg-gray-800 rounded-xl shadow">
         <button className="text-sm">
           <BookOpenIcon
-            className="w-6 h-6 text-gray-500 hover:text-gray-800"
+            className="w-6 h-6 text-gray-100 hover:text-white"
             onClick={fetchCurExamScene}
           />
         </button>
         <button className="text-sm" onClick={gotoEditor}>
-          <PencilAltIcon className="w-6 h-6 text-gray-500 hover:text-gray-800" />
+          <PencilAltIcon className="w-6 h-6 text-gray-100 hover:text-white" />
         </button>
         <button className="text-sm" onClick={deleteCaption}>
-          <TrashIcon className="w-6 h-6 text-gray-500 hover:text-gray-800" />
+          <TrashIcon className="w-6 h-6 text-gray-100 hover:text-white" />
         </button>
       </div>
     </div>

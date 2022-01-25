@@ -4,8 +4,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import prisma from "@/lib/prisma";
-import { ensureLogin } from "@/lib/utils";
-import { paginationFactory } from "@/lib/models/paganation";
+import { ensureLogin, resp } from "@/lib/utils";
+import { paginationFactory } from "@/lib/models/pagination";
 
 export default async function provideFetchParagraphsService(
   req: NextApiRequest,
@@ -13,12 +13,12 @@ export default async function provideFetchParagraphsService(
 ) {
   await ensureLogin(req, res);
   const {
-    query: { page = 1, pageSize = 10, start, skip, captionId },
+    query: { page = 1, pageSize = 10, start, skip, caption_id: ci },
   } = req;
-  if (!captionId) {
-    res
-      .status(200)
-      .json({ code: 100, msg: "必须指定要获取的句子所属字幕", data: null });
+
+  const caption_id = Number(ci);
+  if (Number.isNaN(caption_id)) {
+    resp(10001, res);
     return;
   }
   const [findManyParams, getResult] = paginationFactory({
@@ -27,7 +27,7 @@ export default async function provideFetchParagraphsService(
     start,
     skip,
     search: {
-      caption_id: captionId,
+      caption_id,
       deleted: false,
     },
   });

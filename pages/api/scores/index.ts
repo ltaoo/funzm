@@ -6,7 +6,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 import prisma from "@/lib/prisma";
 import { ensureLogin } from "@/lib/utils";
-import { paginationFactory } from "@/lib/models/paganation";
+import { paginationFactory } from "@/lib/models/pagination";
 
 export default async function provideScoreRecordsService(
   req: NextApiRequest,
@@ -26,7 +26,12 @@ export default async function provideScoreRecordsService(
   });
 
   const [list, total] = await prisma.$transaction([
-    prisma.scoreRecord.findMany(params),
+    prisma.scoreRecord.findMany({
+      ...params,
+      orderBy: {
+        created_at: "desc",
+      },
+    }),
     prisma.scoreRecord.count({ where: params.where }),
   ]);
 

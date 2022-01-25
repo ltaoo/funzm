@@ -12,6 +12,7 @@ const sizeClassNames = {
 interface IProps {
   icon: React.FC;
   txt?: string;
+  className?: string;
   size?: "small" | "default" | "large";
   disabled?: boolean;
   onClick?: (event?: React.MouseEvent) => void;
@@ -20,6 +21,7 @@ const IconWithTxt: React.FC<IProps> = (props) => {
   const {
     icon,
     txt,
+    className,
     size = "default",
     disabled = false,
     children,
@@ -33,7 +35,8 @@ const IconWithTxt: React.FC<IProps> = (props) => {
           className: cx(
             "p-2 rounded cursor-pointer hover:bg-gray-100",
             sizeClassNames[size],
-            disabled ? "text-gray-300" : "text-gray-500"
+            disabled ? "text-gray-300" : "text-gray-500",
+            className
           ),
           onClick: (event) => {
             if (disabled) {
@@ -45,7 +48,9 @@ const IconWithTxt: React.FC<IProps> = (props) => {
             }
           },
         })}
-        <p className="text-sm text-center text-gray-500">{txt || children}</p>
+        <p className={cx("text-sm text-center text-gray-500", className)}>
+          {txt || children}
+        </p>
       </div>
     </div>
   );

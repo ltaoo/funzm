@@ -1,35 +1,44 @@
-import { useEffect } from "react";
 import { AppProps } from "next/app";
 import Script from "next/script";
 import dayjs from "dayjs";
-import zhCN from 'dayjs/locale/zh-cn';
+import zhCN from "dayjs/locale/zh-cn";
 
-import { getSession, Provider } from "@/next-auth/client";
-
-import "windi.css";
+import { Provider } from "@/next-auth/client";
+import Helper from "@list/core";
 
 import "../styles/global.css";
 
-dayjs.locale('zh-CN', zhCN);
+import "react-toastify/dist/ReactToastify.css";
+import "windi.css";
 
-//   window.addEventListener("unhandledrejection", (err) => {
-//     if (err.reason.code !== undefined) {
-//       console.log(err.reason.message);
-//       return;
-//     }
-//     throw err;
-//   });
+dayjs.locale("zh-CN", zhCN);
+
+Helper.onError = (err) => {
+  console.log(err);
+};
+
+if (typeof window !== "undefined") {
+  window.addEventListener("unhandledrejection", (err) => {
+    // console.log("[ERROR]unhandledrejection", err);
+    if (err.reason.code !== undefined) {
+      err.stopPropagation();
+      alert(err.reason.message);
+      if (err.reason.code === 401) {
+        window.location.replace("/user/login");
+        return;
+      }
+      return;
+    }
+    throw err;
+  });
+}
 
 export default function App({
   Component,
-  pageProps: { session, ...pageProps },
+  pageProps: { user, ...pageProps },
 }: AppProps) {
-  useEffect(() => {
-    // @ts-ignore
-    window._user = session?.user;
-  }, []);
   return (
-    <Provider session={session} options={{}}>
+    <Provider user={user} options={{}}>
       <Script
         strategy="afterInteractive"
         dangerouslySetInnerHTML={{
@@ -49,11 +58,11 @@ export default function App({
   );
 }
 
-App.getInitialProps = async (context) => {
-  const session = await getSession(context);
-  return {
-    pageProps: {
-      session,
-    },
-  };
-};
+// App.getInitialProps = async (context) => {
+//   const user = await fetchUserProfileService();
+//   return {
+//     pageProps: {
+//       user,
+//     },
+//   };
+// };

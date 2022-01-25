@@ -1,28 +1,30 @@
 /**
- * @file 根据 id 获取指定测验详情（结果）
+ * @file 根据 id 获取指定测验详情
+ * （如果未开始时调用该接口，表示表示开始测验）
  */
 import { NextApiRequest, NextApiResponse } from "next";
 import dayjs from "dayjs";
 
 import {
-  CORRECT_RATE_NEEDED_FOR_COMPLETE,
   ExamStatus,
   PARAGRAPH_COUNT_PER_EXAM_SCENE,
-  ScoreType,
-  SpellingResultType,
 } from "@/domains/exam/constants";
 import prisma from "@/lib/prisma";
-import { ensureLogin } from "@/lib/utils";
-import { computeScoreByStats, removeZeroAtTail } from "@/domains/exam/utils";
-import { addScore } from "@/lib/models/score";
+import { ensureLogin, resp } from "@/lib/utils";
 
-export default async function provideExamSceneService(
+export default async function provideExamSceneProfileService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const userId = await ensureLogin(req, res);
+  const user_id = await ensureLogin(req, res);
 
-  const { id } = req.query as { id: string };
+  const { id: i } = req.query as { id: string };
+  const id = Number(i);
+
+  if (Number.isNaN(id)) {
+    return resp(10001, res);
+  }
+
   const data = await prisma.examScene.findUnique({
     where: {
       id,
@@ -39,23 +41,9 @@ export default async function provideExamSceneService(
     },
   });
   if (data === null) {
-    res.status(200).json({
-      code: 130,
-      msg: "测验数据不存在，请确认 id 是否正确",
-      data: null,
-    });
-    return;
+    return resp(13000, res);
   }
-  const {
-    caption_id,
-    start_id,
-    status,
-    spellings,
-    created_at,
-    begin_at,
-    ended_at,
-  } = data;
-
+  const { caption_id, index, start_id, status, spellings } = data;
   const paragraphs = await prisma.paragraph.findMany({
     where: {
       caption_id,
@@ -67,126 +55,52 @@ export default async function provideExamSceneService(
     take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
   });
 
-  const now = dayjs();
-  // need update exam status
-  if (ended_at && status === ExamStatus.Started) {
-    let result = status;
-    let score = 0;
-    // completed
-    if (spellings.length === paragraphs.length) {
-      const correctSpellings = spellings.filter(
-        (spelling) => spelling.type === SpellingResultType.Correct
-      );
-      const incorrectSpellings = spellings.filter(
-        (spelling) => spelling.type === SpellingResultType.Incorrect
-      );
-      const rate = parseFloat(
-        removeZeroAtTail(
-          ((correctSpellings.length / spellings.length) * 100).toFixed(2)
-        )
-      );
-      result = (() => {
-        if (rate >= CORRECT_RATE_NEEDED_FOR_COMPLETE) {
-          return ExamStatus.Completed;
-        }
-        return ExamStatus.Failed;
-      })();
-
-      score = (() => {
-        // @todo 是否已经完成过同样的测验（start 相同），相同则将积分数乘以比例减少，按完成过测验的数量即使，最小 10%
-        if (result === ExamStatus.Completed) {
-          return computeScoreByStats({
-            total: spellings.length,
-            seconds: now.clone().unix() - (begin_at || created_at),
-            correct: correctSpellings.length,
-            incorrect: incorrectSpellings.length,
-            correctRate: rate,
-          });
-        }
-        return 0;
-      })();
-      if (result === ExamStatus.Completed) {
-        await addScore(userId, {
-          value: score,
-          desc: `完成测验 ${id}`,
-          type: ScoreType.Increment,
-          createdAt: now.clone().unix(),
-        });
-      }
-    }
-    const updated = await prisma.examScene.update({
-      where: {
-        id,
-      },
-      data: {
-        status: result,
-        score,
-      },
-      include: {
-        spellings: {
-          orderBy: {
-            created_at: "desc",
-          },
-          include: {
-            paragraph: true,
-          },
-        },
-      },
-    });
-    res.status(200).json({
-      code: 0,
-      msg: "",
-      data: {
-        ...updated,
-        paragraphs,
-      },
-    });
-    return;
-  }
-
   if (status === ExamStatus.Prepare) {
-    console.log('[LOG]start a prepare exam');
     const data = await prisma.examScene.update({
       where: {
         id,
       },
       data: {
         status: ExamStatus.Started,
-        begin_at: dayjs().unix(),
+        begin_at: dayjs().toDate(),
       },
     });
-    res.status(200).json({
-      code: 0,
-      msg: "",
-      data: {
+    return resp(
+      {
         ...data,
         paragraphs,
       },
-    });
-    return;
+      res
+    );
   }
 
   if ([ExamStatus.Completed, ExamStatus.Failed].includes(status)) {
-    res.status(200).json({
-      code: 0,
-      msg: "",
-      data: {
-        ...data,
-        paragraphs,
+    // 尝试获取下一关卡句子，如果已经没有数据了，就不让展示「下一关」按钮
+    const paragraphCount = await prisma.paragraph.count({
+      where: {
+        caption_id,
+        deleted: false,
       },
     });
-    return;
+    const maxIndex = Math.ceil(paragraphCount / PARAGRAPH_COUNT_PER_EXAM_SCENE);
+    return resp(
+      {
+        ...data,
+        paragraphs,
+        no_more: index >= maxIndex,
+      },
+      res
+    );
   }
-  const lastOne = spellings[0];
 
-  // console.log("[LOG]/api/exam/scene/[id].ts - spellings", spellings);
-  res.status(200).json({
-    code: 0,
-    msg: "",
-    data: {
+  // 已开始的测验
+  const lastOne = spellings[0];
+  return resp(
+    {
       ...data,
       cur: lastOne?.paragraph_id,
       paragraphs,
     },
-  });
+    res
+  );
 }

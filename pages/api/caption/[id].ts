@@ -3,7 +3,7 @@
  */
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { ensureLogin } from "@/lib/utils";
+import { ensureLogin, resp } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 
 export default async function provideFetchCaptionService(
@@ -11,27 +11,37 @@ export default async function provideFetchCaptionService(
   res: NextApiResponse
 ) {
   await ensureLogin(req, res);
-  const { query } = req;
-  const { id } = query as { id: string; paragraph?: string };
+  const { id: i } = req.query as { id: string; paragraph?: string };
+
+  const caption_id = Number(i);
+
+  if (Number.isNaN(caption_id)) {
+    return resp(10001, res);
+  }
 
   const [paragraphCount, data] = await prisma.$transaction(
     [
       prisma.paragraph.count({
         where: {
-          caption_id: id,
+          caption_id,
         },
       }),
       prisma.caption.findUnique({
         where: {
-          id,
+          id: caption_id,
         },
       }),
     ].filter(Boolean)
   );
 
   if (data === null) {
-    res.status(200).json({ code: 130, msg: "id 不存在", data: null });
-    return;
+    return resp(300, res);
   }
-  res.status(200).json({ code: 0, msg: "", data });
+  resp(
+    {
+      ...(data as any),
+      count: paragraphCount,
+    },
+    res
+  );
 }
