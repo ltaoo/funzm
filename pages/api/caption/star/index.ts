@@ -41,6 +41,7 @@ export default async function provideFetchStaredCaptionsService(
   return resp(
     getResult(
       list.map((record) => {
+        // @ts-ignore
         const { caption } = record;
         return {
           ...caption,
