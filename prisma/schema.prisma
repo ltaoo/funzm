@@ -70,7 +70,7 @@ model VerificationToken {
 }
 model Credential {
   user_id          Int          @unique
-  user             User         @relation(fields: [user_id], references: [id])
+  user             User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   password         String?
   salt             String?
@@ -147,7 +147,7 @@ model Subscription {
   canceled_at          DateTime?
 
   user_id         Int      
-  user            User         @relation(fields: [user_id], references: [id])
+  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   created_at      DateTime     @default(now())
   expired_at      DateTime?
@@ -170,7 +170,7 @@ model Profile {
   nickname        String?
   avatar          String?
   user_id         Int      
-  user            User         @relation(fields: [user_id], references: [id])
+  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("profiles")
 }
@@ -179,7 +179,7 @@ model Profile {
 model Score {
   value           Int          @default(0)
   user_id         Int      
-  user            User         @relation(fields: [user_id], references: [id])
+  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("score")
 }
@@ -191,7 +191,7 @@ model Rank {
   exp             Int          @default(0)
 
   user_id         Int      
-  user            User         @relation(fields: [user_id], references: [id])
+  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("rank")
 }
@@ -207,7 +207,7 @@ model Caption {
   created_at     DateTime      @default(now())
   updated_at     DateTime?
 
-  user           User          @relation(fields: [user_id], references: [id])
+  user           User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
   paragraphs     Paragraph[]
   exam_scenes    ExamScene[]
   notes          Note[]
@@ -262,8 +262,8 @@ model ExamScene {
   score           Int?                 @default(0)
 
   spellings       SpellingResult[]
-  caption         Caption              @relation(fields: [caption_id], references: [id])
-  user            User                 @relation(fields: [user_id], references: [id])
+  caption         Caption              @relation(fields: [caption_id], references: [id], onDelete: Cascade)
+  user            User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
   start           Paragraph            @relation(fields: [start_id], references: [id])
 
   created_at      DateTime   @default(now())
@@ -284,7 +284,7 @@ model SpellingResult {
 
   exam_scene_id  Int?    
 
-  user           User?       @relation(fields: [user_id], references: [id])
+  user           User?       @relation(fields: [user_id], references: [id], onDelete: Cascade)
   exam_scene     ExamScene?  @relation(fields: [exam_scene_id], references: [id], onDelete: Cascade)
   paragraph      Paragraph   @relation(fields: [paragraph_id], references: [id], onDelete: Cascade)
 
@@ -310,7 +310,7 @@ model Note {
   paragraph             Paragraph @relation(fields: [paragraph_id], references: [id])
 
   user_id               Int  
-  user                  User     @relation(fields: [user_id], references: [id])
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   created_at            DateTime  @default(now())
 
@@ -323,7 +323,7 @@ model Word {
   text                  String
 
   user_id               Int       
-  user                  User     @relation(fields: [user_id], references: [id])
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   paragraph_id          Int?       
   paragraph             Paragraph?     @relation(fields: [paragraph_id], references: [id])
@@ -338,7 +338,7 @@ model ScoreRecord {
   id                    Int     @id @default(autoincrement())
 
   user_id               Int?  
-  user                  User?     @relation(fields: [user_id], references: [id])
+  user                  User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   type                  Int
   number                Int
@@ -354,7 +354,7 @@ model CheckInRecord {
   id                    Int    @id @default(autoincrement())
 
   user_id               Int?  
-  user                  User?     @relation(fields: [user_id], references: [id])
+  user                  User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   day                   Int
   // 是否补签
@@ -398,8 +398,8 @@ model StarRecord {
   user_id    Int        @unique
   caption_id Int
 
-  user       User       @relation(fields: [user_id], references: [id])
-  caption    Caption    @relation(fields: [caption_id], references: [id])
+  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  caption    Caption    @relation(fields: [caption_id], references: [id], onDelete: Cascade)
 
   created_at DateTime   @default(now())
 

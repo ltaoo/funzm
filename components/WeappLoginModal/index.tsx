@@ -24,6 +24,7 @@ const WeappLoginModal = (props) => {
 
   const fetchWeappQrcode = useCallback(async () => {
     setQrcode(null);
+    setStatus(WeappQrcodeStatus.Wait);
     if (loadingRef.current) {
       return;
     }

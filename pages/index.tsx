@@ -26,7 +26,7 @@ const Website = (props) => {
   const loadingRef = useRef(false);
 
   const [caption] = useState({
-    title: "《Young Sheldon》S01.01",
+    title: "Young.Sheldon.S01E01.Pilot",
     paragraphs: [
       {
         id: 1,

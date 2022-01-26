@@ -8,8 +8,7 @@ import { encode } from "@/next-auth/jwt";
 import { resp } from "@/lib/utils";
 import { WEAPP_ID, WEAPP_SECRET } from "@/lib/wx/token";
 import prisma from "@/lib/prisma";
-import dayjs from "dayjs";
-import { SubscriptionStatus } from "@prisma/client";
+import { addDefaultCaptionToUser } from "@/lib/caption";
 
 export default async function provideWeappLoginService(
   req: NextApiRequest,
@@ -87,7 +86,7 @@ export default async function provideWeappLoginService(
       provider_account_id: openid,
     },
   });
-
+  await addDefaultCaptionToUser(id);
   const payload = {
     id,
     nickname,

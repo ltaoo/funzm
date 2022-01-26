@@ -54,7 +54,7 @@ const Dashboard = (props) => {
     <Layout title="首页">
       <div className="flex">
         <main className="flex-1 mr-12">
-          <div className="mt-4">
+          <div className="">
             {/* <div className="text-2xl text-gray-800">进行中的测验</div> */}
             <div className="">
               {(() => {
@@ -73,7 +73,7 @@ const Dashboard = (props) => {
                 if (captions.length) {
                   return (
                     <>
-                      <div className="mt-8 text-2xl text-gray-800">
+                      <div className="mt-4 text-2xl text-gray-800">
                         我的字幕
                       </div>
                       <div className="mt-4 space-y-4">
