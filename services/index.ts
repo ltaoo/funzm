@@ -1,4 +1,4 @@
-import { RequestResponse } from "@list/core";
+import { FetchParams, RequestResponse } from "@list/core";
 
 import { df } from "@/utils";
 import request from "@/utils/request";
@@ -20,8 +20,8 @@ export function checkInService() {
 /**
  * 获取积分记录
  */
-export async function fetchScoreRecordsService() {
-  const resp = (await request.get("/api/scores")) as RequestResponse;
+export async function fetchScoreRecordsService(params: FetchParams) {
+  const resp = (await request.get("/api/scores", params)) as RequestResponse;
 
   return {
     ...resp,

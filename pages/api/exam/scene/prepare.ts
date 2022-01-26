@@ -19,7 +19,7 @@ export default async function providePreparedExamService(
   const { caption_id: c } = req.query as { caption_id: string };
   const caption_id = Number(c);
 
-  console.log("[LOG]/api/exam/scene/prepare", req.query);
+  // console.log("[LOG]/api/exam/scene/prepare", req.query);
 
   if (Number.isNaN(caption_id)) {
     return resp(10001, res);
@@ -93,10 +93,10 @@ export default async function providePreparedExamService(
     skip: PARAGRAPH_COUNT_PER_EXAM_SCENE,
     take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
   });
-  console.log(
-    "[LOG]/api/exam/scene/prepare - search paragraph for create a new scene",
-    nextParagraphs
-  );
+  // console.log(
+  //   "[LOG]/api/exam/scene/prepare - search paragraph for create a new scene",
+  //   nextParagraphs
+  // );
   // console.log("[API]provideCurExamScene - next paragraphs", response);
   const remainingParagraphs = nextParagraphs;
   if (remainingParagraphs.length === 0) {

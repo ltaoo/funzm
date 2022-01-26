@@ -1,4 +1,4 @@
-import { PluginAPI } from "list-helper-core";
+import { PluginAPI } from "@list/core";
 import qs from "qs";
 
 import { params2Search, search2Params } from "./utils";

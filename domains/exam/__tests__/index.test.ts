@@ -1,4 +1,5 @@
-import Exam, { ExamStatus } from "../index";
+import Exam from "../index";
+import { ExamStatus } from "../constants";
 
 function sleep(delay) {
   return new Promise((resolve) => {
@@ -70,8 +71,8 @@ describe("Exam class", () => {
     instance.start();
     let data = instance.toJSON();
     expect(data.status).toBe(ExamStatus.Started);
-    expect(data.combo).toBe(0);
-    expect(data.maxCombo).toBe(0);
+    // expect(data.combo).toBe(0);
+    // expect(data.maxCombo).toBe(0);
     expect(data.curParagraphId).toBe("1");
     expect(data.curParagraph).toEqual({
       id: "1",
@@ -116,8 +117,8 @@ describe("Exam class", () => {
       },
     ]);
     expect(data.incorrectParagraphs).toEqual([]);
-    expect(data.combo).toBe(1);
-    expect(data.maxCombo).toBe(1);
+    // expect(data.combo).toBe(1);
+    // expect(data.maxCombo).toBe(1);
     expect(data.curParagraphId).toBe("3");
 
     instance.write({
@@ -171,8 +172,8 @@ describe("Exam class", () => {
       },
     ]);
     expect(data.incorrectParagraphs).toEqual([]);
-    expect(data.combo).toBe(2);
-    expect(data.maxCombo).toBe(2);
+    // expect(data.combo).toBe(2);
+    // expect(data.maxCombo).toBe(2);
     expect(data.curParagraphId).toBe("4");
 
     instance.write({
@@ -209,8 +210,8 @@ describe("Exam class", () => {
         error: "my plan backup",
       },
     ]);
-    expect(data.combo).toBe(0);
-    expect(data.maxCombo).toBe(2);
+    // expect(data.combo).toBe(0);
+    // expect(data.maxCombo).toBe(2);
     expect(data.curParagraphId).toBe("5");
     expect(data.remainingParagraphsCount).toBe(4);
     expect(data.paragraphs.length).toBe(4);

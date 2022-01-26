@@ -6,14 +6,13 @@ import cx from "classnames";
 import { useRouter } from "next/router";
 
 import {
-  createExamSceneService,
   fetchPreparedExamService,
   fetchExamSceneProfileService,
+  replayExamScene,
 } from "@/services/exam";
-import { ExamStatus } from "@/domains/exam/constants";
+import { ExamStatus, ExamTypePathMap } from "@/domains/exam/constants";
 import SimpleExamStats from "@/components/SimpleExamStats";
 import {
-  ArrowLeftIcon,
   ArrowRightIcon,
   CheckIcon,
   DocumentTextIcon,
@@ -54,13 +53,12 @@ const SimpleCaptionExamPage = () => {
       return;
     }
     const { captionId, startId, type } = examScene;
-    const { id } = await createExamSceneService({
-      captionId,
-      start: startId,
-      type,
+    const { id: i, type: t } = await replayExamScene({
+      id,
     });
+    const path = ExamTypePathMap[t];
     router.push({
-      pathname: `/exam/simple/${id}`,
+      pathname: `/exam/${path}/${i}`,
     });
   }, [examScene]);
 

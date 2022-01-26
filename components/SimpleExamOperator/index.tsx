@@ -5,7 +5,7 @@
 import { SkipIcon, ClearIcon, LogoutIcon } from "@ltaoo/icons/outline";
 
 import IconWithTxt from "@/components/IconWithTxt";
-import Exam from "@/domains/exam";
+import Exam from "@/domains/exam/base";
 
 interface IProps {
   instance: Exam;

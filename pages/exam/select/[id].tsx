@@ -14,7 +14,7 @@ import { SpellingResultType } from "@/domains/exam/constants";
 import { ExamStatus } from "@/domains/exam/constants";
 import SelectionExam from "@/domains/exam/selection";
 import { IExamSceneDomain } from "@/domains/exam/types";
-import SimpleExamInput from "@/components/SimpleExamInput";
+import SimpleExamInput from "@/components/SelectionExamMode";
 import SimpleExamOperator from "@/components/SimpleExamOperator";
 
 const SimpleCaptionExamPage = () => {

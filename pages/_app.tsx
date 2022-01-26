@@ -24,7 +24,7 @@ if (typeof window !== "undefined") {
       err.stopPropagation();
       alert(err.reason.message);
       if (err.reason.code === 401) {
-        window.location.replace("/user/login");
+        window.location.replace("/");
         return;
       }
       return;

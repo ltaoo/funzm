@@ -1,14 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/router";
+
+import { CheckCircleIcon, RefreshIcon } from "@ltaoo/icons/outline";
 
 import { useVisible } from "@/hooks";
 import {
   fetchWeappLoginQrcodeService,
   fetchWeappLoginQrcodeStatusService,
 } from "@/services/wx";
-import Modal from "@/components/Modal";
-import { buffer2ImgUrl } from "@/utils";
+import { buffer2ImgUrl, loopRequest } from "@/utils";
 import { WeappQrcodeStatus } from "@/constants";
+import Modal from "@/components/Modal";
+import Spin from "@/components/Spin";
 
 const WeappLoginModal = (props) => {
   const { children } = props;
@@ -16,35 +19,33 @@ const WeappLoginModal = (props) => {
   const router = useRouter();
   const [qrcode, setQrcode] = useState(null);
   const [visible, show, hide] = useVisible();
-  const timerRef = useRef<NodeJS.Timeout>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, []);
+  const [status, setStatus] = useState(WeappQrcodeStatus.Wait);
+  const loadingRef = useRef(false);
 
   const fetchWeappQrcode = useCallback(async () => {
-    // @ts-ignore
+    setQrcode(null);
+    if (loadingRef.current) {
+      return;
+    }
+    loadingRef.current = true;
     const { image: buffer } = await fetchWeappLoginQrcodeService();
     const imgUrl = buffer2ImgUrl(buffer);
+    loadingRef.current = false;
     setQrcode(imgUrl);
-
-    timerRef.current = setInterval(async () => {
-      const { status } = await fetchWeappLoginQrcodeStatusService();
+    loopRequest(fetchWeappLoginQrcodeStatusService, ({ status }) => {
+      setStatus(status);
       if (status === WeappQrcodeStatus.Confirmed) {
-        clearInterval(timerRef.current);
-        router.push({
-          pathname: "/dashboard",
-        });
+        setTimeout(() => {
+          router.push({
+            pathname: "/dashboard",
+          });
+        }, 800);
+        return true;
       }
       if (status === WeappQrcodeStatus.Expired) {
-        clearInterval(timerRef.current);
-        alert("请刷新页面重试");
+        return true;
       }
-    }, 2000);
+    });
   }, []);
 
   return (
@@ -59,7 +60,39 @@ const WeappLoginModal = (props) => {
       </span>
       <Modal visible={visible} onCancel={hide}>
         <div className="text-gray-800 text-center">请使用微信扫码登录</div>
-        <img className="mt-8 w-48 h-48" src={qrcode} />
+        <div className="relative">
+          <img className="mt-8 w-48 h-48" src={qrcode} />
+          {status !== WeappQrcodeStatus.Wait && (
+            <div className="#mask absolute inset-0 bg-white opacity-90" />
+          )}
+          {qrcode === null && (
+            <div
+              className="center text-center cursor-pointer"
+              onClick={fetchWeappQrcode}
+            >
+              <Spin className="mt-4" theme="dark" />
+            </div>
+          )}
+          {status === WeappQrcodeStatus.Expired && (
+            <div
+              className="center text-center cursor-pointer"
+              onClick={fetchWeappQrcode}
+            >
+              <RefreshIcon className="inline-block w-12 h-12 text-gray-500" />
+              <div className="mt-2 text-center text-xl text-gray-800">
+                点击刷新
+              </div>
+            </div>
+          )}
+          {status === WeappQrcodeStatus.Confirmed && (
+            <div className="center text-center">
+              <CheckCircleIcon className="inline-block w-12 h-12 text-green-500" />
+              <div className="mt-2 text-center text-xl text-green-500">
+                登录中...
+              </div>
+            </div>
+          )}
+        </div>
       </Modal>
     </>
   );

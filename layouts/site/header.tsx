@@ -3,6 +3,7 @@ import { Popover, Transition } from "@headlessui/react";
 import Link from "next/link";
 import { MenuIcon, XIcon, LogoIcon } from "@ltaoo/icons/outline";
 import { useRouter } from "next/router";
+import WeappLoginModal from "@/components/WeappLoginModal";
 
 const navigation = [
   { name: "功能", href: "/" },
@@ -26,7 +27,7 @@ const SiteHeader = (props) => {
           <div className="logo flex items-center flex-grow flex-shrink-0 lg:flex-grow-0">
             <div className="flex items-center justify-between w-full md:w-auto">
               <a href="#">
-                <span className="sr-only">FunZM</span>
+                <span className="sr-only">Funzm</span>
                 <LogoIcon className="h-8 w-auto text-green-500 sm:h-10" />
               </a>
               <div className="flex items-center md:hidden">
@@ -59,16 +60,11 @@ const SiteHeader = (props) => {
                 个人中心
               </div>
             ) : (
-              <div
-                className="inline font-medium text-green-600 cursor-pointer hover:text-green-500"
-                onClick={() => {
-                  router.push({
-                    pathname: "/user/login",
-                  });
-                }}
-              >
-                登录
-              </div>
+              <WeappLoginModal>
+                <div className="inline font-medium text-green-600 cursor-pointer hover:text-green-500">
+                  登录
+                </div>
+              </WeappLoginModal>
             )}
           </div>
         </nav>

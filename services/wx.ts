@@ -3,8 +3,8 @@ import request from "@/utils/request";
 /**
  * 获取小程序登录二维码
  */
-export function fetchWeappLoginQrcodeService() {
-  return request.get("/api/auth/wx/qrcode");
+export async function fetchWeappLoginQrcodeService() {
+  return (await request.get("/api/auth/wx/qrcode")) as { image: Buffer };
 }
 
 /**

@@ -562,6 +562,7 @@ class Exam {
       // combo,
       // maxCombo,
       countdown,
+      inputting: "",
       index,
       curWords,
       displayedWords,

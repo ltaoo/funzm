@@ -65,6 +65,7 @@ img {
 }
 
 .spin {
+  display: inline-block;
   padding-top: 8px;
   overflow: hidden;
 }

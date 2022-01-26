@@ -1,3 +1,6 @@
+/**
+ * @file 单词翻译面板
+ */
 import { useCallback, useState } from "react";
 
 import Modal from "@/components/Modal";
@@ -14,7 +17,6 @@ const TranslatePanel = (props) => {
 
   const translate = useCallback(async () => {
     const resp = await translateService(keyword);
-    //     console.log(resp);
     setExplains(resp.explains);
     setSpeeches(resp.speeches);
   }, [keyword]);

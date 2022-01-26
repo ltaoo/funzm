@@ -43,3 +43,9 @@ export const REWARD_SCORES_FOR_REMAINING_PER_SECOND = 1;
 // 每次测验获取的句子数
 export const PARAGRAPH_COUNT_PER_EXAM_SCENE = 20;
 export const CORRECT_RATE_NEEDED_FOR_COMPLETE = 60;
+
+export const ExamTypePathMap: Record<ExamType, string> = {
+  [ExamType.Selection]: "select",
+  [ExamType.Spelling]: "input",
+  [ExamType.Speak]: "speak",
+};

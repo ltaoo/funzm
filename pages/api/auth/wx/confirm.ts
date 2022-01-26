@@ -14,7 +14,7 @@ export default async function provideWeappLoginService(
   const user_id = await ensureLogin(req, res);
 
   const { token } = req.body;
-  console.log('[api/auth/wx/confirm]', user_id, token);
+  console.log("[api/auth/wx/confirm]", user_id, token);
   if (!token) {
     return resp(10001, res);
   }
@@ -24,8 +24,12 @@ export default async function provideWeappLoginService(
       token,
     },
   });
+
+  if (!tokenPrepareConfirm) {
+    return resp(11002, res);
+  }
   if (tokenPrepareConfirm.status === WeappQrcodeStatus.Confirmed) {
-    return resp(12000, res);
+    return resp(11001, res);
   }
 
   // websocket 通知 web 登录并写入 cookie

@@ -258,3 +258,14 @@ export function df(time, short: boolean = false) {
   }
   return dayjs(time).format("YYYY-MM-DD HH:mm:ss");
 }
+
+/**
+ * 请求完成再发送下一个请求的轮询
+ */
+export async function loopRequest(fn: () => Promise<unknown>, checker) {
+  const [resp] = await Promise.all([fn(), sleep(2000)]);
+  if (await checker(resp)) {
+    return true;
+  }
+  return await loopRequest(fn, checker);
+}

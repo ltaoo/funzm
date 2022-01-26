@@ -91,11 +91,12 @@ export function parseCaptionContent(
   return [
     {
       id: "1",
-      line: 1,
+      line: "1",
       start: "",
       end: "",
       text1: content,
       text2: undefined,
+      valid: false,
     },
   ];
 }

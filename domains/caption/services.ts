@@ -37,9 +37,7 @@ export async function fetchCaptionWithoutParagraphsService({
  * @param id
  */
 export async function fetchCaptionProfileService({ id }: { id: string }) {
-  const resp = (await request.get(
-    `/api/caption/${id}?paragraph=1`
-  )) as ICaptionRes;
+  const resp = (await request.get(`/api/caption/${id}`)) as ICaptionRes;
 
   const { title, count, created_at } = resp;
 
@@ -128,3 +126,8 @@ export function updateParagraphService(body: {
 }) {
   return request.post("/api/paragraphs/update", body);
 }
+
+/**
+ *
+ */
+export function starCaption() {}

@@ -21,6 +21,7 @@ export default defineConfig({
       "w-6 h-6 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100",
     "icon--large":
       "w-12 h-12 p-2 text-gray-500 rounded cursor-pointer hover:bg-gray-100",
+    "center": "absolute top-[50%] left-[50%] transform -translate-x-2/4 -translate-y-2/4"
   },
   plugins: [
     require("windicss/plugin/line-clamp"),

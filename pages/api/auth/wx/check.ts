@@ -14,9 +14,9 @@ export default async function provideWeappQrcodeStatusCheckService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const token = await getToken({ req, cookieName: "weapp-token" });
+  const t = await getToken({ req, cookieName: "weapp-token" });
 
-  if (!token) {
+  if (!t) {
     resp(
       {
         status: WeappQrcodeStatus.Expired,
@@ -28,7 +28,7 @@ export default async function provideWeappQrcodeStatusCheckService(
 
   const existing = await prisma.verificationToken.findFirst({
     where: {
-      token: token.token,
+      token: t.token,
     },
   });
 
@@ -42,18 +42,22 @@ export default async function provideWeappQrcodeStatusCheckService(
         user_id: existing.user_id,
       },
     });
+    await prisma.verificationToken.delete({
+      where: {
+        token: t.token as string,
+      },
+    });
     const defaultToken = {
       id: existing.user_id,
       nickname: profile.nickname,
       avatar: profile.avatar,
     };
-    // console.log('[]before encode', defaultToken)
     const token = await encode({
       token: defaultToken,
       secret: process.env.SECRET,
     });
 
-    const cookie = serialize(TOKEN_NAME, token, {
+    const userCookie = serialize(TOKEN_NAME, token, {
       maxAge: DEFAULT_MAX_AGE,
       expires: new Date(Date.now() + DEFAULT_MAX_AGE * 1000),
       httpOnly: true,
@@ -61,8 +65,11 @@ export default async function provideWeappQrcodeStatusCheckService(
       path: "/",
       sameSite: "lax",
     });
-
-    res.setHeader("Set-Cookie", cookie);
+    const cookie = serialize("weapp-token", "", {
+      maxAge: -1,
+      path: "/",
+    });
+    res.setHeader("Set-Cookie", [userCookie, cookie]);
   }
 
   return resp(

@@ -1,44 +1,29 @@
 /**
  * @file 官网首页
  */
-
 import React, { useCallback, useRef, useState } from "react";
 import cx from "classnames";
 import { useRouter } from "next/router";
 import {
-  AdjustmentsIcon,
   DocumentPdfIcon,
   DocumentDocxIcon,
   DocumentTxtIcon,
 } from "@ltaoo/icons/outline";
-import Tooltip from "rc-tooltip";
 import Head from "next/head";
 
-import { getSession } from "@/next-auth/client";
-import { useVisible } from "@/hooks";
-import { localdb } from "@/utils/db";
-import { showModal } from "@/utils/modal";
-import { downloadDocx, downloadPdf, downloadTxt, insertStyle } from "@/utils";
+import { getToken } from "@/next-auth/jwt";
+import { TOKEN_NAME } from "@/next-auth/constants";
 import Footer from "@/layouts/site/footer";
 import SiteHeader from "@/layouts/site/header";
-import Exam from "@/domains/exam";
-import { ExamStatus } from "@/domains/exam/constants";
+import { localdb } from "@/utils/db";
+import { downloadDocx, downloadPdf, downloadTxt } from "@/utils";
+import Tooltip from "@/components/Tooltip";
 import CaptionUpload from "@/components/CaptionFileUpload";
-import ParagraphSettingsForm from "@/components/ParagraphSettingsForm";
-import Modal from "@/components/Modal";
-import SimpleExamInput from "@/components/SimpleExamInput";
-import SimpleExamOperator from "@/components/SimpleExamOperator";
-import SimpleExamStats from "@/components/SimpleExamStats";
-
-import "rc-tooltip/assets/bootstrap_white.css";
 
 const Website = (props) => {
-  const { user } = props;
+  const { u: user } = props;
   const router = useRouter();
   const loadingRef = useRef(false);
-  const [visible, show, hide] = useVisible();
-  const examRef = useRef<Exam | null>(null);
-  const [exam, setExam] = useState<Exam | null>(null);
 
   const [caption] = useState({
     title: "《Young Sheldon》S01.01",
@@ -81,56 +66,7 @@ const Website = (props) => {
     });
   }, []);
 
-  const createCaptionFromExisting = useCallback(() => {}, []);
-  const updateParagraphStyles = useCallback(() => {
-    insertStyle(`.text1 {
-  font-size: 20px;
-}
-.text2 {
-  font-size: 36px;
-}
-`);
-  }, []);
-  const startSimpleExam = useCallback((caption) => {
-    const { paragraphs } = caption;
-    examRef.current = new Exam({
-      title: "",
-      status: ExamStatus.Started,
-      combo: 0,
-      maxCombo: 0,
-      curParagraphId: paragraphs[0].id,
-      paragraphs,
-      canComplete: true,
-      onChange: (nextExam) => {
-        setExam(nextExam);
-      },
-      onCorrect({ combo }) {
-        showModal(
-          <div>
-            <p className="text-4xl text-green-500">CORRECT!</p>
-            <p className="pr-4 text-right text-2xl text-yellow-500">x{combo}</p>
-          </div>,
-          {
-            duration: 800,
-          }
-        );
-      },
-      onIncorrect() {
-        showModal(
-          <div>
-            <p className="text-4xl text-red-500">INCORRECT!</p>
-          </div>,
-          {
-            duration: 800,
-          }
-        );
-      },
-    });
-    // @ts-ignore
-    setExam(examRef.current.toJSON());
-  }, []);
-
-  console.log(exam);
+  // console.log("[PAGE]index - render", user);
 
   return (
     <div className="relative bg-white overflow-hidden dark:bg-gray-800">
@@ -202,7 +138,7 @@ const Website = (props) => {
           </div>
           <div className="mt-12 text-center">
             <div className="inline-flex space-x-4 md:block">
-              <Tooltip placement="bottom" overlay={<div>下载 txt 文件</div>}>
+              <Tooltip placement="bottom" content="下载 txt 文件">
                 <DocumentTxtIcon
                   className="icon"
                   onClick={() => {
@@ -210,11 +146,7 @@ const Website = (props) => {
                   }}
                 />
               </Tooltip>
-              <Tooltip
-                placement="bottom"
-                overlay={<div>下载 docx 文件</div>}
-                overlayClassName="bg-gray-500"
-              >
+              <Tooltip placement="bottom" content="下载 docx 文件">
                 <DocumentDocxIcon
                   className="icon"
                   onClick={() => {
@@ -222,10 +154,7 @@ const Website = (props) => {
                   }}
                 />
               </Tooltip>
-              <Tooltip
-                placement="bottom"
-                overlay={<div>下载 PDF（耗时较长）</div>}
-              >
+              <Tooltip placement="bottom" content="下载 PDF（耗时较长）">
                 <DocumentPdfIcon
                   className="icon"
                   onClick={() => {
@@ -244,37 +173,6 @@ const Website = (props) => {
           <p className="block underline text-center text-gray-300">
             无需注册即可下载多种格式文档
           </p>
-          <hr className="mt-10 dark:opacity-40" />
-          <div className="mt-26 text-center md:mx-auto md:w-260">
-            <div className="text-3xl underline decoration-wavy decoration-green-500 underline-offset-6 dark:text-gray-200">
-              &nbsp;&nbsp;进行一个小测验&nbsp;&nbsp;
-            </div>
-            <div className="inline-block mt-6 text-gray-500">
-              上面字幕内容还记得多少呢？
-            </div>
-            <div className="">
-              {!exam && (
-                <div
-                  className="mt-12 inline-block py-2 px-4 text-green-500 rounded border-1 border-green-500 cursor-pointer"
-                  onClick={() => {
-                    startSimpleExam(caption);
-                    import("scroll-into-view-if-needed").then((mod) => {
-                      const scrollIntoView = mod.default;
-                      const $exam = document.querySelector("#exam");
-                      scrollIntoView($exam, {
-                        scrollMode: "if-needed",
-                        behavior: "smooth",
-                        block: "start",
-                        inline: "nearest",
-                      });
-                    });
-                  }}
-                >
-                  点击开始
-                </div>
-              )}
-            </div>
-          </div>
           {/* <div className="mt-36 text-center md:mx-auto md:w-260">
             <div className="inline-block text-3xl underline decoration-wavy decoration-green-500 underline-offset-6 dark:text-gray-200">
               &nbsp;&nbsp;或许，可以试试更难的...&nbsp;&nbsp;
@@ -357,18 +255,23 @@ const Website = (props) => {
         </a>
       </div>
       <Footer />
-      <Modal visible={visible} onCancel={hide}>
-        <ParagraphSettingsForm />
-      </Modal>
     </div>
   );
 };
 
 export const getServerSideProps = async (context) => {
-  const session = await getSession(context);
+  const token = await getToken({
+    req: context.req,
+    cookieName: TOKEN_NAME,
+  });
   return {
     props: {
-      user: session?.user ?? null,
+      u: !!token
+        ? {
+            nickname: token.nickname,
+            avatar: token.avatar,
+          }
+        : null,
     },
   };
 };

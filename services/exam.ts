@@ -12,13 +12,13 @@ import {
 import request from "@/utils/request";
 
 /**
- * 创建场景测验
+ * 创建测验记录
+ * @param body
+ * @deprecated
+ * @returns
  */
-export function createExamSceneService(body: {
-  caption_id: string;
-  type: ExamType;
-}) {
-  return request.post("/api/exam/scene/add", body) as Promise<{ id: string }>;
+export function createExamService(body) {
+  return request.post("/api/exam/add", body);
 }
 
 /**
@@ -28,6 +28,16 @@ export function createExamSceneService(body: {
  */
 export function updateExamService(body) {
   return request.post("/api/exam/update", body) as Promise<{ id: string }>;
+}
+
+/**
+ * 创建测验关卡
+ */
+export function createExamSceneService(body: {
+  caption_id: string;
+  type: ExamType;
+}) {
+  return request.post("/api/exam/scene/add", body) as Promise<{ id: string }>;
 }
 
 /**
@@ -100,6 +110,13 @@ export function fetchExamSceneService(params: { id: string }) {
 }
 
 /**
+ * 重新开始指定测验关卡
+ */
+export function replayExamScene({ id }: { id: string }) {
+  return request.post(`/api/exam/scene/replay/${id}`) as Promise<IExamSceneRes>;
+}
+
+/**
  * 获取测验场景详情
  * @param param0
  * @returns
@@ -115,4 +132,11 @@ export function fetchExamSceneProfileService({ id }) {
  */
 export function updateExamSceneService(body) {
   return request.post("/api/exam/scene/update", body);
+}
+
+/**
+ * 获取测验进度
+ */
+export function fetchExamProgressService({ caption_id }) {
+  return request.get(`/api/exam/progress/${caption_id}`);
 }

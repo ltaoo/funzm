@@ -368,12 +368,12 @@ export async function ensureLogin(req: NextApiRequest, res: NextApiResponse) {
     });
     res.setHeader("Set-Cookie", cookie);
     resp(401, res);
-    throw new Error("请先登录");
-    // return Promise.reject({
-    //   code: 401,
-    //   message: "请先登录",
-    //   data: null,
-    // });
+    // throw new Error("请先登录");
+    return Promise.reject({
+      code: 401,
+      message: "请先登录",
+      data: null,
+    });
   }
   return token.id as number;
 }

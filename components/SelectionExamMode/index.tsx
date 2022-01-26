@@ -3,7 +3,7 @@
  */
 import cx from "classnames";
 
-import Exam from "@/domains/exam";
+import Exam from "@/domains/exam/selection";
 
 interface IProps extends Omit<Exam, "onNext"> {
   className?: string;

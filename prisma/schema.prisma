@@ -47,6 +47,7 @@ model User {
   score_records    ScoreRecord[]
   // packages         Package[]
   check_in_records CheckInRecord[]
+  star_records     StarRecord[]
   score            Score?
   rank             Rank?
 
@@ -210,6 +211,7 @@ model Caption {
   paragraphs     Paragraph[]
   exam_scenes    ExamScene[]
   notes          Note[]
+  star_records   StarRecord[]
 }
 
 model Paragraph {
@@ -389,3 +391,17 @@ model Item {
 
 //   @@map("packages")
 // }
+
+// 收藏的字幕
+model StarRecord {
+  id                    Int     @id @default(autoincrement())
+  user_id    Int        @unique
+  caption_id Int
+
+  user       User       @relation(fields: [user_id], references: [id])
+  caption    Caption    @relation(fields: [caption_id], references: [id])
+
+  created_at DateTime   @default(now())
+
+  @@map("start_records")
+}
