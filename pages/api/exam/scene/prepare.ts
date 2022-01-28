@@ -68,7 +68,16 @@ export default async function providePreparedExamService(
     },
     take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
   });
-
+  // 还在测验就退出，再点进去
+  if ([ExamStatus.Prepare, ExamStatus.Started].includes(status)) {
+    return resp(
+      {
+        ...existing,
+        paragraphs,
+      },
+      res
+    );
+  }
   // 需要重来
   if ([ExamStatus.Failed].includes(status)) {
     const fakeCreated = {

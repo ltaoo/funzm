@@ -12,9 +12,25 @@ export default async function provideCaptionDeletingService(
 ) {
   const user_id = await ensureLogin(req, res);
 
-  const { id } = req.query as { id: string };
+  const { id: i } = req.query as { id: string };
+
+  const id = Number(i);
+
+  if (Number.isNaN(id)) {
+    return resp(10001, res);
+  }
+
+  const matched = await prisma.caption.findUnique({
+    where: { id },
+  });
+  if (!matched) {
+    return resp(10003, res);
+  }
+  if (matched.user_id !== user_id) {
+    return resp(10003, res);
+  }
   await prisma.caption.delete({
-    where: { id: Number(id) },
+    where: { id },
   });
 
   resp(null, res);
