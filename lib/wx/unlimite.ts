@@ -5,10 +5,14 @@
  */
 import axios from "axios";
 
+import { isProd } from "@/constants";
+
 import { getAccessToken } from "./token";
 
 export async function generateWeappQrcode({ scene, page }) {
   const token = await getAccessToken();
+
+  console.log('[]generateWeappQrcode', isProd);
 
   const resp = await axios.post(
     `https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${token}`,
@@ -16,7 +20,7 @@ export async function generateWeappQrcode({ scene, page }) {
       scene,
       page,
       check_path: false,
-      env_version: process.env.prod ? "release" : "develop",
+      env_version: isProd ? "release" : "develop",
     },
     {
       responseType: "arraybuffer",

@@ -39,10 +39,14 @@ export default async function provideExamSceneAddingService(
     include: {
       start: true,
     },
-    orderBy: {
-      index: "desc",
-      created_at: "desc",
-    },
+    orderBy: [
+      {
+        index: "desc",
+      },
+      {
+        created_at: "desc",
+      },
+    ],
   });
   // 指定的字幕第一次获取预备测验内容
   if (!existing) {
