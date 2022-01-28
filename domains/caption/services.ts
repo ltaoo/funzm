@@ -73,7 +73,7 @@ export function updateCaptionService(body) {
  * @param id
  */
 export function deleteCaptionService({ id }) {
-  return request.get(`/api/caption/delete?id=${id}`);
+  return request.get(`/api/caption/delete/${id}`);
 }
 
 /**

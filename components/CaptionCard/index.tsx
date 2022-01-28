@@ -28,11 +28,11 @@ const CaptionCard = (props) => {
   }, []);
 
   const deleteCaption = useCallback(async () => {
-    await deleteCaptionService(idRef.current);
+    await deleteCaptionService({ id });
     if (onDelete) {
       onDelete();
     }
-  }, [onDelete]);
+  }, [id, onDelete]);
 
   const gotoEditor = useCallback(() => {
     router.push({

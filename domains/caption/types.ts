@@ -19,7 +19,7 @@ export interface ICaptionValues {
  * 句子
  */
 export interface IParagraphValues {
-  id: string;
+  id: number;
   line: string;
   start: string;
   end: string;

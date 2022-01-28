@@ -20,8 +20,6 @@ export default async function provideExamProgressService(
     return resp(10001, res);
   }
 
-  console.log(caption_id);
-
   const examScenes = await prisma.examScene.findMany({
     where: {
       user_id,

@@ -40,9 +40,9 @@ export default class SelectionExam extends Exam {
     this.inputtingWords = [];
   }
 
-  next() {
+  next(isSkip) {
     this.inputtingWords = [];
-    super.next();
+    super.next(isSkip);
   }
 
   clear() {
@@ -51,15 +51,17 @@ export default class SelectionExam extends Exam {
   }
 
   setA() {
-    this.curWords = splitText2Words(this.curParagraph.text2);
-    this.displayedWords = shuffle([
-      ...this.curWords.map(([, word]) => word).filter(Boolean),
-    ]).map((str) => {
-      return {
-        uid: uid(),
-        word: str,
-      };
-    });
+    if (this.curParagraph) {
+      this.curWords = splitText2Words(this.curParagraph.text2);
+      this.displayedWords = shuffle([
+        ...this.curWords.map(([, word]) => word).filter(Boolean),
+      ]).map((str) => {
+        return {
+          uid: uid(),
+          word: str,
+        };
+      });
+    }
   }
 
   write(word) {

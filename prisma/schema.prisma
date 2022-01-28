@@ -304,10 +304,10 @@ model Note {
   end                   Int?
 
   caption_id            Int
-  caption               Caption @relation(fields: [caption_id], references: [id])
+  caption               Caption @relation(fields: [caption_id], references: [id], onDelete: Cascade)
 
   paragraph_id          Int
-  paragraph             Paragraph @relation(fields: [paragraph_id], references: [id])
+  paragraph             Paragraph @relation(fields: [paragraph_id], references: [id], onDelete: Cascade)
 
   user_id               Int  
   user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)

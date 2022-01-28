@@ -33,9 +33,14 @@ export default async function providePreparedExamService(
     include: {
       start: true,
     },
-    orderBy: {
-      index: "desc",
-    },
+    orderBy: [
+      {
+        index: "desc",
+      },
+      {
+        created_at: "desc",
+      },
+    ],
   });
   // 指定的字幕第一次获取预备测验内容
   if (!existing) {
@@ -68,7 +73,7 @@ export default async function providePreparedExamService(
     },
     take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
   });
-  // 还在测验就退出，再点进去
+  // 还在测验
   if ([ExamStatus.Prepare, ExamStatus.Started].includes(status)) {
     return resp(
       {

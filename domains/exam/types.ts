@@ -6,7 +6,7 @@ type ExamCallback = (examJSON: IExamSceneDomain) => void;
 export interface IExamBaseParams {
   title: string;
   status: ExamStatus;
-  curParagraphId: string;
+  curParagraphId: number;
   combo?: number;
   maxCombo?: number;
   paragraphs: IParagraphValues[];

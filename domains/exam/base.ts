@@ -28,11 +28,11 @@ class Exam {
   /**
    * 当前看到的段落
    */
-  curParagraph: IParagraphValues;
+  curParagraph: null | IParagraphValues;
   /**
    * 当前看到的段落 id
    */
-  curParagraphId: string;
+  curParagraphId: number;
   /**
    * 倒计时（秒数）
    */
@@ -263,6 +263,7 @@ class Exam {
     const remainingParagraphsCount =
       this.paragraphs.length - (matchedIndex + 1);
 
+    console.log("[DOMAIN]exam - next", isSkip);
     if (isSkip) {
       if (this.onSkip) {
         this.onSkip(this.toJSON());
@@ -301,6 +302,7 @@ class Exam {
   }
 
   skip() {
+    console.log("[DOMAIN]exam - skip");
     if (this.onBeforeSkip) {
       const res = this.onBeforeSkip(this.toJSON());
       if (res === false) {
@@ -314,7 +316,7 @@ class Exam {
     if (this.status !== ExamStatus.Started) {
       return new Error("测验还未开始。");
     }
-    this.skippedParagraphs.push(this.curParagraph);
+    this.skippedParagraphs.push(this.curParagraph!);
     this.next(true);
   }
 
@@ -334,7 +336,7 @@ class Exam {
     const diffContent = this.diff(...params);
 
     if (diffContent === null) {
-      this.correctParagraphs.push(this.curParagraph);
+      this.correctParagraphs.push(this.curParagraph!);
       // console.log("Correct!");
       this.combo += 1;
       if (this.combo > this.maxCombo) {
@@ -347,7 +349,7 @@ class Exam {
       return;
     }
     this.incorrectParagraphs.push({
-      ...this.curParagraph,
+      ...this.curParagraph!,
       input: diffContent,
     });
     // console.log("Incorrect!");
@@ -367,7 +369,7 @@ class Exam {
     this.paragraphMap = arr2map(this.paragraphs, "id");
     this.remainingParagraphsCount = this.paragraphs.length;
   }
-  setCurParagraph(paragraphId: string) {
+  setCurParagraph(paragraphId: number) {
     this.curParagraphId = paragraphId;
     this.curParagraph = this.paragraphMap[paragraphId];
   }
