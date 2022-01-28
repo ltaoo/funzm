@@ -1,4 +1,4 @@
-import Exam from "../index";
+import Exam from "../selection";
 import { ExamStatus } from "../constants";
 
 function sleep(delay) {
