@@ -95,7 +95,7 @@ export default async function provideUpdateExamSceneService(
         if (hasAddScore) {
           return 0;
         }
-        return Math.floor(Math.random() * 10);
+        return Math.ceil(Math.random() * 10);
       }
       return 0;
     })();
