@@ -87,7 +87,7 @@ export default async function provideUpdateExamSceneService(
             caption_id,
             index,
             NOT: {
-              id,
+              // id,
               score: 0,
             },
           },

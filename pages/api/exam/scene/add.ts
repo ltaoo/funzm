@@ -1,5 +1,5 @@
 /**
- * @file 新增测验
+ * @file 新增最新测验
  */
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -41,6 +41,7 @@ export default async function provideExamSceneAddingService(
     },
     orderBy: {
       index: "desc",
+      created_at: "desc",
     },
   });
   // 指定的字幕第一次获取预备测验内容
