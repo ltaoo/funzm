@@ -5,11 +5,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 import { ensureLogin, resp } from "@/lib/utils";
 import prisma from "@/lib/prisma";
-import {
-  ExamStatus,
-  ExamType,
-  PARAGRAPH_COUNT_PER_EXAM_SCENE,
-} from "@/domains/exam/constants";
+import { ExamStatus } from "@/domains/exam/constants";
 
 export default async function provideExamSceneReplayService(
   req: NextApiRequest,

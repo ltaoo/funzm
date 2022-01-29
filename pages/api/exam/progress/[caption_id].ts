@@ -41,9 +41,11 @@ export default async function provideExamProgressService(
   for (let i = 0; i < examScenes.length; i += 1) {
     const es = examScenes[i];
 
-    const { index, start, score, status } = es;
+    const { id, index, start, score, status } = es;
 
     result[index] = result[index] || {
+      id,
+      scene_id: id,
       count: 0,
       score,
       start,

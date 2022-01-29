@@ -3,6 +3,7 @@ import {
   EXPECTED_SECONDS_PER_PARAGRAPH,
   REWARD_SCORES_FOR_CORRECT_SPELLING,
   REWARD_SCORES_FOR_REMAINING_PER_SECOND,
+  SpellingResultType,
 } from "./constants";
 
 /**
@@ -114,4 +115,34 @@ export function paddingZero(num) {
     return `0${number}`;
   }
   return number;
+}
+
+/**
+ * 区分类型
+ */
+export function getMultipleTypeSpellings(spellings) {
+  const skippedSpellings = [];
+  const correctSpellings = [];
+  const incorrectSpellings = [];
+  for (let i = 0; i < spellings.length; i += 1) {
+    const { type } = spellings[i];
+    if (type === SpellingResultType.Skipped) {
+      skippedSpellings.push(spellings[i]);
+      continue;
+    }
+    if (type === SpellingResultType.Correct) {
+      correctSpellings.push(spellings[i]);
+      continue;
+    }
+    if (type === SpellingResultType.Incorrect) {
+      incorrectSpellings.push(spellings[i]);
+      continue;
+    }
+  }
+
+  return {
+    correctSpellings,
+    incorrectSpellings,
+    skippedSpellings,
+  };
 }
