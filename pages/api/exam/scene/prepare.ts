@@ -117,7 +117,7 @@ export default async function providePreparedExamService(
   if (remainingParagraphs.length === 0) {
     return resp(
       {
-        is_all_completed: true,
+        no_more: true,
       },
       res
     );
