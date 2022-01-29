@@ -3,14 +3,15 @@
  */
 import { NextApiRequest, NextApiResponse } from "next";
 
-import prisma from '@/lib/prisma';
-import { ensureLogin } from "@/lib/utils";
+import prisma from "@/lib/prisma";
+import { ensureLogin, resp } from "@/lib/utils";
+import dayjs from "dayjs";
 
 export default async function provideExamStatsService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const userId = await ensureLogin(req, res);
+  const user_id = await ensureLogin(req, res);
 
   const { start, end } = req.query;
 
@@ -18,37 +19,26 @@ export default async function provideExamStatsService(
   const endTime = Number(end) as number;
 
   if (typeof startTime !== "number" || typeof endTime !== "number") {
-    res.status(200).json({
-      code: 1000,
-      msg: "参数类型错误，请传入数字",
-    });
-    return;
+    return resp(10001, res);
   }
   if (endTime < startTime) {
-    res.status(200).json({
-      code: 1000,
-      msg: "结束时间不能小于开始时间",
-    });
-    return;
+    return resp(10005, res);
   }
   if (endTime - startTime > 31 * 24 * 60 * 60) {
-    res.status(200).json({
-      code: 1000,
-      msg: "时间范围不能超过一个月",
-    });
-    return;
+    return resp(10004, res);
   }
 
   const data = await prisma.examScene.findMany({
-	where: {
-	},
-	orderBy: {
-	  created_at: "desc",
-	},
-      });
-      res.status(200).json({
-	code: 0,
-	msg: "",
-	data,
-      });
+    where: {
+      user_id,
+      created_at: {
+        gt: dayjs(startTime * 1000).toDate(),
+        lte: dayjs(endTime * 1000).toDate(),
+      },
+    },
+    orderBy: {
+      created_at: "desc",
+    },
+  });
+  return resp(data, res);
 }

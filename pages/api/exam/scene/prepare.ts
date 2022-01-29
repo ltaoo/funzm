@@ -113,8 +113,14 @@ export default async function providePreparedExamService(
   // );
   // console.log("[API]provideCurExamScene - next paragraphs", response);
   const remainingParagraphs = nextParagraphs;
+  // 已经完成所有关卡
   if (remainingParagraphs.length === 0) {
-    return resp({ id: null }, res);
+    return resp(
+      {
+        is_all_completed: true,
+      },
+      res
+    );
   }
   const fakeCreated = {
     caption_id,
