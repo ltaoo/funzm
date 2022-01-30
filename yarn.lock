@@ -3360,6 +3360,11 @@ hmac-drbg@^1.0.1:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.1"
 
+hotkeys-js@^3.8.7:
+  version "3.8.7"
+  resolved "https://registry.npmmirror.com/hotkeys-js/-/hotkeys-js-3.8.7.tgz#c16cab978b53d7242f860ca3932e976b92399981"
+  integrity sha512-ckAx3EkUr5XjDwjEHDorHxRO2Kb7z6Z2Sxul4MbBkN8Nho7XDslQsgMJT+CiJ5Z4TgRxxvKHEpuLE3imzqy4Lg==
+
 howler@^2.2.3:
   version "2.2.3"
   resolved "https://registry.nlark.com/howler/download/howler-2.2.3.tgz#a2eff9b08b586798e7a2ee17a602a90df28715da"

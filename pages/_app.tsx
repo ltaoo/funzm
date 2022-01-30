@@ -2,6 +2,7 @@ import { AppProps } from "next/app";
 import Script from "next/script";
 import dayjs from "dayjs";
 import zhCN from "dayjs/locale/zh-cn";
+import hotkeys from "hotkeys-js";
 
 import { Provider } from "@/next-auth/client";
 import Helper from "@list/core";
@@ -10,6 +11,9 @@ import "../styles/global.css";
 
 import "react-toastify/dist/ReactToastify.css";
 import "windi.css";
+import TranslatePanel from "@/components/TranslatePanel";
+import { useVisible } from "@/hooks";
+import { useEffect } from "react";
 
 dayjs.locale("zh-CN", zhCN);
 
@@ -37,6 +41,16 @@ export default function App({
   Component,
   pageProps: { user, ...pageProps },
 }: AppProps) {
+  const [visible, show, hide] = useVisible();
+
+  useEffect(() => {
+    hotkeys("ctrl+k, command+k", function (event, handler) {
+      // Prevent the default refresh event under WINDOWS system
+      event.preventDefault();
+      show();
+    });
+  }, []);
+
   return (
     <Provider user={user} options={{}}>
       <Script
@@ -53,6 +67,7 @@ export default function App({
           }`,
         }}
       />
+      <TranslatePanel visible={visible} onCancel={hide} />
       <Component {...pageProps} />
     </Provider>
   );
