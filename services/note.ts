@@ -39,6 +39,19 @@ export async function addNoteService({
   end,
   captionId,
   paragraphId,
+}: {
+  // 笔记内容
+  content: string;
+  // 标记的文本
+  text: string;
+  // 开始下标
+  start: number;
+  // 结束下标
+  end: number;
+  // 笔记的字幕
+  captionId?: number;
+  // 笔记的段落
+  paragraphId?: number;
 }) {
   const data = (await request.post("/api/notes/add", {
     content,
@@ -54,10 +67,11 @@ export async function addNoteService({
 /**
  * 更新笔记
  */
-export function updateNoteService({ id, content }) {
-  return request.post(`/api/notes/update/${id}`, {
+export async function updateNoteService({ id, content }) {
+  const data = await request.post(`/api/notes/update/${id}`, {
     content,
   });
+  return data as INoteValues;
 }
 
 /**
@@ -66,6 +80,26 @@ export function updateNoteService({ id, content }) {
 export async function fetchNotesByCaptionIdService(id) {
   const data = (await request.get("/api/notes/search", {
     caption_id: id,
+  })) as INoteRes[];
+  return data.map((note) => {
+    const { id, content, start, end, paragraph_id } = note;
+    return {
+      id,
+      paragraphId: paragraph_id,
+      content,
+      start,
+      end,
+    };
+  });
+}
+
+/**
+ * 根据给定的段落 id 获取笔记
+ * @param ids
+ */
+export async function fetchNotesByParagraphsService(ids: number[]) {
+  const data = (await request.post("/api/notes/search", {
+    paragraph_ids: ids,
   })) as INoteRes[];
   return data.map((note) => {
     const { id, content, start, end, paragraph_id } = note;

@@ -1,7 +1,7 @@
 /**
  * @file 拼写结果列表
  */
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import Layout from "@/layouts";
 import useHelper from "@list/hooks";
@@ -13,8 +13,16 @@ import { compareLine } from "@/domains/caption/utils";
 import ScrollView from "@/components/ScrollView";
 import { ChartBarIcon } from "@ltaoo/icons/outline";
 import IncomingTip from "@/components/Incoming";
+import HighlightContent from "@/components/HighlightContent";
+import {
+  addNoteService,
+  fetchNotesByParagraphsService,
+  updateNoteService,
+} from "@/services/note";
 
 const SpellingResultsPage = () => {
+  const [notes, setNotes] = useState([]);
+
   const [{ dataSource, noMore }, helper] = useHelper<ISpellingValues>(
     fetchSpellingsService,
     {
@@ -23,6 +31,28 @@ const SpellingResultsPage = () => {
       },
     }
   );
+
+  const fetchNotesByParagraphs = useCallback(async (ids) => {
+    // const ids = Object.keys(ids);
+    const notes = await fetchNotesByParagraphsService(ids);
+    setNotes((prev) => prev.concat(notes));
+  }, []);
+
+  useEffect(() => {
+    // Object.keys(paragraphIds).join(",")
+    const paragraphIds = dataSource
+      .map((s) => {
+        return s.paragraph.id;
+      })
+      .reduce((total, cur) => {
+        return { ...total, [cur]: true };
+      }, {});
+
+    const ids = Object.keys(paragraphIds).map(Number);
+    if (ids.length) {
+      fetchNotesByParagraphs(ids);
+    }
+  }, [dataSource.length]);
 
   useEffect(() => {
     helper.init();
@@ -34,6 +64,8 @@ const SpellingResultsPage = () => {
     // console.log(res);
   }, []);
 
+  console.log("[] - render", dataSource);
+
   return (
     <Layout title="错题记录">
       <div className="flex">
@@ -42,18 +74,65 @@ const SpellingResultsPage = () => {
           <ScrollView noMore={noMore} onLoadMore={helper.loadMoreWithLastItem}>
             <div className="mt-4 rounded space-y-4">
               {dataSource.map((record) => {
-                const { type, input, paragraph, createdAt } = record;
+                const { id, type, input, paragraph, createdAt } = record;
                 return (
-                  <div
-                    key={createdAt}
-                    className="py-2 px-4 bg-white rounded shadow"
-                  >
+                  <div key={id} className="py-2 px-4 bg-white rounded shadow">
                     <div className="text-gray-500">
                       <div className="mt-2 text-xl text-red-500 font-serif">
                         {input}
                       </div>
                       <div className="text-xl font-serif">
-                        {paragraph.text2}
+                        <HighlightContent
+                          highlights={paragraph.notes}
+                          onSubmit={async ({
+                            id: i,
+                            content,
+                            text,
+                            start,
+                            end,
+                          }) => {
+                            if (i) {
+                              await updateNoteService({
+                                id: i,
+                                content,
+                              });
+                              helper.modifyItem({
+                                ...record,
+                                paragraph: {
+                                  ...record.paragraph,
+                                  notes: record.paragraph.notes?.map((n) => {
+                                    if (n.id === i) {
+                                      return {
+                                        ...n,
+                                        content,
+                                      };
+                                    }
+                                    return n;
+                                  }),
+                                },
+                              });
+                            } else {
+                              const created = await addNoteService({
+                                content,
+                                text,
+                                start,
+                                end,
+                                paragraphId: paragraph.id,
+                              });
+                              helper.modifyItem({
+                                ...record,
+                                paragraph: {
+                                  ...record.paragraph,
+                                  notes:
+                                    record.paragraph.notes?.concat(created),
+                                },
+                              });
+                            }
+                          }}
+                        >
+                          {paragraph.text2}
+                        </HighlightContent>
+                        {/* {paragraph.text2} */}
                       </div>
                       <div className="mt-4">{paragraph.text1}</div>
                     </div>

@@ -1,3 +1,6 @@
+/**
+ * @file 更新笔记
+ */
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { ensureLogin, resp } from "@/lib/utils";
@@ -9,9 +12,25 @@ export default async function provideNoteUpdateService(
 ) {
   const user_id = await ensureLogin(req, res);
 
-  const { id, content } = req.query;
+  const { id } = req.query as { id: string };
+  const { content } = req.body;
 
-  console.log(id, content);
+  const existing = await prisma.note.findFirst({
+    where: { id: Number(id), user_id },
+  });
 
-  return resp(null, res);
+  if (!existing) {
+    return resp(10003, res);
+  }
+
+  const updated = await prisma.note.update({
+    where: {
+      id: Number(id),
+    },
+    data: {
+      content,
+    },
+  });
+
+  return resp(updated, res);
 }

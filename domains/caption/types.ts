@@ -25,8 +25,13 @@ export interface IParagraphValues {
   end: string;
   text1: string;
   text2: string;
-
   valid: boolean;
+
+  notes?: {
+    id?: number;
+    start: number;
+    end: number;
+  }[];
 }
 
 export interface CaptionFile {

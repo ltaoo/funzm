@@ -22,8 +22,12 @@ export default async function provideSpellingsService(req, res) {
     prisma.spellingResult.findMany({
       ...params,
       include: {
-        paragraph: true,
-      }
+        paragraph: {
+          include: {
+            notes: true,
+          },
+        },
+      },
     }),
     prisma.spellingResult.count({
       where: params.where,

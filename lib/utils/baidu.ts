@@ -97,7 +97,7 @@ async function getTokenAndGTK(opts: { cookie?: string; force?: boolean } = {}) {
     // @ts-ignore
     headers.Cookie = c;
   }
-  console.log("[]Do not matched the cache, request again.", c);
+  // console.log("[]Do not matched the cache, request again.", c);
   const resp = await fetch(
     "https://fanyi.baidu.com/translate?aldtype=16047&query=14&keyfrom=baidu&smartresult=dict&lang=auto2zh",
     {
@@ -176,10 +176,11 @@ export async function translate(word, force = false) {
   });
   const data = await resp.json();
   if (data.errno) {
-    if (count >= 3) {
+    if (count >= 2) {
       count = 0;
       return data;
     }
+    count += 1;
     return translate(word, true);
   }
   // console.log("[]baidu translate success", data);
