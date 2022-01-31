@@ -1,3 +1,6 @@
+/**
+ * @file 通用接口
+ */
 import { FetchParams, RequestResponse } from "@list/core";
 
 import { df } from "@/utils";

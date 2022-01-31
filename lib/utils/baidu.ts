@@ -208,9 +208,21 @@ function parseBaiduResult(result) {
   }
   const { simple_means } = dict_result;
   const { exchange, collins, memory_skill, symbols } = simple_means;
+  const symbol = symbols[0];
   return {
     word: simple_means.word_name,
     memory_skill,
     explains: simple_means.word_means,
+    speeches: {
+      en: symbol.ph_en,
+      am: symbol.ph_am,
+    },
+    parts: symbol.parts.map((p) => {
+      const { part, means } = p;
+      return {
+        type: part,
+        means: means.join("；"),
+      };
+    }),
   };
 }
