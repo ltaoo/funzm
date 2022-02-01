@@ -63,6 +63,10 @@ const TOKEN_REGEXP = /token: '(.+)',/;
 const GTK_REGEXP = /window\.gtk = '(.+)'/;
 async function getTokenAndGTK(opts: { force?: boolean } = {}) {
   const { force = false } = opts;
+  console.log(
+    "[BAIDU]getTokenAndGTK check match cache",
+    cachedToken && cachedGtk && cachedCookie
+  );
   if (cachedToken && cachedGtk && cachedCookie && !force) {
     return {
       token: cachedToken,
@@ -94,10 +98,11 @@ async function getTokenAndGTK(opts: { force?: boolean } = {}) {
     method: "GET",
   });
   const cookie = resp.headers.get("set-cookie");
+  console.log("[BAIDU]initialize request to get cookie", cookie);
 
   if (cookie) {
-    const t = cookie.split(";")[0];
-    headers.Cookie = t;
+    const ttt = cookie.split(";")[0];
+    headers.Cookie = ttt;
   }
   // console.log("[]Do not matched the cache, request again.", c);
   resp = await fetch("https://fanyi.baidu.com/translate", {
@@ -108,6 +113,12 @@ async function getTokenAndGTK(opts: { force?: boolean } = {}) {
   const data = await resp.text();
   const token = data.match(TOKEN_REGEXP);
   const gtk = data.match(GTK_REGEXP);
+
+  console.log(
+    "[BAIDU]request baidu with cookie, then get token and gtk",
+    !!token,
+    !!gtk
+  );
 
   if (token !== null && gtk !== null) {
     const tt = token[1];
@@ -135,7 +146,14 @@ export async function translate(word, force = false) {
 
   const { token, gtk, cookie } = tokenAndGTK;
   const sign = t(word, gtk);
-  console.log(cookie, token, gtk, sign, word);
+  console.log(
+    "[BAIDU]invoke translate api with cookie",
+    cookie,
+    token,
+    gtk,
+    sign,
+    word
+  );
   const body = qs.stringify({
     from: "zh",
     to: "en",
