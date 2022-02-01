@@ -1,0 +1,19 @@
+fetch("https://fanyi.baidu.com/v2transapi?from=en&to=zh", {
+  "headers": {
+    "accept": "*/*",
+    "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
+    "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "sec-ch-ua": "\" Not;A Brand\";v=\"99\", \"Google Chrome\";v=\"97\", \"Chromium\";v=\"97\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"macOS\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+    "x-requested-with": "XMLHttpRequest",
+    "cookie": "BAIDUID=6137ECF8D1F677814796CDCFF4D9485E:FG=1; Hm_lvt_64ecd82404c51e03dc91cb9e8c025574=1643458650; Hm_lpvt_64ecd82404c51e03dc91cb9e8c025574=1643547057; REALTIME_TRANS_SWITCH=1; FANYI_WORD_SWITCH=1; HISTORY_SWITCH=1; SOUND_SPD_SWITCH=1; SOUND_PREFER_SWITCH=1; APPGUIDE_10_0_2=1; __yjs_duid=1_a476190ec2c243ac32e63839a02f9d5f1643547057511; BIDUPSID=6137ECF8D1F677814796CDCFF4D9485E; PSTM=1643547176; delPer=0; PSINO=3; H_PS_PSSID=35106_31254_34584_35491_35541_35796_35319_26350_22160; BAIDUID_BFESS=2486009C5671B0F07AA5A67E03ACF58C:FG=1",
+    "Referer": "https://fanyi.baidu.com/translate?aldtype=16047&query=14&keyfrom=baidu&smartresult=dict&lang=auto2zh",
+    "Referrer-Policy": "strict-origin-when-cross-origin"
+  },
+  "body": "from=en&to=zh&query=wreck&transtype=translang&simple_means_flag=3&sign=669987.973330&token=982b29a4f0a7492370855353bae10c4e&domain=common",
+  "method": "POST"
+});

@@ -61,14 +61,8 @@ let cachedGtk = null;
 let cachedCookie = null;
 const TOKEN_REGEXP = /token: '(.+)',/;
 const GTK_REGEXP = /window\.gtk = '(.+)'/;
-async function getTokenAndGTK(opts: { cookie?: string; force?: boolean } = {}) {
-  const { cookie: c, force = false } = opts;
-  // console.log(
-  //   "[]getTokenAndGTK check has cache",
-  //   cachedToken,
-  //   cachedGtk,
-  //   cachedCookie
-  // );
+async function getTokenAndGTK(opts: { force?: boolean } = {}) {
+  const { force = false } = opts;
   if (cachedToken && cachedGtk && cachedCookie && !force) {
     return {
       token: cachedToken,
@@ -89,24 +83,28 @@ async function getTokenAndGTK(opts: { cookie?: string; force?: boolean } = {}) {
     "sec-fetch-mode": "navigate",
     "sec-fetch-site": "same-origin",
     "upgrade-insecure-requests": "1",
-    Referer:
-      "https://fanyi.baidu.com/translate?aldtype=16047&query=14&keyfrom=baidu&smartresult=dict&lang=auto2zh",
+    Cookie: undefined,
+    Referer: "https://fanyi.baidu.com/translate",
     "Referrer-Policy": "strict-origin-when-cross-origin",
   };
-  if (c) {
-    // @ts-ignore
-    headers.Cookie = c;
+  // console.log("[]Do not matched the cache, request again.", c);
+  let resp = await fetch("https://fanyi.baidu.com/translate", {
+    headers,
+    body: null,
+    method: "GET",
+  });
+  const cookie = resp.headers.get("set-cookie");
+
+  if (cookie) {
+    const t = cookie.split(";")[0];
+    headers.Cookie = t;
   }
   // console.log("[]Do not matched the cache, request again.", c);
-  const resp = await fetch(
-    "https://fanyi.baidu.com/translate?aldtype=16047&query=14&keyfrom=baidu&smartresult=dict&lang=auto2zh",
-    {
-      headers,
-      body: null,
-      method: "GET",
-    }
-  );
-  const cookie = resp.headers.get("set-cookie");
+  resp = await fetch("https://fanyi.baidu.com/translate", {
+    headers,
+    body: null,
+    method: "GET",
+  });
   const data = await resp.text();
   const token = data.match(TOKEN_REGEXP);
   const gtk = data.match(GTK_REGEXP);
@@ -116,35 +114,28 @@ async function getTokenAndGTK(opts: { cookie?: string; force?: boolean } = {}) {
     const gg = gtk[1];
     cachedToken = tt;
     cachedGtk = gg;
+    cachedCookie = t;
     // console.log("[]cache token and gtk", cachedToken, cachedGtk);
     return {
-      // token: token[1],
-      // gtk: gtk[1],
       token: tt,
       gtk: gg,
-      // cookie: cachedCookie,
+      cookie: headers.Cookie,
     };
   }
-  // return null;
-
-  const t = cookie.split(";")[0];
-  cachedCookie = t;
-  return {
-    cookie: t,
-  };
+  return null;
 }
 
 let count = 0;
 export async function translate(word, force = false) {
-  const { cookie } = await getTokenAndGTK();
-  const tokenAndGTK = await getTokenAndGTK({ cookie, force });
+  const tokenAndGTK = await getTokenAndGTK({ force });
+
   if (tokenAndGTK === null) {
     return null;
   }
 
-  const { token, gtk } = tokenAndGTK;
+  const { token, gtk, cookie } = tokenAndGTK;
   const sign = t(word, gtk);
-  // console.log(token, gtk, cookie, sign, word);
+  console.log(cookie, token, gtk, sign, word);
   const body = qs.stringify({
     from: "zh",
     to: "en",
@@ -183,7 +174,6 @@ export async function translate(word, force = false) {
     count += 1;
     return translate(word, true);
   }
-  // console.log("[]baidu translate success", data);
   return parseBaiduResult(data);
 }
 
