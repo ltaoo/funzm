@@ -125,7 +125,7 @@ async function getTokenAndGTK(opts: { force?: boolean } = {}) {
     const gg = gtk[1];
     cachedToken = tt;
     cachedGtk = gg;
-    cachedCookie = t;
+    cachedCookie = headers.Cookie;
     // console.log("[]cache token and gtk", cachedToken, cachedGtk);
     return {
       token: tt,
