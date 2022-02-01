@@ -138,13 +138,16 @@ async function getTokenAndGTK(opts: { force?: boolean } = {}) {
 
 let count = 0;
 export async function translate(word, force = false) {
-  const tokenAndGTK = await getTokenAndGTK({ force });
+  // const tokenAndGTK = await getTokenAndGTK({ force });
 
-  if (tokenAndGTK === null) {
-    return null;
-  }
+  // if (tokenAndGTK === null) {
+  //   return null;
+  // }
 
-  const { token, gtk, cookie } = tokenAndGTK;
+  // const { token, gtk, cookie } = tokenAndGTK;
+  const cookie = "BAIDUID=6137ECF8D1F677814796CDCFF4D9485E:FG=1;";
+  const token = "982b29a4f0a7492370855353bae10c4e";
+  const gtk = "320305.131321201";
   const sign = t(word, gtk);
   console.log(
     "[BAIDU]invoke translate api with cookie",
