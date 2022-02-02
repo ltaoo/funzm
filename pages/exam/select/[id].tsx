@@ -48,7 +48,11 @@ const SimpleCaptionExamPage = () => {
       status: ExamStatus.Started,
       curParagraphId: (() => {
         if (curParagraphIndex && curParagraphIndex !== -1) {
-          return paragraphs[curParagraphIndex + 1].id;
+          const i =
+            curParagraphIndex === paragraphs.length - 1
+              ? curParagraphIndex
+              : curParagraphIndex + 1;
+          return paragraphs[i].id;
         }
         return start_id;
       })(),

@@ -26,7 +26,7 @@ const WordsPage = () => {
         <div className="flex-1 mr-12">
           <div className="text-2xl text-gray-800">我的生词</div>
           <ScrollView noMore={noMore} onLoadMore={helper.loadMoreWithLastItem}>
-            <div className="flex mt-4 rounded space-x-4">
+            <div className="flex flex-wrap mt-4 rounded space-x-4">
               {dataSource.map((word) => {
                 const { id, text, paragraph, createdAt } = word;
                 return (

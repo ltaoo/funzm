@@ -224,7 +224,14 @@ function parseBaiduResult(result) {
   return {
     word: simple_means.word_name,
     memory_skill,
-    explains: simple_means.word_means,
+    explains: (() => {
+      if (simple_means.word_means) {
+        return simple_means.word_means;
+      }
+      if (symbol?.parts && symbol?.parts[0]) {
+        return symbol.parts[0].means;
+      }
+    })(),
     speeches: {
       en: symbol.ph_en,
       am: symbol.ph_am,
