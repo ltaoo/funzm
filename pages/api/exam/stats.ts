@@ -15,6 +15,9 @@ export default async function provideExamStatsService(
 
   const { start, end } = req.query;
 
+  if (start === undefined || end === undefined) {
+    return resp(10006, res);
+  }
   const startTime = Number(start) as number;
   const endTime = Number(end) as number;
 
@@ -32,7 +35,7 @@ export default async function provideExamStatsService(
     where: {
       user_id,
       created_at: {
-        gt: dayjs(startTime * 1000).toDate(),
+        gte: dayjs(startTime * 1000).toDate(),
         lte: dayjs(endTime * 1000).toDate(),
       },
     },

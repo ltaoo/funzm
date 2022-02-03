@@ -123,12 +123,17 @@ export default async function provideIncorrectSpellingStatsService(
           },
         },
         data: {
-          exam_scene_total,
-          success_exam_scene_total,
-          failed_exam_scene_total,
-          success_spellings_total,
-          failed_spellings_total,
-          skipped_spellings_total,
+          exam_scene_total: e.exam_scene_total + exam_scene_total,
+          success_exam_scene_total:
+            e.success_exam_scene_total + success_exam_scene_total,
+          failed_exam_scene_total:
+            e.failed_exam_scene_total + failed_exam_scene_total,
+          success_spellings_total:
+            e.success_spellings_total + success_spellings_total,
+          failed_spellings_total:
+            e.failed_spellings_total + failed_spellings_total,
+          skipped_spellings_total:
+            e.skipped_spellings_total + skipped_spellings_total,
         },
       });
     } else {
