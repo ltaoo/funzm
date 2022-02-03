@@ -275,7 +275,7 @@ model ExamScene {
 }
 
 model ExamStats {
-  exam_scene_id             Int
+  user_id                   Int
 
   // 当天共计进行了多少次关卡
   exam_scene_total          Int
@@ -290,7 +290,9 @@ model ExamStats {
   // 跳过拼写总数
   skipped_spellings_total   Int
 
-  created_at                DateTime   @unique @default(now())
+  created_at                DateTime   @default(now())
+
+  @@unique([user_id, created_at])
 
   @@map("exam_stats")
 }
@@ -448,6 +450,7 @@ model Flag {
   id                    Int     @id @default(autoincrement())
 
   spelling_flag_id      Int?
+  exam_scene_flag_id    Int?
 
   @@map("flags")
 }

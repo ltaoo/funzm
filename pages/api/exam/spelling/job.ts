@@ -3,7 +3,6 @@ import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
 import { resp } from "@/lib/utils";
 import { SpellingResultType } from "@/domains/exam/constants";
-import dayjs from "dayjs";
 
 export default async function provideIncorrectSpellingStatsService(
   req: NextApiRequest,
@@ -27,17 +26,48 @@ export default async function provideIncorrectSpellingStatsService(
     fetchArgs.cursor = {
       id: spelling_flag_id,
     };
+    // @ts-ignore
+    fetchArgs.skip = 1;
   }
   const spellings = await prisma.spellingResult.findMany(fetchArgs);
-  //   console.log(spellings);
+
+  console.log("[]spellings total is", spellings.length);
   const incorrect_spellings = spellings.filter((spelling) => {
     return spelling.type === SpellingResultType.Incorrect;
   });
-  //   console.log(incorrect_spellings);
+  console.log("and incorrect spellings is", incorrect_spellings.length);
+
+  if (spellings.length === 0) {
+    return resp(null, res);
+  }
+
+  const map = {};
   for (let i = 0; i < incorrect_spellings.length; i += 1) {
-    const { user_id, paragraph_id } = incorrect_spellings[i];
+    const { id, user_id, paragraph_id, created_at } = incorrect_spellings[i];
+    console.log("[]incorrect spelling id is", id);
+    const key = `${user_id}-${paragraph_id}`;
+    if (map[key]) {
+      map[key] = {
+        user_id,
+        paragraph_id,
+
+        updated_at: created_at,
+      };
+    } else {
+      map[key] = {
+        user_id,
+        paragraph_id,
+
+        created_at,
+      };
+    }
+  }
+
+  const keys = Object.keys(map);
+  for (let i = 0; i < keys.length; i += 1) {
+    const { user_id, paragraph_id, updated_at, created_at } = map[keys[i]];
     const e = await prisma.incorrectParagraph.findFirst({
-      where: { id: paragraph_id },
+      where: { user_id, id: paragraph_id },
     });
     if (e) {
       await prisma.incorrectParagraph.update({
@@ -45,7 +75,7 @@ export default async function provideIncorrectSpellingStatsService(
           id: paragraph_id,
         },
         data: {
-          updated_at: dayjs().toDate(),
+          updated_at,
         },
       });
     } else {
@@ -53,6 +83,7 @@ export default async function provideIncorrectSpellingStatsService(
         data: {
           user_id,
           id: paragraph_id,
+          created_at,
         },
       });
     }
@@ -63,7 +94,13 @@ export default async function provideIncorrectSpellingStatsService(
       id: flag.id,
     },
     data: {
-      spelling_flag_id: spellings.pop().id,
+      spelling_flag_id: (() => {
+        const lastOne = spellings.pop();
+        if (lastOne) {
+          return lastOne.id;
+        }
+        return flag.spelling_flag_id;
+      })(),
     },
   });
 

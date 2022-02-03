@@ -28,7 +28,7 @@ export default async function provideExamStatsService(
     return resp(10004, res);
   }
 
-  const data = await prisma.examScene.findMany({
+  const data = await prisma.examStats.findMany({
     where: {
       user_id,
       created_at: {
