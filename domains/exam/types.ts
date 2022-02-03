@@ -1,4 +1,5 @@
 import { ICaptionValues, IParagraphValues } from "@/domains/caption/types";
+import { INoteValues } from "@/domains/note/types";
 
 import { ExamStatus, ExamType, SpellingResultType } from "./constants";
 
@@ -165,4 +166,17 @@ export interface ISpellingValues {
   // 属于哪个用户
   // userId: string;
   createdAt: string;
+}
+
+export interface IIncorrectParagraph {
+  id: number;
+  text1: string;
+  text2: string;
+  notes: INoteValues[];
+  hasSuccess: boolean;
+  spellings: ISpellingValues[];
+  incorrectSpellings: ISpellingValues[];
+  times: number;
+  incorrectTimes: number;
+  updatedAt: string;
 }

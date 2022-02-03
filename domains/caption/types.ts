@@ -1,3 +1,5 @@
+import { ISpellingValues } from "@/domains/exam/types";
+
 export interface ICaptionRes {
   id: number;
   title: string;
@@ -32,6 +34,7 @@ export interface IParagraphValues {
     start: number;
     end: number;
   }[];
+  spellings?: ISpellingValues[];
 }
 
 export interface CaptionFile {

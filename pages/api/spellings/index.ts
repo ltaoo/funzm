@@ -1,17 +1,24 @@
-import { ensureLogin } from "@/lib/utils";
+/**
+ * @file 获取拼写列表
+ */
+import { NextApiRequest, NextApiResponse } from "next";
+
+import { ensureLogin, resp } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 import { paginationFactory } from "@/lib/models/pagination";
 
-export default async function provideSpellingsService(req, res) {
-  const userId = await ensureLogin(req, res);
+export default async function provideSpellingsService(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const user_id = await ensureLogin(req, res);
 
-  const { page, pageSize, status } = req.query;
+  const { page, pageSize } = req.query;
   const [params, getResult] = paginationFactory({
     page,
     pageSize,
     search: {
-      type: status ? Number(status) : undefined,
-      user_id: userId,
+      user_id: user_id,
     },
     sort: {
       created_at: "desc",
@@ -19,24 +26,21 @@ export default async function provideSpellingsService(req, res) {
   });
 
   const [list, total] = await prisma.$transaction([
-    prisma.spellingResult.findMany({
+    prisma.incorrectParagraph.findMany({
       ...params,
       include: {
         paragraph: {
           include: {
             notes: true,
+            spellings: true,
           },
         },
       },
     }),
-    prisma.spellingResult.count({
+    prisma.incorrectParagraph.count({
       where: params.where,
     }),
   ]);
 
-  res.status(200).json({
-    code: 0,
-    msg: "",
-    data: getResult(list, total),
-  });
+  return resp(getResult(list, total), res);
 }

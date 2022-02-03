@@ -1,5 +1,5 @@
 /**
- * @file 更新测验关卡
+ * @file 更新（结算）测验关卡
  */
 import { NextApiRequest, NextApiResponse } from "next";
 import dayjs from "dayjs";

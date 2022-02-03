@@ -234,6 +234,7 @@ model Paragraph {
   spellings    SpellingResult[]
   words        Word[]
   notes        Note[]
+  incorrect_paragraph IncorrectParagraph?
 
   @@map("paragraphs")
 }
@@ -273,16 +274,52 @@ model ExamScene {
   @@map("exam_scenes")
 }
 
+model ExamStats {
+  exam_scene_id             Int
+
+  // 当天共计进行了多少次关卡
+  exam_scene_total          Int
+  // 成功次数
+  success_exam_scene_total  Int
+  // 失败次数
+  failed_exam_scene_total   Int
+  // 正确拼写次数
+  success_spellings_total   Int
+  // 错误拼写总数
+  failed_spellings_total    Int
+  // 跳过拼写总数
+  skipped_spellings_total   Int
+
+  created_at                DateTime   @unique @default(now())
+
+  @@map("exam_stats")
+}
+
+// 似乎可以给 Paragraph 一个 hasIncorrectSpelling 标记，效果是一样的？
+model IncorrectParagraph {
+  id             Int        @id
+  user_id        Int
+
+  paragraph      Paragraph  @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  created_at     DateTime    @default(now())
+  updated_at     DateTime?
+
+  @@unique([id, user_id])
+  
+  @@map("incorrect_paragraphs")
+}
+
 model SpellingResult {
-  id             Int      @id @default(autoincrement())
+  id             Int        @id @default(autoincrement())
   type           Int
 
   user_id        Int
 
-  paragraph_id   Int    
+  paragraph_id   Int
 
 
-  exam_scene_id  Int?    
+  exam_scene_id  Int?
 
   user           User?       @relation(fields: [user_id], references: [id], onDelete: Cascade)
   exam_scene     ExamScene?  @relation(fields: [exam_scene_id], references: [id], onDelete: Cascade)
@@ -290,7 +327,7 @@ model SpellingResult {
 
   input          String?
 
-  created_at     DateTime   @default(now())
+  created_at     DateTime    @default(now())
 
   @@map("spelling_results")
 }
@@ -404,4 +441,13 @@ model StarRecord {
   created_at DateTime   @default(now())
 
   @@map("start_records")
+}
+
+// 全局的标记
+model Flag {
+  id                    Int     @id @default(autoincrement())
+
+  spelling_flag_id      Int?
+
+  @@map("flags")
 }

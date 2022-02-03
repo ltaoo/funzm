@@ -7,9 +7,7 @@ import Layout from "@/layouts";
 import useHelper from "@list/hooks";
 import { fetchSpellingsService } from "@/services/spellings";
 import { SpellingResultType } from "@/domains/exam/constants";
-import { ISpellingValues } from "@/domains/exam/types";
-import { spellingResultRes2Values } from "@/domains/exam/transformer";
-import { compareLine } from "@/domains/caption/utils";
+import { IIncorrectParagraph } from "@/domains/exam/types";
 import ScrollView from "@/components/ScrollView";
 import { ChartBarIcon } from "@ltaoo/icons/outline";
 import IncomingTip from "@/components/Incoming";
@@ -23,7 +21,7 @@ import {
 const SpellingResultsPage = () => {
   const [notes, setNotes] = useState([]);
 
-  const [{ dataSource, noMore }, helper] = useHelper<ISpellingValues>(
+  const [{ dataSource, noMore }, helper] = useHelper<IIncorrectParagraph>(
     fetchSpellingsService,
     {
       search: {
@@ -42,7 +40,7 @@ const SpellingResultsPage = () => {
     // Object.keys(paragraphIds).join(",")
     const paragraphIds = dataSource
       .map((s) => {
-        return s.paragraph.id;
+        return s.id;
       })
       .reduce((total, cur) => {
         return { ...total, [cur]: true };
@@ -74,16 +72,22 @@ const SpellingResultsPage = () => {
           <ScrollView noMore={noMore} onLoadMore={helper.loadMoreWithLastItem}>
             <div className="mt-4 rounded space-y-4">
               {dataSource.map((record) => {
-                const { id, type, input, paragraph, createdAt } = record;
+                const {
+                  id,
+                  text1,
+                  text2,
+                  notes,
+                  times,
+                  incorrectTimes,
+                  incorrectSpellings,
+                  updatedAt,
+                } = record;
                 return (
                   <div key={id} className="py-2 px-4 bg-white rounded shadow">
                     <div className="text-gray-500">
-                      <div className="mt-2 text-xl text-red-500 font-serif">
-                        {input}
-                      </div>
                       <div className="text-xl font-serif">
                         <HighlightContent
-                          highlights={paragraph.notes}
+                          highlights={notes}
                           onSubmit={async ({
                             id: i,
                             content,
@@ -98,18 +102,16 @@ const SpellingResultsPage = () => {
                               });
                               helper.modifyItem({
                                 ...record,
-                                paragraph: {
-                                  ...record.paragraph,
-                                  notes: record.paragraph.notes?.map((n) => {
-                                    if (n.id === i) {
-                                      return {
-                                        ...n,
-                                        content,
-                                      };
-                                    }
-                                    return n;
-                                  }),
-                                },
+                                ...record,
+                                notes: notes?.map((n) => {
+                                  if (n.id === i) {
+                                    return {
+                                      ...n,
+                                      content,
+                                    };
+                                  }
+                                  return n;
+                                }),
                               });
                             } else {
                               const created = await addNoteService({
@@ -117,26 +119,33 @@ const SpellingResultsPage = () => {
                                 text,
                                 start,
                                 end,
-                                paragraphId: paragraph.id,
+                                paragraphId: id,
                               });
                               helper.modifyItem({
                                 ...record,
-                                paragraph: {
-                                  ...record.paragraph,
-                                  notes:
-                                    record.paragraph.notes?.concat(created),
-                                },
+                                notes: notes?.concat(created),
                               });
                             }
                           }}
                         >
-                          {paragraph.text2}
+                          {text2}
                         </HighlightContent>
-                        {/* {paragraph.text2} */}
                       </div>
-                      <div className="mt-4">{paragraph.text1}</div>
+                      {/* <div className="mt-4">{text1}</div> */}
                     </div>
-                    <time className="text-gray-300 text-sm">{createdAt}</time>
+
+                    <div className="mt-2 py-2 px-2 text-gray-500 rounded bg-gray-100">
+                      {incorrectSpellings.map((spelling) => {
+                        const { id: i, input } = spelling;
+                        return <div key={i}>{input}</div>;
+                      })}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <time className="text-gray-300 text-sm">{updatedAt}</time>
+                      <div className="mt-2 mr-4 text-sm text-gray-300">
+                        {incorrectTimes}/{times}
+                      </div>
+                    </div>
                   </div>
                 );
               })}
