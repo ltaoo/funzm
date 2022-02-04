@@ -1,6 +1,5 @@
 /**
  * @file 获取出现过错误拼写的句子列表
- * @deprecated
  */
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -8,7 +7,7 @@ import { ensureLogin, resp } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 import { paginationFactory } from "@/lib/models/pagination";
 
-export default async function provideSpellingsService(
+export default async function provideIncorrectParagraphsService(
   req: NextApiRequest,
   res: NextApiResponse
 ) {

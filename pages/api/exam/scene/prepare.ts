@@ -42,6 +42,14 @@ export default async function providePreparedExamService(
       },
     ],
   });
+  const paragraphCount = await prisma.paragraph.count({
+    where: {
+      caption_id,
+    },
+  });
+  const expectedSceneCount = Math.ceil(
+    paragraphCount / PARAGRAPH_COUNT_PER_EXAM_SCENE
+  );
   // 指定的字幕第一次获取预备测验内容
   if (!existing) {
     const paragraphs = await prisma.paragraph.findMany({
@@ -57,6 +65,7 @@ export default async function providePreparedExamService(
       start: paragraphs[0],
       start_id: paragraphs[0].id,
       index: 1,
+      scene_count: expectedSceneCount,
       paragraphs,
     };
     return resp(fakeCreated, res);
@@ -91,6 +100,7 @@ export default async function providePreparedExamService(
       start_id,
       status: ExamStatus.Prepare,
       paragraphs,
+      scene_count: expectedSceneCount,
       index,
     };
     return resp(fakeCreated, res);
@@ -127,6 +137,7 @@ export default async function providePreparedExamService(
     status: ExamStatus.Prepare,
     start: nextParagraphs[0],
     paragraphs: nextParagraphs,
+    scene_count: expectedSceneCount,
     index: index + 1,
   };
   return resp(fakeCreated, res);

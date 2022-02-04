@@ -5,8 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import Layout from "@/layouts";
 import useHelper from "@list/hooks";
-import { fetchSpellingsService } from "@/services/spellings";
-import { SpellingResultType } from "@/domains/exam/constants";
+import { fetchIncorrectParagraphsService } from "@/services/spellings";
 import { IIncorrectParagraph } from "@/domains/exam/types";
 import ScrollView from "@/components/ScrollView";
 import { ChartBarIcon } from "@ltaoo/icons/outline";
@@ -22,12 +21,7 @@ const SpellingResultsPage = () => {
   const [notes, setNotes] = useState([]);
 
   const [{ dataSource, noMore }, helper] = useHelper<IIncorrectParagraph>(
-    fetchSpellingsService,
-    {
-      search: {
-        status: SpellingResultType.Incorrect,
-      },
-    }
+    fetchIncorrectParagraphsService
   );
 
   const fetchNotesByParagraphs = useCallback(async (ids) => {
