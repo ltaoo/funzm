@@ -17,6 +17,7 @@ import {
 } from "@/domains/caption/services";
 import { ICaptionValues } from "@/domains/caption/types";
 import CheckInInput from "@/components/CheckInInput";
+import { hideLoading, showLoading } from "@/components/SpinModal";
 
 const Dashboard = (props) => {
   const { dataSource = [] } = props;
@@ -36,6 +37,7 @@ const Dashboard = (props) => {
   }, []);
 
   const handleUploadCaption = useCallback(async (caption) => {
+    showLoading({ title: "正在上传..." });
     const { title, content, type } = caption;
     const p = await parseCaptionContent(content, type);
     const { id } = await addCaptionService({
@@ -47,6 +49,7 @@ const Dashboard = (props) => {
         };
       }),
     });
+    await hideLoading();
     router.push({ pathname: `/captions/${id}` });
   }, []);
 

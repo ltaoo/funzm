@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { AppProps } from "next/app";
 import Script from "next/script";
 import dayjs from "dayjs";
@@ -6,14 +7,14 @@ import hotkeys from "hotkeys-js";
 
 import { Provider } from "@/next-auth/client";
 import Helper from "@list/core";
+import TranslatePanel from "@/components/TranslatePanel";
+import { useVisible } from "@/hooks";
+import { hideLoading } from "@/components/SpinModal";
 
 import "../styles/global.css";
 
 import "react-toastify/dist/ReactToastify.css";
 import "windi.css";
-import TranslatePanel from "@/components/TranslatePanel";
-import { useVisible } from "@/hooks";
-import { useEffect } from "react";
 
 dayjs.locale("zh-CN", zhCN);
 
@@ -26,6 +27,7 @@ if (typeof window !== "undefined") {
     // console.log("[ERROR]unhandledrejection", err);
     if (err.reason.code !== undefined) {
       err.stopPropagation();
+      hideLoading();
       alert(err.reason.message);
       if (err.reason.code === 401) {
         window.location.replace("/");
