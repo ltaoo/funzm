@@ -55,7 +55,7 @@ const SimpleExamStats: React.FC<IProps> = (props) => {
           </div>
         </div>
       </div>
-      {status === ExamStatus.Completed && (
+      {status === ExamStatus.Completed && score !== 0 && (
         <>
           <hr className="mt-8" />
           <div className="mt-8 flex flex-row-reverse">

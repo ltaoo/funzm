@@ -1,7 +1,8 @@
 /**
- * @file 低难度字幕测验
+ * @file 选择模式
  */
 import { Fragment, useRef, useCallback, useEffect, useState } from "react";
+import cx from "classnames";
 import { useRouter } from "next/router";
 import { Transition } from "@headlessui/react";
 
@@ -14,10 +15,10 @@ import { SpellingResultType } from "@/domains/exam/constants";
 import { ExamStatus } from "@/domains/exam/constants";
 import SelectionExam from "@/domains/exam/selection";
 import { IExamSceneDomain } from "@/domains/exam/types";
-import SimpleExamInput from "@/components/SelectionExamMode";
+import SelectionExamInput from "@/components/SelectionExamMode";
 import SimpleExamOperator from "@/components/SimpleExamOperator";
 
-const SimpleCaptionExamPage = () => {
+const SelectionExamScenePage = () => {
   const router = useRouter();
 
   const examRef = useRef(null);
@@ -130,9 +131,9 @@ const SimpleCaptionExamPage = () => {
   return (
     <div className="h-screen">
       {exam?.status === ExamStatus.Started && (
-        <div className="relative h-full md:mx-auto md:w-240">
+        <div className="relative h-full mx-auto w-240">
           {/* @ts-ignore */}
-          <SimpleExamInput
+          <SelectionExamInput
             {...exam}
             onClick={(segment) => {
               if (!examRef.current) {
@@ -143,7 +144,11 @@ const SimpleCaptionExamPage = () => {
           />
           <div className="relative">
             <div
-              className="absolute w-2 h-2 bg-green-500"
+              className={cx(
+                "absolute w-2 h-2 bg-gray-800",
+                correctVisible ? "bg-green-500" : "",
+                incorrectVisible ? "bg-red-500" : ""
+              )}
               style={{
                 left: `${exam.countdown}%`,
                 transform: `translateX(-${exam.countdown}%)`,
@@ -159,36 +164,8 @@ const SimpleCaptionExamPage = () => {
           </div>
         </div>
       )}
-      <Transition
-        show={correctVisible}
-        as={Fragment}
-        enter="ease-out duration-300"
-        enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-        enterTo="opacity-100 translate-y-0 sm:scale-100"
-        leave="ease-in duration-200"
-        leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-        leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-      >
-        <div className="absolute right-10 top-16 transform -rotate-6">
-          <p className="text-4xl text-green-500">CORRECT!</p>
-        </div>
-      </Transition>
-      <Transition
-        show={incorrectVisible}
-        as={Fragment}
-        enter="ease-out duration-300"
-        enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-        enterTo="opacity-100 translate-y-0 sm:scale-100"
-        leave="ease-in duration-200"
-        leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-        leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-      >
-        <div className="absolute right-10 top-16 transform -rotate-6">
-          <p className="text-4xl text-red-300">INCORRECT!</p>
-        </div>
-      </Transition>
     </div>
   );
 };
 
-export default SimpleCaptionExamPage;
+export default SelectionExamScenePage;

@@ -1,5 +1,5 @@
 /**
- * @file 简单测验展示、输入组件
+ * @file 选择测验模式输入组件
  */
 import cx from "classnames";
 
@@ -9,7 +9,7 @@ interface IProps extends Omit<Exam, "onNext"> {
   className?: string;
   onClick?: (word: { uid: number; word: string }) => void;
 }
-const SimpleExamInput: React.FC<IProps> = (props) => {
+const SelectionExamInput: React.FC<IProps> = (props) => {
   const {
     className,
     curParagraph,
@@ -21,7 +21,7 @@ const SimpleExamInput: React.FC<IProps> = (props) => {
 
   return (
     <div className={cx("text-left", className)}>
-      <div className="py-8 px-4 text-xl text-gray-800">
+      <div className="py-8 px-4 text-xl text-gray-500">
         <div className="">{curParagraph.text1}</div>
       </div>
       <div className="py-6 px-4">
@@ -56,10 +56,10 @@ const SimpleExamInput: React.FC<IProps> = (props) => {
               <div
                 key={uid}
                 className={cx(
-                  "inline mr-2 mb-2 px-4 py-1 text-white rounded-md bg-green-500 cursor-pointer hover:shadow",
+                  "inline mr-2 mb-2 px-4 py-1 rounded cursor-pointer",
                   existing
-                    ? "!bg-green-100 !hover:shadow-none dark:!bg-gray-800"
-                    : ""
+                    ? "bg-gray-100 text-gray-300"
+                    : "text-gray-100 bg-gray-800 "
                 )}
                 onClick={() => {
                   if (existing) {
@@ -80,4 +80,4 @@ const SimpleExamInput: React.FC<IProps> = (props) => {
   );
 };
 
-export default SimpleExamInput;
+export default SelectionExamInput;

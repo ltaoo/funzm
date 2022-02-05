@@ -134,7 +134,7 @@ const PrepareExamPage = () => {
               />
             </div>
           </div>
-          <div className="mt-8">
+          <div className="mt-8 px-2">
             <Paragraphs dataSource={curExamScene.paragraphs} />
           </div>
         </div>

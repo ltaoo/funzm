@@ -108,9 +108,13 @@ export function examSceneRes2Values(res: IExamSceneRes): IExamSceneValues {
     paragraphs,
     noMore: !!no_more,
 
-    incorrectParagraphs: incorrectSpellings.map(
-      (spelling) => spelling.paragraph
-    ),
+    incorrectParagraphs: incorrectSpellings.map((spelling) => {
+      const { paragraph, input } = spelling;
+      return {
+        input,
+        ...paragraph,
+      };
+    }),
     correctParagraphs: correctSpellings.map((spelling) => spelling.paragraph),
     skippedParagraphs: skippedSpellings.map((spelling) => spelling.paragraph),
 
@@ -159,6 +163,6 @@ export function spellingRes2Values(res: ISpellingRes): ISpellingValues {
     paragraph_id,
     paragraph,
     input,
-    createdAt: dayjs(created_at).format("YYYY-MM-DD HH:mm:ss"),
+    createdAt: df(created_at),
   };
 }

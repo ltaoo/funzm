@@ -46,8 +46,8 @@ export default class SelectionExam extends Exam {
   }
 
   clear() {
-    super.clear();
     this.inputtingWords = [];
+    super.clear();
   }
 
   setA() {

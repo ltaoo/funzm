@@ -1,9 +1,10 @@
 /**
- * @file 全局拼写字幕测验
+ * @file 拼写模式测验
  */
-import { Fragment, useRef, useCallback, useEffect, useState } from "react";
+import React, { useRef, useCallback, useEffect, useState } from "react";
+import cx from "classnames";
 import { useRouter } from "next/router";
-import { Transition } from "@headlessui/react";
+import hotkeys from "hotkeys-js";
 
 import {
   createExamSpellingService,
@@ -14,20 +15,18 @@ import { SpellingResultType } from "@/domains/exam/constants";
 import InputExam from "@/domains/exam/input";
 import { ExamStatus } from "@/domains/exam/constants";
 import { IExamSceneDomain } from "@/domains/exam/types";
-import Loading from "@/components/Loading";
-import Modal from "@/components/Modal";
 import SimpleExamOperator from "@/components/SimpleExamOperator";
 
-const SimpleCaptionExamPage = () => {
+const InputtingExamScenePage = () => {
   const router = useRouter();
 
   const examRef = useRef(null);
-  const [loading, setLoading] = useState(false);
   const [exam, setExam] = useState<IExamSceneDomain>(null);
   const [correctVisible, setCorrectVisible] = useState(false);
   const [incorrectVisible, setIncorrectVisible] = useState(false);
   const [text2, setText2] = useState(null);
-  const [tipVisible, setTipVisible] = useState(false);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const pressRef = useRef(false);
 
   const init = useCallback(async () => {
     const id = router.query.id as string;
@@ -112,27 +111,56 @@ const SimpleCaptionExamPage = () => {
 
   useEffect(() => {
     init();
+    // hotkeys("ctrl+k, command+k", function (event, handler) {
+    //   event.preventDefault();
+    //   showText2();
+    // });
     return () => {
+      // hotkeys.unbind("ctrl+k, command+k");
       if (examRef.current) {
         examRef.current.clearTimer();
       }
     };
   }, []);
 
-  const handlePressEnter = useCallback((event) => {
-    if (event.keyCode === 13) {
-      examRef.current.compare();
+  const focusInput = useCallback(() => {
+    if (inputRef.current === null) {
+      return;
+    }
+    inputRef.current.focus();
+  }, []);
+
+  const handlePressEnter = useCallback(
+    (event: React.KeyboardEvent) => {
+      const { keyCode } = event;
+      if (keyCode === 91) {
+        pressRef.current = true;
+      }
+      if (keyCode === 75 && pressRef.current) {
+        showText2();
+        return;
+      }
+      if (keyCode === 13) {
+        event.preventDefault();
+        examRef.current.compare();
+        focusInput();
+      }
+    },
+    [exam]
+  );
+  const handleKeyUp = useCallback((event: React.KeyboardEvent) => {
+    const { keyCode } = event;
+    if (keyCode === 91) {
+      pressRef.current = false;
     }
   }, []);
 
-  const showText2 = useCallback((paragraph) => {
-    return () => {
-      setText2(paragraph.text2);
-      setTipVisible(true);
-    };
-  }, []);
-
-  console.log("[PAGE]exam/simple/[id] - render", exam);
+  const showText2 = useCallback(() => {
+    setText2(exam.curParagraph.text2);
+    setTimeout(() => {
+      setText2(null);
+    }, 2000);
+  }, [exam]);
 
   if (exam === null) {
     return null;
@@ -140,88 +168,66 @@ const SimpleCaptionExamPage = () => {
 
   return (
     <div className="h-screen">
-      {exam?.status === ExamStatus.Started && (
-        <div className="relative h-full px-4 md:mx-auto md:w-240">
-          <div className="mt-24 min-h-56">
-            <div className="text1">{exam.curParagraph.text1}</div>
-            <textarea
-              autoFocus
-              value={examRef.current.inputting}
-              className="mt-8 w-full text2 text-3xl outline-none border-0 placeholder-gray-300"
-              placeholder="请输入英文翻译"
-              onKeyDown={handlePressEnter}
-              onChange={(event) => {
-                const {
-                  target: { value },
-                } = event;
-                examRef.current.write(value);
-              }}
-            ></textarea>
+      <div className="relative mx-auto w-240 h-full px-4">
+        <div className="mt-8 min-h-56">
+          <div className="text1">{exam.curParagraph.text1}</div>
+          <textarea
+            ref={inputRef}
+            // key={exam.curParagraph.text1}
+            autoFocus
+            value={examRef.current.inputting}
+            className="mt-12 p-2 w-full text2 text-3xl border border-gray-500 rounded placeholder-gray-300 outline-none"
+            placeholder="请输入英文翻译"
+            onKeyDown={handlePressEnter}
+            onKeyUp={handleKeyUp}
+            onChange={(event) => {
+              const {
+                target: { value },
+              } = event;
+              examRef.current.write(value);
+            }}
+          ></textarea>
+        </div>
+        <div className="relative">
+          <div
+            className={cx(
+              "absolute w-2 h-2 bg-gray-800",
+              correctVisible ? "bg-green-500" : "",
+              incorrectVisible ? "bg-red-500" : ""
+            )}
+            style={{
+              left: `${exam.countdown}%`,
+              transform: `translateX(-${exam.countdown}%)`,
+            }}
+          ></div>
+          <hr />
+        </div>
+        <div className="flex items-center justify-between mt-6 px-4">
+          <div className="text-xl text-gray-400">
+            {exam.index}/{exam.paragraphs.length}
           </div>
-          <div className="relative">
-            <div
-              className="absolute w-2 h-2 bg-green-500"
-              style={{
-                left: `${exam.countdown}%`,
-                transform: `translateX(-${exam.countdown}%)`,
-              }}
-            ></div>
-            <hr />
-          </div>
-          <div className="flex items-center justify-between mt-6 px-4 sm:mx-auto sm:w-180 sm:px-0">
-            <div className="text-xl text-gray-400">
-              {exam.index}/{exam.paragraphs.length}
-            </div>
-            <SimpleExamOperator instance={examRef.current} />
-          </div>
-          <div className="text-gray-300">
-            <div className="text-xl">Tip</div>
-            <div className="m-4">
-              <div>1、「回车键」提交当前输入内容并对比是否正确</div>
-              <div>2、无论正确与否，都会进入下一句</div>
-            </div>
+          <SimpleExamOperator
+            instance={examRef.current}
+            onTip={showText2}
+            onClear={() => {
+              focusInput();
+            }}
+          />
+        </div>
+        <div className="text-gray-300 mt-4 px-4">
+          <div className="text-xl">Tip</div>
+          <div className="m-2">
+            <div>1、「回车键」提交当前输入内容并对比是否正确</div>
+            <div>2、无论正确与否，都会进入下一句</div>
+            <div>3、Ctrl + k 显示英文原文 2s</div>
           </div>
         </div>
-      )}
-      <Transition
-        show={correctVisible}
-        as={Fragment}
-        enter="ease-out duration-300"
-        enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-        enterTo="opacity-100 translate-y-0 sm:scale-100"
-        leave="ease-in duration-200"
-        leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-        leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-      >
-        <div className="absolute right-10 top-16 transform -rotate-6">
-          <p className="text-4xl text-green-500">CORRECT!</p>
-        </div>
-      </Transition>
-      <Transition
-        show={incorrectVisible}
-        as={Fragment}
-        enter="ease-out duration-300"
-        enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-        enterTo="opacity-100 translate-y-0 sm:scale-100"
-        leave="ease-in duration-200"
-        leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-        leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-      >
-        <div className="absolute right-10 top-16 transform -rotate-6">
-          <p className="text-4xl text-red-300">INCORRECT!</p>
-        </div>
-      </Transition>
-      <Loading visible={loading} />
-      <Modal
-        visible={tipVisible}
-        onCancel={() => {
-          setTipVisible(false);
-        }}
-      >
-        <div className="text-center">{text2}</div>
-      </Modal>
+        {text2 && (
+          <div className="mt-8 text-3xl font-serif text-gray-300">{text2}</div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default SimpleCaptionExamPage;
+export default InputtingExamScenePage;

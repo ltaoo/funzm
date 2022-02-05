@@ -16,6 +16,7 @@ export enum SpellingResultType {
   Correct = 1,
   Incorrect = 2,
   Skipped = 3,
+  Remaining = 4,
 }
 
 export enum ExamStatus {

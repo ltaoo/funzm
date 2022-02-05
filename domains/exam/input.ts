@@ -11,7 +11,13 @@ export default class InputExam extends Exam {
   inputting: string;
 
   constructor(props: IInputExamParams) {
-    super(props);
+    super({
+      ...props,
+      onBeforeNext: () => {
+        this.inputting = "";
+        return true;
+      },
+    });
 
     this.inputting = "";
   }

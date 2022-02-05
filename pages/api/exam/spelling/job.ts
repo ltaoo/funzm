@@ -31,11 +31,11 @@ export default async function provideIncorrectSpellingStatsService(
   }
   const spellings = await prisma.spellingResult.findMany(fetchArgs);
 
-  console.log("[]spellings total is", spellings.length);
+  // console.log("[]spellings total is", spellings.length);
   const incorrect_spellings = spellings.filter((spelling) => {
     return spelling.type === SpellingResultType.Incorrect;
   });
-  console.log("and incorrect spellings is", incorrect_spellings.length);
+  // console.log("and incorrect spellings is", incorrect_spellings.length);
 
   if (spellings.length === 0) {
     return resp(null, res);
@@ -44,7 +44,7 @@ export default async function provideIncorrectSpellingStatsService(
   const map = {};
   for (let i = 0; i < incorrect_spellings.length; i += 1) {
     const { id, user_id, paragraph_id, created_at } = incorrect_spellings[i];
-    console.log("[]incorrect spelling id is", id);
+    // console.log("[]incorrect spelling id is", id);
     const key = `${user_id}-${paragraph_id}`;
     if (map[key]) {
       map[key] = {

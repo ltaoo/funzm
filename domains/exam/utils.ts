@@ -1,5 +1,7 @@
 import {
   DECREMENT_SCORES_FOR_INCORRECT_SPELLING,
+  ExamType,
+  ExamTypePathMap,
   EXPECTED_SECONDS_PER_PARAGRAPH,
   REWARD_SCORES_FOR_CORRECT_SPELLING,
   REWARD_SCORES_FOR_REMAINING_PER_SECOND,
@@ -145,4 +147,9 @@ export function getMultipleTypeSpellings(spellings) {
     incorrectSpellings,
     skippedSpellings,
   };
+}
+
+export function getMatchedPagePath(t: ExamType) {
+  const p = ExamTypePathMap[t || ExamType.Selection] || "select";
+  return p;
 }

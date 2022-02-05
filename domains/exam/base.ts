@@ -109,7 +109,7 @@ class Exam {
   /**
    * 调用 next 方法前的回调
    */
-  onBeforeNext?: (exam: IExamSceneDomain) => boolean;
+  onBeforeNext?: (exam?: IExamSceneDomain) => boolean;
   /**
    * 调用 next 后的回调
    */
@@ -277,7 +277,6 @@ class Exam {
       this.remainingParagraphsCount = remainingParagraphsCount;
       this.setA();
     }
-    this.index += 1;
     if (!nextParagraph && this.canComplete) {
       this.status = ExamStatus.Completed;
       this.endedAt = dayjs();
@@ -287,6 +286,7 @@ class Exam {
         this.onComplete(res);
       }
     }
+    this.index += 1;
     const res = this.toJSON();
     this.onNext(res);
     this.onChange(res);
@@ -337,7 +337,6 @@ class Exam {
 
     if (diffContent === null) {
       this.correctParagraphs.push(this.curParagraph!);
-      // console.log("Correct!");
       this.combo += 1;
       if (this.combo > this.maxCombo) {
         this.maxCombo = this.combo;
@@ -352,7 +351,6 @@ class Exam {
       ...this.curParagraph!,
       input: diffContent,
     });
-    // console.log("Incorrect!");
     this.combo = 0;
     this.onIncorrect(this.toJSON());
 

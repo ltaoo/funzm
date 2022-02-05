@@ -18,7 +18,7 @@ export default async function provideExamSceneAddingService(
 
   const { caption_id: c, type: t } = req.body as {
     caption_id: string;
-    type: string;
+    type: number;
   };
   const caption_id = Number(c);
 
@@ -62,7 +62,7 @@ export default async function provideExamSceneAddingService(
         user: { connect: { id: user_id } },
         caption: { connect: { id: caption_id } },
         start: { connect: { id: firstParagraph.id } },
-        type: Number(t),
+        type: t,
         index: 1,
       },
     });
@@ -82,12 +82,17 @@ export default async function provideExamSceneAddingService(
 
   // 最大关卡是失败，需要重来
   if ([ExamStatus.Failed].includes(status)) {
+    console.log(
+      "[API]api/exam/scene/add - add new scene because prev scene is failed",
+      existing,
+      Number(t)
+    );
     const created = await prisma.examScene.create({
       data: {
         caption: { connect: { id: caption_id } },
         user: { connect: { id: user_id } },
         start: { connect: { id: start.id } },
-        type,
+        type: t,
         index,
       },
       include: {
@@ -109,7 +114,7 @@ export default async function provideExamSceneAddingService(
     take: PARAGRAPH_COUNT_PER_EXAM_SCENE,
   });
   console.log(
-    "[LOG]/api/exam/scene/add - create new one",
+    "[LOG]/api/exam/scene/add - create new one because prev scene is success",
     index,
     start_id,
     nextParagraphs
@@ -123,7 +128,7 @@ export default async function provideExamSceneAddingService(
       caption: { connect: { id: caption_id } },
       user: { connect: { id: user_id } },
       start: { connect: { id: nextParagraphs[0].id } },
-      type,
+      type: t,
       index: index + 1,
     },
     include: {

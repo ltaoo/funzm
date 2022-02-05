@@ -2,21 +2,28 @@
  * @file 测验操作栏（跳过、清除等操作）
  */
 
-import { SkipIcon, ClearIcon, LogoutIcon } from "@ltaoo/icons/outline";
+import {
+  SkipIcon,
+  ClearIcon,
+  XIcon,
+  LightBulbIcon,
+} from "@ltaoo/icons/outline";
 
 import IconWithTxt from "@/components/IconWithTxt";
 import Exam from "@/domains/exam/base";
 
 interface IProps {
   instance: Exam;
+  onTip?: () => void;
+  onClear?: () => void;
 }
 const SimpleExamOperator: React.FC<IProps> = (props) => {
-  const { instance } = props;
+  const { instance, onClear, onTip } = props;
 
   return (
     <div className="inline-flex space-x-4 text-center">
       <IconWithTxt
-        icon={LogoutIcon}
+        icon={XIcon}
         onClick={() => {
           if (!instance) {
             return;
@@ -24,9 +31,18 @@ const SimpleExamOperator: React.FC<IProps> = (props) => {
           instance.onFailed(instance.toJSON());
         }}
       >
-        退出
+        结束
       </IconWithTxt>
-      {/* <IconWithTxt icon={LightBulbIcon}>提示</IconWithTxt> */}
+      <IconWithTxt
+        icon={LightBulbIcon}
+        onClick={() => {
+          if (onTip) {
+            onTip();
+          }
+        }}
+      >
+        提示
+      </IconWithTxt>
       <IconWithTxt
         icon={SkipIcon}
         disabled={Number(instance.countdown) >= 95}
@@ -46,6 +62,9 @@ const SimpleExamOperator: React.FC<IProps> = (props) => {
             return;
           }
           instance.clear();
+          if (onClear) {
+            onClear();
+          }
         }}
       >
         清除

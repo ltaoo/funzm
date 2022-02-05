@@ -14,7 +14,7 @@ import { SpellingResultType } from "@/domains/exam/constants";
 import { ExamStatus } from "@/domains/exam/constants";
 import SelectionExam from "@/domains/exam/selection";
 import { IExamSceneDomain } from "@/domains/exam/types";
-import SimpleExamInput from "@/components/SelectionExamMode";
+import SelectionExamInput from "@/components/SelectionExamMode";
 import SimpleExamOperator from "@/components/SimpleExamOperator";
 
 const SimpleCaptionExamPage = () => {
@@ -125,7 +125,7 @@ const SimpleCaptionExamPage = () => {
       {exam?.status === ExamStatus.Started && (
         <div className="relative h-full md:mx-auto md:w-240">
           {/* @ts-ignore */}
-          <SimpleExamInput
+          <SelectionExamInput
             {...exam}
             onClick={(segment) => {
               if (!examRef.current) {
