@@ -16,7 +16,9 @@ export default async function providePreparedExamService(
 ) {
   const user_id = await ensureLogin(req, res);
 
-  const { caption_id: c } = req.query as { caption_id: string };
+  const { caption_id: c } = req.query as {
+    caption_id?: string;
+  };
   const caption_id = Number(c);
 
   // console.log("[LOG]/api/exam/scene/prepare", req.query);

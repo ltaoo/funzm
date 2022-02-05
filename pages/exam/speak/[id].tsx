@@ -9,7 +9,7 @@ import {
   createExamSpellingService,
   fetchExamSceneService,
   updateExamSceneService,
-} from "@/services/exam";
+} from "@/domains/exam/services";
 import { SpellingResultType } from "@/domains/exam/constants";
 import { ExamStatus } from "@/domains/exam/constants";
 import SelectionExam from "@/domains/exam/selection";

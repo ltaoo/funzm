@@ -9,7 +9,7 @@ import {
   fetchPreparedExamService,
   fetchExamSceneProfileService,
   replayExamScene,
-} from "@/services/exam";
+} from "@/domains/exam/services";
 import { ExamStatus, ExamTypePathMap } from "@/domains/exam/constants";
 import SimpleExamStats from "@/components/SimpleExamStats";
 import {
@@ -19,7 +19,7 @@ import {
   ReplyIcon,
   XIcon,
 } from "@ltaoo/icons/outline";
-import { examSceneRes2Ins } from "@/domains/exam/transformer";
+import { examSceneRes2Ins } from "@/domains/exam/transform";
 import IconWithTxt from "@/components/IconWithTxt";
 import { IExamSceneValues } from "@/domains/exam/types";
 import Layout from "@/layouts";

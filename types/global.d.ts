@@ -37,4 +37,17 @@ declare interface URLSearchParams extends IterableCopy {
   //
 }
 
-declare type CaptionFileType = 'ass' | 'srt' | 'text';
+declare type CaptionFileType = "ass" | "srt" | "text";
+
+interface RequestResponse<T> {
+  code: number;
+  msg: string;
+  data: T;
+}
+
+interface PaginationRes<T> {
+  page: number;
+  pageSize: number;
+  total: number;
+  list: T[];
+}

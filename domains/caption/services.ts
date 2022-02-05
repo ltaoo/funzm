@@ -1,12 +1,18 @@
 /**
  * @file 字幕接口
  */
+import dayjs from "dayjs";
 import { FetchParams, RequestResponse, Response } from "@list/core";
 
 import request from "@/utils/request";
 import { df } from "@/utils";
-import { ICaptionRes, IParagraphValues } from "@/domains/caption/types";
+import {
+  ICaptionRes,
+  ICaptionValues,
+  IParagraphValues,
+} from "@/domains/caption/types";
 import { hasTowLanguage } from "./utils";
+import { captionRes2Values } from "./transform";
 
 /**
  * 新增字幕
@@ -36,17 +42,18 @@ export async function fetchCaptionWithoutParagraphsService({
  * 获取字幕详情
  * @param id
  */
-export async function fetchCaptionProfileService({ id }: { id: string }) {
+export async function fetchCaptionProfileService({ id }) {
   const resp = (await request.get(`/api/caption/${id}`)) as ICaptionRes;
 
-  const { title, count, created_at } = resp;
+  const { title, count, is_owner, created_at } = resp;
 
   return {
     id,
     title,
     count,
-    createdAt: df(created_at),
-  };
+    isOwner: is_owner,
+    createdAt: dayjs(created_at).format("MM-DD HH:mm"),
+  } as ICaptionValues;
 }
 
 /**
@@ -54,10 +61,16 @@ export async function fetchCaptionProfileService({ id }: { id: string }) {
  * @param {number} params.page - 页码
  * @returns
  */
-export function fetchCaptionsService(params: FetchParams) {
-  return request.get("/api/captions", {
-    ...params,
-  }) as Promise<Response<ICaptionRes>>;
+export async function fetchCaptionsService(params) {
+  const resp = (await request.get(
+    "/api/captions",
+    params
+  )) as PaginationRes<ICaptionRes>;
+
+  return {
+    ...resp,
+    list: resp.list.map(captionRes2Values),
+  } as PaginationRes<ICaptionValues>;
 }
 
 /**
@@ -126,8 +139,3 @@ export function updateParagraphService(body: {
 }) {
   return request.post("/api/paragraphs/update", body);
 }
-
-/**
- *
- */
-export function starCaption() {}

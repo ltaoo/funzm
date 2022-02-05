@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { fetchCaptionProfileService, fetchCaptionsService } from "@/domains/caption/services";
+import { fetchCaptionProfileService, fetchCaptionsService } from "./services";
+import { ICaptionValues } from "./types";
 
 export function useCaptions() {
   const [loading, setLoading] = useState(true);
-  const [captions, setCaptions] = useState([]);
+  const [captions, setCaptions] = useState<ICaptionValues[]>([]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -29,7 +30,7 @@ export function useCaptions() {
  * @returns
  */
 export function useCaption(id) {
-  const [caption, setCaption] = useState(null);
+  const [caption, setCaption] = useState<null | ICaptionValues>(null);
 
   useEffect(() => {
     (async () => {

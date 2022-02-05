@@ -1,11 +1,11 @@
 import { ISpellingValues } from "@/domains/exam/types";
+import { INoteValues } from "@/domains/note/types";
 
 export interface ICaptionRes {
   id: number;
   title: string;
-
   count: number;
-
+  is_owner: boolean;
   created_at: string;
 }
 export interface ICaptionValues {
@@ -13,6 +13,7 @@ export interface ICaptionValues {
   title: string;
   paragraphs: IParagraphValues[];
   count: number;
+  isOwner: boolean;
   author: string;
   createdAt: string;
 }
@@ -28,12 +29,7 @@ export interface IParagraphValues {
   text1: string;
   text2: string;
   valid: boolean;
-
-  notes?: {
-    id?: number;
-    start: number;
-    end: number;
-  }[];
+  notes?: INoteValues[];
   spellings?: ISpellingValues[];
 }
 

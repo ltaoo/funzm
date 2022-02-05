@@ -1,5 +1,8 @@
 import dayjs from "dayjs";
 
+import { df } from "@/utils";
+import { IParagraphValues } from "@/domains/caption/types";
+
 import { SpellingResultType } from "./constants";
 import {
   IExamSceneRes,
@@ -16,66 +19,73 @@ export function partialExamSceneRes2Values(res): IPartialExamSceneValues {
   return {
     id,
     captionId,
-
     status,
-
     start,
     score,
-
-    startedAt: dayjs(created_at).format("MM/DD HH:mm"),
-    endedAt: dayjs(ended_at).format("MM/DD HH:mm"),
+    startedAt: df(created_at, true),
+    endedAt: df(ended_at, true),
   };
 }
 
 /**
- * 简单测验场景响应值 转 实例值
+ * 测验关卡响应值 转 实例值
  */
-export function examSceneRes2Ins(res: IExamSceneRes): IExamSceneValues {
+export function examSceneRes2Values(res: IExamSceneRes): IExamSceneValues {
   const {
     id,
     caption_id,
     status,
     start,
     start_id,
+    type,
     cur,
     spellings,
     paragraphs,
     score,
+    no_more,
+    index,
+    scene_count,
     created_at,
     begin_at = created_at,
     ended_at,
   } = res;
-  const skippedSpellings = [];
-  const correctSpellings = [];
-  const incorrectSpellings = [];
-  for (let i = 0; i < spellings.length; i += 1) {
-    const { type } = spellings[i];
-    if (type === SpellingResultType.Skipped) {
-      skippedSpellings.push(spellings[i]);
-      continue;
+  const skippedSpellings: ISpellingValues[] = [];
+  const correctSpellings: ISpellingValues[] = [];
+  const incorrectSpellings: ISpellingValues[] = [];
+  let remainingParagraphs: IParagraphValues[] = [];
+
+  if (spellings && spellings.length) {
+    for (let i = 0; i < spellings.length; i += 1) {
+      const spelling = spellings[i];
+      const { type } = spelling;
+      if (type === SpellingResultType.Skipped) {
+        skippedSpellings.push(spellingRes2Values(spelling));
+      }
+      if (type === SpellingResultType.Correct) {
+        correctSpellings.push(spellingRes2Values(spelling));
+      }
+      if (type === SpellingResultType.Incorrect) {
+        incorrectSpellings.push(spellingRes2Values(spelling));
+      }
     }
-    if (type === SpellingResultType.Correct) {
-      correctSpellings.push(spellings[i]);
-      continue;
-    }
-    if (type === SpellingResultType.Incorrect) {
-      incorrectSpellings.push(spellings[i]);
-      continue;
-    }
+    const spellingParagraphIds = spellings.map(
+      (spelling) => spelling.paragraph_id
+    );
+    remainingParagraphs = paragraphs.filter((paragraph) => {
+      const { id } = paragraph;
+      return !spellingParagraphIds.includes(id);
+    });
   }
-  const spellingParagraphIds = spellings.map(
-    (spelling) => spelling.paragraph_id
-  );
-  const remainingParagraphs = paragraphs.filter((paragraph) => {
-    const { id } = paragraph;
-    return !spellingParagraphIds.includes(id);
-  });
+
   const correctRate =
     correctSpellings.length === 0
       ? 0
       : parseFloat(
           removeZeroAtTail(
-            ((correctSpellings.length / spellings.length) * 100).toFixed(2)
+            (
+              (correctSpellings.length / (spellings || []).length) *
+              100
+            ).toFixed(2)
           )
         );
 
@@ -87,12 +97,16 @@ export function examSceneRes2Ins(res: IExamSceneRes): IExamSceneValues {
     start,
     startId: start_id,
     cur,
+    percent: (index / scene_count) * 100,
 
     status,
+    type,
     correctSpellings,
     incorrectSpellings,
     skippedSpellings,
     remainingParagraphs,
+    paragraphs,
+    noMore: !!no_more,
 
     incorrectParagraphs: incorrectSpellings.map(
       (spelling) => spelling.paragraph
@@ -133,12 +147,16 @@ export function examSceneRes2Ins(res: IExamSceneRes): IExamSceneValues {
   };
 }
 
-export function spellingResultRes2Values(res: ISpellingRes): ISpellingValues {
-  const { id, type, paragraph, input, created_at } = res;
+/**
+ * 拼写响应值 2 表单值
+ */
+export function spellingRes2Values(res: ISpellingRes): ISpellingValues {
+  const { id, type, paragraph_id, paragraph, input, created_at } = res;
 
   return {
     id,
     type,
+    paragraph_id,
     paragraph,
     input,
     createdAt: dayjs(created_at).format("YYYY-MM-DD HH:mm:ss"),

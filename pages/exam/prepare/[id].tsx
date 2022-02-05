@@ -3,7 +3,6 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
-import Link from "next/link";
 
 import {
   DocumentTextIcon,
@@ -14,36 +13,34 @@ import {
 
 import Layout from "@/layouts";
 import {
-  fetchPreparedExamService,
-  fetchExamScenesByCaptionService,
+  fetchPreparedExamSceneService,
   createExamSceneService,
-} from "@/services/exam";
+} from "@/domains/exam/services";
 import { ExamStatus, ExamType } from "@/domains/exam/constants";
-import { IPartialExamSceneValues } from "@/domains/exam/types";
-
+import { IExamSceneValues } from "@/domains/exam/types";
 import { useCaption } from "@/domains/caption/hooks";
+import Paragraphs from "@/components/Paragraphs";
 
-const SimpleCaptionExamPage = () => {
+const PrepareExamPage = () => {
   const router = useRouter();
 
   const id = router.query.id as string;
 
   const caption = useCaption(id);
-  const [examScenes, setExamScenes] = useState<IPartialExamSceneValues[]>(null);
-  const [startedScene, setStartedScene] =
-    useState<IPartialExamSceneValues>(null);
+  const [examScenes, setExamScenes] = useState<IExamSceneValues[]>([]);
+  const [curExamScene, setCurExamScene] = useState<IExamSceneValues>(null);
   const loadingRef = useRef(false);
 
   const init = useCallback(async (id) => {
     if (!id) {
       return;
     }
-    const preparedExamScene = await fetchPreparedExamService({
+    const preparedExamScene = await fetchPreparedExamSceneService({
       captionId: id,
     });
-    setStartedScene(preparedExamScene);
-    const examScenesResponse = await fetchExamScenesByCaptionService({ id });
-    setExamScenes(examScenesResponse);
+    setCurExamScene(preparedExamScene);
+    // const examScenesResponse = await fetchExamScenesByCaptionService({ id });
+    // setExamScenes(examScenesResponse);
   }, []);
 
   useEffect(() => {
@@ -72,10 +69,35 @@ const SimpleCaptionExamPage = () => {
     [id]
   );
 
-  // console.log("[PAGE]exam/simple/[id] - render", id, startedScene, caption);
-
-  if (examScenes === null) {
+  if (curExamScene === null) {
     return null;
+  }
+
+  const { start, noMore, percent } = curExamScene;
+
+  if (noMore) {
+    return (
+      <div className="page mt-4 px-4">
+        <div className="mt-12 text-center">
+          <div className="mt-8 text-xl text-gray-500">
+            <div className="text-center">恭喜</div>
+            <div className="text-center">所有测验已完成</div>
+          </div>
+        </div>
+        <div className="mt-12 text-center">
+          <div
+            className="inline-block py-2 px-4 text-gray-100 bg-gray-800 rounded"
+            onClick={() => {
+              router.push({
+                pathname: `/pages/exam/progress/${id}`,
+              });
+            }}
+          >
+            查看所有测验
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -83,36 +105,37 @@ const SimpleCaptionExamPage = () => {
       <main className="flex">
         <div className="flex-1 mr-12">
           <div className="mt-4">
-            <div className="py-4 px-6 bg-gray-100 rounded-xl shadow">
-              <p className="text-xl text-gray-500">
-                {startedScene.start.text1}
-              </p>
+            <div className="overflow-hidden relative py-4 px-6 bg-gray-100 rounded-xl shadow">
+              <p className="text-xl text-gray-500">{start.text1}</p>
               <p className="text-3xl text-gray-800 font-serif">
-                {startedScene.start.text2 || (
+                {start.text2 || (
                   <div className="text-gray-300 italic">Empty</div>
                 )}
               </p>
+              <div
+                className="absolute bottom-0 left-0 h-1 bg-gray-800"
+                style={{
+                  width: `${percent}%`,
+                }}
+              ></div>
             </div>
-            <div className="inline-flex mt-4 py-3 px-6 space-x-4 bg-gray-800 rounded-xl shadow">
-              {/* <Link href={`/exam/select/${startedScene.id}`}> */}
+            <div className="inline-flex mt-4 py-2 px-4 space-x-4 bg-gray-800 rounded-xl shadow">
               <LightningBoltIcon
                 className="w-6 h-6 text-gray-200 cursor-pointer"
                 onClick={createExamScene(ExamType.Selection)}
               />
-              {/* </Link> */}
-              {/* <Link href={`/exam/input/${startedScene.id}`}> */}
               <PencilAltIcon
                 className="w-6 h-6 text-gray-200 cursor-pointer"
                 onClick={createExamScene(ExamType.Spelling)}
               />
-              {/* </Link> */}
-              {/* <Link href={`/exam/speak/${startedScene.id}`}> */}
               <MicrophoneIcon
                 className="w-6 h-6 text-gray-200 cursor-pointer"
                 onClick={createExamScene(ExamType.Speak)}
               />
-              {/* </Link> */}
             </div>
+          </div>
+          <div className="mt-8">
+            <Paragraphs dataSource={curExamScene.paragraphs} />
           </div>
         </div>
         <div className="mt-4 w-80">
@@ -170,4 +193,4 @@ const SimpleCaptionExamPage = () => {
   );
 };
 
-export default SimpleCaptionExamPage;
+export default PrepareExamPage;

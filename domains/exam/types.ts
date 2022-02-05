@@ -1,4 +1,4 @@
-import { ICaptionValues, IParagraphValues } from "@/domains/caption/types";
+import { IParagraphValues } from "@/domains/caption/types";
 import { INoteValues } from "@/domains/note/types";
 
 import { ExamStatus, ExamType, SpellingResultType } from "./constants";
@@ -72,37 +72,66 @@ export interface IExamSceneDomain {
   };
 }
 
-export interface IExamSceneRes {
-  id: number;
-  caption_id: number;
-  start_id: number;
-  // user_id: string;
-  status: ExamStatus;
-  type?: ExamType;
+export interface IExamProgressRes {
+  scene_id: number;
+  index: number;
   start: IParagraphValues;
-  cur?: number;
-  spellings: {
-    id: number;
-    type: SpellingResultType;
-    paragraph_id: number;
-  }[];
-  paragraphs: IParagraphValues[];
-  score: number;
-  created_at: number;
-  begin_at?: number;
-  ended_at?: number;
+  prefect: boolean;
 }
+
 export interface IExamSceneRes {
   id: number;
+  /**
+   * 对应字幕 id
+   */
   caption_id: number;
-  user_id: string;
-
-  status: ExamStatus;
+  /**
+   * 开始句子 id
+   */
   start_id: number;
+  start: IParagraphValues;
+  /**
+   * 当前进行中的拼写 id?
+   */
   cur?: number;
-
+  /**
+   * 状态
+   */
+  status: ExamStatus;
+  /**
+   * 类型
+   */
+  type?: ExamType;
+  /**
+   * 关联的拼写列表
+   */
+  spellings: ISpellingRes[];
+  /**
+   * 该关卡使用的句子
+   */
+  paragraphs: IParagraphValues[];
+  /**
+   * 关卡获得的积分
+   */
+  score: number;
+  /**
+   * 关卡创建时间
+   */
   created_at: number;
-  start_at: number;
+  /**
+   * 关卡开始时间
+   */
+  begin_at?: number;
+  /**
+   * 关卡结束时间
+   */
+  ended_at?: number;
+  /**
+   * 没有更多关卡了
+   */
+  no_more?: boolean;
+  index: number;
+  scene_count: number;
 }
 export interface IExamSceneValues {
   id: number;
@@ -115,6 +144,8 @@ export interface IExamSceneValues {
   startId: number;
   start: IParagraphValues;
   cur?: number;
+  // 该字幕的总体进度
+  percent: number;
 
   correctSpellings: ISpellingValues[];
   incorrectSpellings: ISpellingValues[];
@@ -124,6 +155,9 @@ export interface IExamSceneValues {
   incorrectParagraphs: IParagraphValues[];
   skippedParagraphs: IParagraphValues[];
   remainingParagraphs: IParagraphValues[];
+
+  noMore: boolean;
+  paragraphs: IParagraphValues[];
 
   startedAt: string;
   endedAt: string;
@@ -146,25 +180,33 @@ export interface IExamSceneValues {
 }
 
 export interface ISpellingRes {
-  id: string;
+  id: number;
   type: SpellingResultType;
   input?: string;
-  exam_scene_id: string;
+  exam_scene_id: number;
+  paragraph_id: number;
   paragraph: IParagraphValues;
   created_at: number;
 }
 export interface ISpellingValues {
-  id: string;
-  // 拼写结果（类型）
+  id: number;
+  /**
+   * 拼写结果（类型）
+   */
   type: SpellingResultType;
-  // 该次拼写输入的内容
-  input: string;
-  // 属于哪个测验场景
-  // examSceneId: string;
-  // 拼写的那段句子
+  /**
+   * 该次拼写输入的内容
+   * 只有错误时才存在该字段
+   */
+  input?: string;
+  /**
+   * 拼写的那段句子
+   */
+  paragraph_id: number;
   paragraph: IParagraphValues;
-  // 属于哪个用户
-  // userId: string;
+  /**
+   * 创建时间
+   */
   createdAt: string;
 }
 
