@@ -12,9 +12,10 @@ import { ICaptionValues } from "@/domains/caption/types";
 import IncomingTip from "@/components/Incoming";
 import ScrollView from "@/components/ScrollView";
 import CaptionCard from "@/components/CaptionCard";
+import FakeCaptionCard from "@/components/CaptionCard/sk";
 
 const CaptionsManagePage = () => {
-  const [{ dataSource, noMore }, helper] =
+  const [{ dataSource, initial, noMore }, helper] =
     useHelper<ICaptionValues>(fetchCaptionsService);
 
   useEffect(() => {
@@ -22,6 +23,14 @@ const CaptionsManagePage = () => {
   }, []);
 
   const contentElm = useMemo(() => {
+    if (initial) {
+      <div>
+        <div className="text-2xl text-gray-800">我的字幕</div>
+        <div className="mt-4 space-y-4">
+          <FakeCaptionCard />
+        </div>
+      </div>;
+    }
     if (dataSource.length === 0) {
       return (
         <div className="mt-16 text-center">
@@ -34,18 +43,26 @@ const CaptionsManagePage = () => {
     }
     return (
       <div>
-        <div className="text-2xl text-gray-800">字幕列表</div>
+        <div className="text-2xl text-gray-800">我的字幕</div>
         <ScrollView noMore={noMore} onLoadMore={helper.loadMoreWithLastItem}>
           <div className="mt-4 space-y-4">
             {dataSource.map((caption) => {
               const { id } = caption;
-              return <CaptionCard key={id} {...caption} />;
+              return (
+                <CaptionCard
+                  key={id}
+                  {...caption}
+                  onDelete={() => {
+                    helper.refresh();
+                  }}
+                />
+              );
             })}
           </div>
         </ScrollView>
       </div>
     );
-  }, [dataSource]);
+  }, [initial, dataSource]);
 
   return (
     <Layout title="字幕列表">
