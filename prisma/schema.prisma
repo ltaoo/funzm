@@ -433,8 +433,7 @@ model Item {
 
 // 收藏的字幕
 model StarRecord {
-  id                    Int     @id @default(autoincrement())
-  user_id    Int        @unique
+  user_id    Int        
   caption_id Int
 
   user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -442,7 +441,9 @@ model StarRecord {
 
   created_at DateTime   @default(now())
 
-  @@map("start_records")
+  @@unique([user_id, caption_id])
+
+  @@map("star_records")
 }
 
 // 全局的标记

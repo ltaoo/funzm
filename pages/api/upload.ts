@@ -1,11 +1,13 @@
-import { ReadStream, unlinkSync } from "fs";
+/**
+ * @file 七牛云 文件上传
+ */
+import { unlinkSync } from "fs";
 
 import { NextApiRequest, NextApiResponse } from "next";
 import { IncomingForm } from "formidable";
 import { v4 as uuid } from "uuid";
 
 import { ensureLogin, resp } from "@/lib/utils";
-import prisma from "@/lib/prisma";
 import { uploadFile, uploadStream } from "@/lib/utils/upload";
 
 export const config = {

@@ -1,3 +1,6 @@
+/**
+ * @file 收藏指定字幕
+ */
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { ensureLogin, resp } from "@/lib/utils";
@@ -14,6 +17,17 @@ export default async function provideCaptionStarService(
 
   if (Number.isNaN(id)) {
     return resp(10001, res);
+  }
+
+  const existing = await prisma.starRecord.findFirst({
+    where: {
+      user_id,
+      caption_id: id,
+    },
+  });
+
+  if (existing) {
+    return resp(12002, resp);
   }
 
   await prisma.starRecord.create({
