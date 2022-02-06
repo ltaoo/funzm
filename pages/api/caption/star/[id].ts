@@ -27,7 +27,7 @@ export default async function provideCaptionStarService(
   });
 
   if (existing) {
-    return resp(12002, resp);
+    return resp(12002, res);
   }
 
   await prisma.starRecord.create({
