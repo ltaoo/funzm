@@ -11,6 +11,7 @@ import { fetchCaptionsService } from "@/domains/caption/services";
 import { ICaptionValues } from "@/domains/caption/types";
 import IncomingTip from "@/components/Incoming";
 import ScrollView from "@/components/ScrollView";
+import CaptionCard from "@/components/CaptionCard";
 
 const CaptionsManagePage = () => {
   const [{ dataSource, noMore }, helper] =
@@ -35,34 +36,10 @@ const CaptionsManagePage = () => {
       <div>
         <div className="text-2xl text-gray-800">字幕列表</div>
         <ScrollView noMore={noMore} onLoadMore={helper.loadMoreWithLastItem}>
-          <div className="mt-4 space-y-10">
+          <div className="mt-4 space-y-4">
             {dataSource.map((caption) => {
-              const { id, title } = caption;
-              return (
-                <div
-                  key={id}
-                  className="p-4 bg-gray-100 rounded-xl shadow hover:shadow-xl"
-                >
-                  <a href={`/captions/${id}`}>
-                    <p className="text-xl">{title}</p>
-                  </a>
-                  <div className="mt-4 space-x-4">
-                    <a className={`/captions/${id}`}>
-                      <div className="inline-block py-1 px-4 text-sm text-gray-100 rounded bg-gray-800 cursor-pointer">
-                        详情
-                      </div>
-                    </a>
-                    <a className={`/captions/editor/${id}`}>
-                      <div className="inline-block py-1 px-4 text-sm text-gray-100 rounded bg-gray-800 cursor-pointer">
-                        编辑
-                      </div>
-                    </a>
-                    <div className="inline-block py-1 px-4 text-sm text-gray-100 rounded bg-gray-800 cursor-pointer">
-                      删除
-                    </div>
-                  </div>
-                </div>
-              );
+              const { id } = caption;
+              return <CaptionCard key={id} {...caption} />;
             })}
           </div>
         </ScrollView>

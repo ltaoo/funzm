@@ -1,13 +1,7 @@
-import { NextApiRequest, NextApiResponse } from "next";
-
-import prisma from "@/lib/prisma";
-import { resp } from "@/lib/utils";
 import { SpellingResultType } from "@/domains/exam/constants";
+import prisma from "@/lib/prisma";
 
-export default async function provideIncorrectSpellingStatsService(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export async function runIncorrectParagraphsStatsJob() {
   let flag = await prisma.flag.findFirst();
 
   if (flag === null) {
@@ -31,14 +25,17 @@ export default async function provideIncorrectSpellingStatsService(
   }
   const spellings = await prisma.spellingResult.findMany(fetchArgs);
 
-  // console.log("[]spellings total is", spellings.length);
+  console.log(
+    "[]start incorrect paragraphs stats job and spellings total:",
+    spellings.length
+  );
   const incorrect_spellings = spellings.filter((spelling) => {
     return spelling.type === SpellingResultType.Incorrect;
   });
   // console.log("and incorrect spellings is", incorrect_spellings.length);
 
   if (spellings.length === 0) {
-    return resp(null, res);
+    return;
   }
 
   const map = {};
@@ -104,5 +101,5 @@ export default async function provideIncorrectSpellingStatsService(
     },
   });
 
-  return resp(flag, res);
+  runIncorrectParagraphsStatsJob();
 }

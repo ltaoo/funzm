@@ -1,15 +1,11 @@
-import { NextApiRequest, NextApiResponse } from "next";
-
-import prisma from "@/lib/prisma";
-import { resp } from "@/lib/utils";
-import { ExamStatus } from "@/domains/exam/constants";
 import dayjs from "dayjs";
+
 import { getMultipleTypeSpellings } from "@/domains/exam/utils";
 
-export default async function provideIncorrectSpellingStatsService(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+import prisma from "@/lib/prisma";
+import { ExamStatus } from "@/domains/exam/constants";
+
+export async function runExamStatsJob() {
   let flag = await prisma.flag.findFirst();
 
   if (flag === null) {
@@ -38,22 +34,22 @@ export default async function provideIncorrectSpellingStatsService(
     },
   });
 
+  console.log("[]start exam stats job and scenes total:", scenes.length);
   if (scenes.length === 0) {
-    return resp(null, res);
+    return;
   }
 
-  console.log("[]scenes total:", scenes.length);
   const map = {};
   for (let i = 0; i < scenes.length; i += 1) {
     const { id, user_id, status, created_at, spellings } = scenes[i];
-    console.log(
-      "[]for scene: id is",
-      id,
-      "status is",
-      status,
-      "and spellings count is ",
-      spellings.length
-    );
+    //     console.log(
+    //       "[]for scene: id is",
+    //       id,
+    //       "status is",
+    //       status,
+    //       "and spellings count is ",
+    //       spellings.length
+    //     );
     const { correctSpellings, incorrectSpellings, skippedSpellings } =
       getMultipleTypeSpellings(spellings);
     const created_day = dayjs(created_at)
@@ -167,5 +163,5 @@ export default async function provideIncorrectSpellingStatsService(
     },
   });
 
-  return resp(flag, res);
+  runExamStatsJob();
 }

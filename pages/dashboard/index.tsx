@@ -18,18 +18,18 @@ import {
 import { ICaptionValues } from "@/domains/caption/types";
 import CheckInInput from "@/components/CheckInInput";
 import { hideLoading, showLoading } from "@/components/SpinModal";
+import useHelper from "@list/hooks";
 
 const Dashboard = (props) => {
-  const { dataSource = [] } = props;
-
-  const [loading, setLoading] = useState(true);
-  const [captions, setCaptions] = useState<ICaptionValues[]>(dataSource);
+  const [{ dataSource, initial, total }, helper] = useHelper<ICaptionValues>(
+    fetchCaptionsService,
+    {
+      pageSize: 5,
+    }
+  );
 
   const refresh = useCallback(async () => {
-    setLoading(true);
-    const nextCaptions = await fetchCaptionsService({ pageSize: 5 });
-    setLoading(false);
-    setCaptions(nextCaptions.list);
+    helper.init();
   }, []);
 
   useEffect(() => {
@@ -58,10 +58,9 @@ const Dashboard = (props) => {
       <div className="flex">
         <main className="flex-1 mr-12">
           <div className="">
-            {/* <div className="text-2xl text-gray-800">进行中的测验</div> */}
             <div className="">
               {(() => {
-                if (loading) {
+                if (initial) {
                   return (
                     <>
                       <div className="mt-8 text-2xl text-gray-800">
@@ -73,14 +72,14 @@ const Dashboard = (props) => {
                     </>
                   );
                 }
-                if (captions.length) {
+                if (dataSource.length) {
                   return (
                     <>
                       <div className="mt-4 text-2xl text-gray-800">
                         我的字幕
                       </div>
                       <div className="mt-4 space-y-4">
-                        {captions.map((caption) => {
+                        {dataSource.map((caption) => {
                           const { id } = caption;
                           return (
                             <CaptionCard
@@ -91,6 +90,18 @@ const Dashboard = (props) => {
                           );
                         })}
                       </div>
+                      {total > 5 && (
+                        <div
+                          className="mt-8 underline text-xl text-center text-gray-800 cursor-pointer"
+                          onClick={() => {
+                            router.push({
+                              pathname: "/captions",
+                            });
+                          }}
+                        >
+                          查看所有字幕
+                        </div>
+                      )}
                     </>
                   );
                 }
