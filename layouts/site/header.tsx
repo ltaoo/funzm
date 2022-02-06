@@ -6,10 +6,10 @@ import { useRouter } from "next/router";
 import WeappLoginModal from "@/components/WeappLoginModal";
 
 const navigation = [
-  { name: "功能", href: "/" },
-  { name: "订阅", href: "/price" },
-  { name: "帮助中心", href: "/help" },
-  { name: "关于我们", href: "/about" },
+  // { name: "功能", href: "/" },
+  // { name: "订阅", href: "/price" },
+  // { name: "帮助中心", href: "/help" },
+  // { name: "关于我们", href: "/about" },
 ];
 
 const SiteHeader = (props) => {

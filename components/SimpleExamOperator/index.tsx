@@ -33,16 +33,18 @@ const SimpleExamOperator: React.FC<IProps> = (props) => {
       >
         结束
       </IconWithTxt>
-      <IconWithTxt
-        icon={LightBulbIcon}
-        onClick={() => {
-          if (onTip) {
-            onTip();
-          }
-        }}
-      >
-        提示
-      </IconWithTxt>
+      {onTip && (
+        <IconWithTxt
+          icon={LightBulbIcon}
+          onClick={() => {
+            if (onTip) {
+              onTip();
+            }
+          }}
+        >
+          提示
+        </IconWithTxt>
+      )}
       <IconWithTxt
         icon={SkipIcon}
         disabled={Number(instance.countdown) >= 95}

@@ -77,26 +77,28 @@ const PrepareExamPage = () => {
 
   if (noMore) {
     return (
-      <div className="page mt-4 px-4">
-        <div className="mt-12 text-center">
-          <div className="mt-8 text-xl text-gray-500">
-            <div className="text-center">恭喜</div>
-            <div className="text-center">所有测验已完成</div>
+      <Layout title="测验准备">
+        <div className="page mt-4 px-4">
+          <div className="mt-12 text-center">
+            <div className="mt-8 text-xl text-gray-500">
+              <div className="text-center">恭喜</div>
+              <div className="text-center">所有测验已完成</div>
+            </div>
+          </div>
+          <div className="mt-12 text-center">
+            <div
+              className="inline-block py-2 px-4 text-gray-100 bg-gray-800 rounded"
+              onClick={() => {
+                router.push({
+                  pathname: `/pages/exam/progress/${id}`,
+                });
+              }}
+            >
+              查看所有测验
+            </div>
           </div>
         </div>
-        <div className="mt-12 text-center">
-          <div
-            className="inline-block py-2 px-4 text-gray-100 bg-gray-800 rounded"
-            onClick={() => {
-              router.push({
-                pathname: `/pages/exam/progress/${id}`,
-              });
-            }}
-          >
-            查看所有测验
-          </div>
-        </div>
-      </div>
+      </Layout>
     );
   }
 

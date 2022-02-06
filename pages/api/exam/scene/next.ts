@@ -46,7 +46,7 @@ export default async function provideCreateNextExamSceneService(
     "[LOG]/api/exam/scene/next - create new one",
     index,
     start_id,
-    nextParagraphs
+    // nextParagraphs
   );
   const remainingParagraphs = nextParagraphs;
   if (remainingParagraphs.length === 0) {

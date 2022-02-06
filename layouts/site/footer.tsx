@@ -4,18 +4,22 @@ const footer = () => {
       <div className="w-full py-8 px-4 text-gray-100 text-center md:mx-auto md:w-260 md:p-10">
         <div className="inline-flex items-center justify-between">
           <div className="inline-block space-x-4 text-sm text-gray-300 md:text-md">
-            <p className="inline-block cursor-pointer">
+            {/* <p className="inline-block cursor-pointer">
               <a className="text-gray-300" href="/changelog" target="_blank">
                 过去与未来
               </a>
-            </p>
-            <p className="inline-block cursor-pointer">
+            </p> */}
+            {/* <p className="inline-block cursor-pointer">
               <a className="text-gray-300" href="/help" target="_blank">
                 帮助文档
               </a>
-            </p>
-            <p className="inline-block cursor-pointer">问题反馈</p>
-            <p className="inline-block cursor-pointer">联系我们</p>
+            </p> */}
+            {/* <p className="inline-block cursor-pointer">问题反馈</p>
+            <p className="inline-block cursor-pointer">联系我们</p> */}
+            <img
+              className="w-48 h-48"
+              src="https://static.ltaoo.work/litao-qrcode.png"
+            />
           </div>
         </div>
         <div className="block mt-12 text-center text-gray-400">
