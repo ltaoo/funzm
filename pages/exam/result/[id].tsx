@@ -32,6 +32,9 @@ const ExamSceneResultPage = () => {
   const [cur, setCur] = useState(SpellingResultType.Incorrect);
 
   const init = useCallback(async (id) => {
+    if (!id) {
+      return;
+    }
     const resp = await fetchExamSceneProfileService({ id });
     setExamScene(resp);
   }, []);
@@ -65,7 +68,10 @@ const ExamSceneResultPage = () => {
     });
   }, [examScene]);
 
-  console.log('[PAGE]exam/result/[id] - render', examScene?.incorrectParagraphs);
+  console.log(
+    "[PAGE]exam/result/[id] - render",
+    examScene?.incorrectParagraphs
+  );
 
   if (examScene === null) {
     return null;

@@ -1,5 +1,5 @@
 /**
- * @file 新增下一个测验
+ * @file 创建下一个测验
  */
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -45,7 +45,7 @@ export default async function provideCreateNextExamSceneService(
   console.log(
     "[LOG]/api/exam/scene/next - create new one",
     index,
-    start_id,
+    start_id
     // nextParagraphs
   );
   const remainingParagraphs = nextParagraphs;

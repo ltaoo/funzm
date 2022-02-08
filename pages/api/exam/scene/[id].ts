@@ -1,6 +1,6 @@
 /**
  * @file 根据 id 获取指定测验详情
- * （如果未开始时调用该接口，表示表示开始测验）
+ * （如果未开始时调用该接口，表示开始测验）
  */
 import { NextApiRequest, NextApiResponse } from "next";
 import dayjs from "dayjs";

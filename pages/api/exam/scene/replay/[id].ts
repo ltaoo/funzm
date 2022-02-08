@@ -1,5 +1,5 @@
 /**
- * @file 重新开始测验
+ * @file 重新开始指定的测验，可传入 type 改变类型
  */
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -16,8 +16,9 @@ export default async function provideExamSceneReplayService(
   const { id: i } = req.query as {
     id: string;
   };
+  const { type: t } = req.body as { type?: number };
 
-  console.log("[LOG]/api/exam/scene/replay - params", req.query);
+  // console.log("[LOG]/api/exam/scene/replay - params", req.query);
   const id = Number(i);
 
   if (Number.isNaN(id)) {
@@ -45,7 +46,7 @@ export default async function provideExamSceneReplayService(
       user: { connect: { id: user_id } },
       start: { connect: { id: start_id } },
       index,
-      type,
+      type: t || type,
     },
     include: {
       start: true,

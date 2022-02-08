@@ -76,8 +76,10 @@ export function fetchExamSceneService({ id }: { id: string }) {
 /**
  * 重新开始指定测验关卡
  */
-export function replayExamScene({ id }: { id: string }) {
-  return request.post(`/api/exam/scene/replay/${id}`) as Promise<IExamSceneRes>;
+export function replayExamScene({ id, type }: { id: string; type?: number }) {
+  return request.post(`/api/exam/scene/replay/${id}`, {
+    type,
+  }) as Promise<IExamSceneRes>;
 }
 
 /**

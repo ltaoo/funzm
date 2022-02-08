@@ -9,6 +9,7 @@ import {
   ExamStatus,
   PARAGRAPH_COUNT_PER_EXAM_SCENE,
 } from "@/domains/exam/constants";
+import dayjs from "dayjs";
 
 export default async function provideExamSceneAddingService(
   req: NextApiRequest,
@@ -21,13 +22,14 @@ export default async function provideExamSceneAddingService(
     type: number;
   };
   const caption_id = Number(c);
+  const type = Number(t);
 
   console.log("[LOG]/api/exam/scene/add - params", req.body);
 
   if (Number.isNaN(caption_id)) {
     return resp(10001, res);
   }
-  if (!t) {
+  if (!type) {
     return resp(10001, res);
   }
 
@@ -35,6 +37,7 @@ export default async function provideExamSceneAddingService(
     where: {
       user_id,
       caption_id,
+      type,
     },
     include: {
       start: true,
@@ -75,9 +78,39 @@ export default async function provideExamSceneAddingService(
     return resp(created, res);
   }
 
-  const { status, index, start, start_id, type } = existing;
-  if ([ExamStatus.Prepare, ExamStatus.Started].includes(status)) {
+  const { id, status, index, start, start_id, begin_at } = existing;
+  if (status === ExamStatus.Prepare) {
     return resp(existing, res);
+  }
+  if (status === ExamStatus.Started) {
+    if (dayjs(begin_at).add(2, "min").isAfter(dayjs())) {
+      await prisma.examScene.update({
+        where: {
+          id,
+        },
+        data: {
+          ended_at: dayjs().toDate(),
+        },
+      });
+      // 之前存在进行中的，但是已经过去太久
+      const created = await prisma.examScene.create({
+        data: {
+          caption: { connect: { id: caption_id } },
+          user: { connect: { id: user_id } },
+          start: { connect: { id: start.id } },
+          type: t,
+          index,
+        },
+        include: {
+          start: true,
+        },
+      });
+      return resp(created, res);
+    }
+    return resp(existing, res);
+  }
+  if ([ExamStatus.Prepare, ExamStatus.Started].includes(status)) {
+    return resp(13001, res);
   }
 
   // 最大关卡是失败，需要重来
