@@ -42,6 +42,7 @@ const WordCard = (props) => {
       return setError(true);
     }
     cachedTranslateResult[keyword] = resp;
+    // @ts-ignore
     setResp(resp);
     setError(false);
   }, []);
