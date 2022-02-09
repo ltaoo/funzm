@@ -13,7 +13,7 @@ export default async function provideFetchParagraphsService(
 ) {
   await ensureLogin(req, res);
   const {
-    query: { page = 1, pageSize = 10, start, skip, caption_id: ci },
+    query: { page = 1, pageSize = 10, start, with_notes, skip, caption_id: ci },
   } = req;
 
   const caption_id = Number(ci);
@@ -36,12 +36,13 @@ export default async function provideFetchParagraphsService(
     prisma.paragraph.count({
       where: findManyParams.where,
     }),
-    prisma.paragraph.findMany(findManyParams),
+    prisma.paragraph.findMany({
+      ...findManyParams,
+      include: {
+        notes: with_notes === "true",
+      },
+    }),
   ]);
 
-  res.status(200).json({
-    code: 0,
-    msg: "",
-    data: getResult(list, total),
-  });
+  resp(getResult(list, total), res);
 }

@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { splitTextHasNotes } from "@/domains/caption/utils";
 import { PencilIcon, XIcon } from "@ltaoo/icons/outline";
 import { useVisible } from "@/hooks";
-import { addNoteService, updateNoteService } from "@/services/note";
 
 function getXAndY(event) {
   const { x, y } = event;
@@ -272,7 +271,7 @@ const HighlightContent: React.FC<IProps> = (props) => {
           <div className="mt-6 relative">
             <div className="p-4">
               <textarea
-                className="py-1 px-2 border border-solid border-gray-800 text-md rounded outline-0"
+                className="py-1 px-2 w-80 text-base border border-solid border-gray-800 rounded outline-0"
                 ref={inputRef}
                 rows={6}
                 autoFocus
@@ -284,12 +283,15 @@ const HighlightContent: React.FC<IProps> = (props) => {
                   onClick={async () => {
                     if (onSubmit) {
                       const content = inputRef.current.value;
+                      const text = selectedTextRef.current?.text;
+                      const start = selectedTextRef.current?.start;
+                      const end = selectedTextRef.current?.end;
                       const created = await onSubmit({
                         id: editingNoteRef.current?.id,
                         content,
-                        text: selectedTextRef.current?.text,
-                        start: selectedTextRef.current?.start,
-                        end: selectedTextRef.current?.end,
+                        text,
+                        start,
+                        end,
                       });
                     }
                     selectedTextRef.current = null;

@@ -29,13 +29,19 @@ import Drawer from "@/components/Drawer";
 import IconWithTxt from "@/components/IconWithTxt";
 import ScrollView from "@/components/ScrollView";
 import Confirm from "@/components/Confirm";
+import { addNoteService, updateNoteService } from "@/services/note";
 
 const CaptionProfilePage = () => {
   const router = useRouter();
   const id = router.query.id as string;
 
   const [{ dataSource, initial, noMore }, helper] = useHelper(
-    fetchParagraphsService
+    fetchParagraphsService,
+    {
+      search: {
+        with_notes: true,
+      },
+    }
   );
   const [settingVisible, setSettingVisible] = useState<boolean>(false);
   const [caption, setCaption] = useState(null);
@@ -78,7 +84,48 @@ const CaptionProfilePage = () => {
             if (initial) {
               return <CaptionPreviewSkeleton />;
             }
-            return <CaptionPreview {...caption} paragraphs={dataSource} />;
+            return (
+              <CaptionPreview
+                {...caption}
+                paragraphs={dataSource}
+                onUpdateNote={async (
+                  { id: i, content, text, start, end },
+                  record
+                ) => {
+                  if (i) {
+                    await updateNoteService({
+                      id: i,
+                      content,
+                    });
+                    helper.modifyItem({
+                      ...record,
+                      ...record,
+                      notes: record.notes?.map((n) => {
+                        if (n.id === i) {
+                          return {
+                            ...n,
+                            content,
+                          };
+                        }
+                        return n;
+                      }),
+                    });
+                  } else {
+                    const created = await addNoteService({
+                      content,
+                      text,
+                      start,
+                      end,
+                      paragraphId: record.id,
+                    });
+                    helper.modifyItem({
+                      ...record,
+                      notes: record.notes?.concat(created),
+                    });
+                  }
+                }}
+              />
+            );
           })()}
 
           <div className="fixed bottom-20 right-10 py-4 space-y-2 bg-gray-800 rounded-xl shadow-xl">
