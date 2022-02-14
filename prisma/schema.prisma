@@ -307,7 +307,7 @@ model IncorrectParagraph {
   created_at     DateTime    @default(now())
   updated_at     DateTime?
 
-  @@unique([id, user_id])
+  @@unique([id, user_id, created_at])
   
   @@map("incorrect_paragraphs")
 }
