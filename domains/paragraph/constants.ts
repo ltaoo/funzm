@@ -1,4 +1,4 @@
-const definite = [
+export const definite = [
   {
     text: "all",
   },
