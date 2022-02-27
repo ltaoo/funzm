@@ -91,7 +91,11 @@ function findSameLevelNode(node, lv) {
     return findSameLevelNode(node.parent, lv);
   }
   if (node.parent === undefined) {
-    return node.children.find((n) => findSameLevelNode(n, level));
+    const r = node.children.find((n) => findSameLevelNode(n, level));
+    if (r === undefined) {
+      return node;
+    }
+    return r;
   }
   return node;
 }
@@ -194,11 +198,6 @@ async function getTocFormMarkdownDirectly(markdown) {
     .process(markdown);
   const result = JSON.parse(String(file));
   return result;
-}
-function addPageKey(node, page) {
-  console.log("invoke add apge key", node[0], page);
-  const [type, children, options = {}] = node;
-  return [type, children, { ...options, page }];
 }
 let cache = null;
 export async function getWholeToc(filepath) {

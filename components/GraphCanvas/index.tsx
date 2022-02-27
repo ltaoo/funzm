@@ -18,16 +18,6 @@ function longerText(a, b) {
 
 const GraphCanvas = (props) => {
   const { times } = props;
-  const $canvasRef = useRef(null);
-
-  useEffect(() => {
-    if ($canvasRef.current === null) {
-      return;
-    }
-    const ctx = $canvasRef.current.getContext("2d");
-  }, []);
-
-  console.log(times);
   const hasCompleted = times.find((t) => t.type === "completed");
 
   //   return <canvas ref={$canvasRef} />;
@@ -37,7 +27,13 @@ const GraphCanvas = (props) => {
         {times.map((time, i) => {
           const { type, top, text, under } = time;
           return (
-            <div key={i} className={cx("relative text-center", times.length === 1 ? "ml-[50%]" : "ml-12" )}>
+            <div
+              key={i}
+              className={cx(
+                "relative text-center",
+                times.length === 1 ? "ml-[50%]" : "ml-12"
+              )}
+            >
               {(() => {
                 if (type === "completed") {
                   return (
