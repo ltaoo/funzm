@@ -38,13 +38,13 @@ const GraphCanvas = (props) => {
                 if (type === "completed") {
                   return (
                     <div className="#top relative">
-                      <p
+                      <div
                         className={cx(
                           "relative -left-14 leading-4 border-t-2 border-r-2 border-gray-300"
                         )}
                       >
                         <pre>{top}</pre>
-                      </p>
+                      </div>
                       <div className="absolute right-10.5 -bottom-2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-transparent border-t-gray-300 transform -translate-x-2/4" />
                     </div>
                   );
@@ -55,13 +55,13 @@ const GraphCanvas = (props) => {
                       {top}
                       {hasCompleted && (
                         <div className="invisible">
-                          <p
+                          <div
                             className={cx(
                               "relative -left-14 leading-4 border-t-2 border-r-2 border-gray-500"
                             )}
                           >
                             <pre>{hasCompleted.top}</pre>
-                          </p>
+                          </div>
                           <div className="absolute left-17.5 top-0 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-transparent border-t-gray-500 transform -translate-x-2/4" />
                         </div>
                       )}
@@ -71,13 +71,13 @@ const GraphCanvas = (props) => {
                 if (hasCompleted) {
                   return (
                     <div className="#top invisible">
-                      <p
+                      <div
                         className={cx(
                           "relative -left-14 leading-4 border-t-2 border-r-2 border-gray-500"
                         )}
                       >
                         <pre>{hasCompleted.top}</pre>
-                      </p>
+                      </div>
                       <div className="absolute left-17.5 top-0 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-transparent border-t-gray-500 transform -translate-x-2/4" />
                     </div>
                   );

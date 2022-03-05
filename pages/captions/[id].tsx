@@ -127,7 +127,6 @@ const CaptionProfilePage = () => {
               />
             );
           })()}
-
           <div className="fixed bottom-20 right-10 py-4 space-y-2 bg-gray-800 rounded-xl shadow-xl">
             <a href={`/captions/editor/${id}`}>
               <div className="group flex items-center py-2 px-4 cursor-pointer">

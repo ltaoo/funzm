@@ -29,7 +29,7 @@ import parse from "remark-parse";
 import frontmatter from "remark-frontmatter";
 import yaml from "js-yaml";
 
-import { transform } from ".";
+import { readMarkdown, transform } from ".";
 
 export function splitEnglish(paragraph) {
   let i = 0;
@@ -99,16 +99,27 @@ function findSameLevelNode(node, lv) {
   }
   return node;
 }
-export function collectToc(paragraphs, toc) {
+
+const m = {
+  1: 0,
+  2: 0,
+  3: 0,
+  4: 0,
+  5: 0,
+};
+export function collectToc(paragraphs, toc, name = "root") {
   if (!Array.isArray(paragraphs)) {
   } else {
     paragraphs.forEach((node) => {
-      const [type, children, options = {}] = node;
+      const [type, children] = node;
+      const options = node[2] || {};
       if (type === "h") {
         const { level } = options;
         if (toc.level === 0) {
+          options.uid = name;
           toc.level = level;
           toc.root = {
+            uid: options.uid,
             level,
             text: children,
             children: [],
@@ -116,7 +127,12 @@ export function collectToc(paragraphs, toc) {
           };
           toc.cur = toc.root;
         } else if (toc.level < level) {
-          const node = {
+          m[level] += 1;
+          const num = m[level];
+          options.uid = `${toc.cur.uid}.${num}`;
+          // 2 -> 3 这种情况
+          const n = {
+            uid: options.uid,
             level,
             text: children,
             parent: toc.cur,
@@ -124,20 +140,28 @@ export function collectToc(paragraphs, toc) {
             ...options,
           };
           toc.level = level;
-          toc.cur.children.push(node);
-          toc.cur = node;
+          toc.cur.children.push(n);
+          toc.cur = n;
         } else {
+          // 3 -> 2 / 3 -> 3 这两种情况
+          if (toc.level > level) {
+            m[toc.level] = 0;
+          }
           toc.level = level;
+          m[level] += 1;
+          const num = m[level];
           const sameLevelNode = findSameLevelNode(toc.cur, level);
-          const node = {
+          options.uid = `${sameLevelNode.parent.uid}.${num}`;
+          const n = {
+            uid: options.uid,
             level,
             text: children,
             parent: sameLevelNode.parent,
             children: [],
             ...options,
           };
-          sameLevelNode.parent.children.push(node);
-          toc.cur = node;
+          sameLevelNode.parent.children.push(n);
+          toc.cur = n;
         }
       } else {
         collectToc(children, toc);
@@ -146,12 +170,27 @@ export function collectToc(paragraphs, toc) {
   }
 }
 
-export function removeParentKey(arr) {
-  return arr.map((node) => {
+function getSimpleParentKeys(obj) {
+  if (obj === undefined) {
+    return null;
+  }
+  const { level, text, parent, children } = obj;
+  return {
+    level,
+    text,
+    parent: getSimpleParentKeys(parent),
+  };
+}
+/**
+ * 简化 parent 字段使其不包含自引用
+ */
+export function simplifyParentKey(arr) {
+  return arr.map((node, i) => {
     const { parent, children, ...rest } = node;
     return {
       ...rest,
-      children: removeParentKey(children),
+      parent: getSimpleParentKeys(parent),
+      children: simplifyParentKey(children),
     };
   });
 }
@@ -183,6 +222,15 @@ function collectHeading(ast) {
   return [];
 }
 const RESOURCE_ROOT_DIR = path.join(process.cwd(), "posts");
+function parseYaml(content) {
+  const configStr = content.match(/---(.|\s)+---/);
+  if (configStr) {
+    const lines = configStr[0].split("\n");
+    const str = lines.slice(1, -1).join("\n");
+    return yaml.load(str);
+  }
+  return {};
+}
 
 async function getTocFormMarkdownDirectly(markdown) {
   const file = await unified()
@@ -191,6 +239,13 @@ async function getTocFormMarkdownDirectly(markdown) {
     .use(function () {
       function compiler(ast) {
         const result = collectHeading(ast).filter((node) => node.length !== 0);
+        // .map((node) => {
+        //   return {
+        //     ...node,
+        //     index,
+        //     title,
+        //   };
+        // });
         return JSON.stringify(result, null, 2);
       }
       Object.assign(this, { Compiler: compiler });
@@ -232,6 +287,13 @@ export async function getWholeToc(filepath) {
       const a = path.resolve(RESOURCE_ROOT_DIR, dir, `${name}.md`);
       if (fs.statSync(a)) {
         const c = fs.readFileSync(a, "utf-8");
+        // const info = c.match(/---(.|\s)+---/);
+        // let title = "";
+        // if (info) {
+        //   const lines = info[0].split("\n");
+        //   const str = lines.slice(1, -1).join("\n");
+        //   title = yaml.load(str);
+        // }
         const d = await getTocFormMarkdownDirectly(c);
         tocs = tocs.concat(d);
         tocs.forEach((node) => {
@@ -245,9 +307,15 @@ export async function getWholeToc(filepath) {
       const a = path.resolve(RESOURCE_ROOT_DIR, dir, `${i}.md`);
       if (fs.statSync(a)) {
         const c = fs.readFileSync(a, "utf-8");
+        // const info = c.match(/---(.|\s)+---/);
+        // let title = "";
+        // if (info) {
+        //   const lines = info[0].split("\n");
+        //   const str = lines.slice(1, -1).join("\n");
+        //   title = yaml.load(str);
+        // }
         const d = await getTocFormMarkdownDirectly(c);
         tocs = tocs.concat(d);
-        // console.log(tocs);
         tocs.forEach((node) => {
           if (node[2].page === undefined) {
             node[2].page = i;
@@ -262,13 +330,18 @@ export async function getWholeToc(filepath) {
 }
 
 export async function getPagePropsFormMarkdown(filepath: string) {
+  const { name } = path.parse(filepath);
+  // const c = readMarkdown(filepath);
+  // const yaml = parseYaml(c);
   const resp = JSON.parse(await transform(filepath));
   const toc = {
     level: 0,
     root: null,
     cur: null,
   };
-  collectToc(resp, toc);
+
+  const paragraphs = resp;
+  collectToc(paragraphs, toc);
 
   const wholeToc = await getWholeToc(filepath);
 
@@ -281,15 +354,14 @@ export async function getPagePropsFormMarkdown(filepath: string) {
   collectToc([["h", "", { level: 1, page: "/" }]].concat(wholeToc), wtoc);
   delete wtoc.cur;
 
-  const { name } = path.parse(filepath);
-
   return {
-    content: resp,
+    // ...yaml,
+    content: paragraphs,
     isIndex: name === "index",
-    wholeToc: wtoc.root ? removeParentKey([wtoc.root]) : [],
+    wholeToc: wtoc.root ? simplifyParentKey([wtoc.root]) : [],
     toc: {
       ...toc.root,
-      children: toc.root ? removeParentKey(toc.root.children) : [],
+      children: toc.root ? simplifyParentKey(toc.root.children) : [],
     },
   };
 }

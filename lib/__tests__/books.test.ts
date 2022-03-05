@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { splitEnglish, collectToc, removeParentKey } from "../book/utils";
+import { splitEnglish, collectToc, simplifyParentKey } from "../book/utils";
 
 // describe("english splitting", () => {
 //   it("1", () => {
@@ -49,7 +49,7 @@ describe("generate toc", () => {
     collectToc(data, toc);
 
     delete toc.cur;
-    const res = removeParentKey([toc.root]);
+    const res = simplifyParentKey([toc.root]);
     expect(res[0]).toStrictEqual({
       level: 1,
       text: "旋元佑文法进阶",

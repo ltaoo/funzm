@@ -76,7 +76,7 @@ const renderText2HasNotes = (text2, nts) => {
 export function renderer(node, i) {
   const [type, children = [], options = {}] = node;
   if (type === "h") {
-    const { level } = options;
+    const { uid, level } = options;
     if (level === 1) {
       return (
         <h1 key={i} id={children}>
@@ -86,8 +86,8 @@ export function renderer(node, i) {
     }
     if (level === 2) {
       return (
-        <h2 key={i} id={children} className="py-4 text-3xl text-center">
-          <a href={`#${children}`} className="hover:no-underline">
+        <h2 key={i} id={uid} className="py-4 text-3xl text-center">
+          <a href={`#${uid}`} className="hover:no-underline">
             {children}
           </a>
         </h2>
@@ -95,8 +95,8 @@ export function renderer(node, i) {
     }
     if (level === 3) {
       return (
-        <h3 key={i} id={children} className="py-4 mt-8 text-2xl">
-          <a href={`#${children}`} className="float ml-[-20px] pr-2">
+        <h3 key={i} id={uid} className="py-4 mt-8 text-2xl">
+          <a href={`#${uid}`} className="float ml-[-20px] pr-2">
             <LinkIcon className="inline-block w-5 h-5 text-gray-300" />
           </a>
           {children}
@@ -105,8 +105,15 @@ export function renderer(node, i) {
     }
     if (level === 4) {
       return (
-        <h4 key={i} id={children} className="py-4 mt-8 text-xl">
-          <a href={`#${children}`} className="float ml-[-20px] pr-2">
+        <h4
+          key={i}
+          id={uid}
+          className="py-4 mt-8 text-xl"
+          onClick={() => {
+            console.log(node);
+          }}
+        >
+          <a href={`#${uid}`} className="float ml-[-20px] pr-2">
             <LinkIcon className="inline-block w-4 h-4 text-gray-300" />
           </a>
           {children}
@@ -223,7 +230,7 @@ export const renderToc = (headings) => {
   return (
     <div className="">
       {headings.map((heading, i) => {
-        const { level, page, text, children } = heading;
+        const { uid, level, page, text, children } = heading;
         return (
           <div
             key={i}
@@ -237,7 +244,7 @@ export const renderToc = (headings) => {
             }}
           >
             <a
-              href={page ? `/resources/english/${page}#${text}` : `#${text}`}
+              href={page ? `/resources/english/${page}#${uid}` : `#${uid}`}
               className=""
             >
               {text}

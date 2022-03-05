@@ -284,12 +284,16 @@ function rehype(ast) {
 }
 
 const RESOURCE_ROOT_DIR = path.join(process.cwd(), "posts");
-
-export function transform(filepath) {
+export function readMarkdown(filepath) {
   const content = fs.readFileSync(
     path.resolve(RESOURCE_ROOT_DIR, filepath),
     "utf-8"
   );
+  return content;
+}
+
+export function transform(filepath) {
+  const content = readMarkdown(filepath);
 
   return unified()
     .use(parse)

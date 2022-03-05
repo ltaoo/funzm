@@ -8,7 +8,7 @@ import { IncomingForm } from "formidable";
 import { v4 as uuid } from "uuid";
 
 import { ensureLogin, resp } from "@/lib/utils";
-import { uploadFile, uploadStream } from "@/lib/utils/upload";
+import { uploadFile } from "@/lib/utils/upload";
 
 export const config = {
   api: {

@@ -1,8 +1,6 @@
 /**
  * @file 字幕领域
  */
-import { readContentFromFile } from "@/utils/bom";
-
 import { CaptionFile } from "./types";
 
 /**
@@ -15,20 +13,7 @@ export function getExt(name) {
   const ext = segments.pop();
   return ext;
 }
-/**
- * 解析字幕文件
- */
-export async function parseCaptionFile(file) {
-  const segments = file.name.split(".");
-  const ext = getExt(file.name);
-  const content = await readContentFromFile(file);
-  const result = parseCaptionContent(content, ext);
-  return {
-    title: segments.slice(0, -1).join("."),
-    type: ext,
-    paragraphs: result,
-  };
-}
+
 function invertText(text, invert) {
   if (!invert) return text;
   return text
