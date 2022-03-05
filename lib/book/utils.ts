@@ -100,20 +100,21 @@ function findSameLevelNode(node, lv) {
   return node;
 }
 
-const m = {
-  1: 0,
-  2: 0,
-  3: 0,
-  4: 0,
-  5: 0,
-};
-function resetM(prev, cur) {
-  m[prev] = 0;
-  if (prev - 1 > cur) {
-    resetM(prev - 1, cur);
-  }
-}
 export function collectToc(paragraphs, toc, name = "") {
+  const m = {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+  };
+
+  function resetM(prev, cur) {
+    m[prev] = 0;
+    if (prev - 1 > cur) {
+      resetM(prev - 1, cur);
+    }
+  }
   if (!Array.isArray(paragraphs)) {
   } else {
     paragraphs.forEach((node) => {
