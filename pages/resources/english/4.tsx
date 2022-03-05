@@ -3,8 +3,8 @@ import { getPagePropsFormMarkdown } from "@/lib/book/utils";
 import BookPageLayout from "@/components/EnglishBook";
 
 const EnglishGookPage = (props) => {
-  const { content: paragraphs = [], toc } = props;
-  return <BookPageLayout toc={toc} paragraphs={paragraphs} />;
+  const { title, content: paragraphs = [], toc } = props;
+  return <BookPageLayout title={title} toc={toc} paragraphs={paragraphs} />;
 };
 
 export default EnglishGookPage;

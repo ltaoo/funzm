@@ -244,7 +244,18 @@ export const renderToc = (headings) => {
             }}
           >
             <a
-              href={page ? `/resources/english/${page}#${uid}` : `#${uid}`}
+              href={(() => {
+                if (level === 2) {
+                  if (page) {
+                    return `/resources/english/${page}`;
+                  }
+                  return "";
+                }
+                if (page) {
+                  return `/resources/english/${page}#${uid}`;
+                }
+                return `#${uid}`;
+              })()}
               className=""
             >
               {text}

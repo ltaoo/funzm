@@ -8,7 +8,11 @@ const BookPageLayout = (props) => {
   return (
     <div className="flex mt-4 px-8 pb-12 text-gray-800">
       <Head>
-        <title>《旋元佑文法进阶》- {title}</title>
+        {title ? (
+          <title>{title} - 《旋元佑文法进阶》</title>
+        ) : (
+          <title>《旋元佑文法进阶》</title>
+        )}
       </Head>
       <div className="fixed left-4 overflow-y-auto top-8 p-8 w-60 h-160">
         <div className="mt-2">

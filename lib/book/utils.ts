@@ -107,16 +107,23 @@ const m = {
   4: 0,
   5: 0,
 };
-export function collectToc(paragraphs, toc, name = "root") {
+function resetM(prev, cur) {
+  m[prev] = 0;
+  if (prev - 1 > cur) {
+    resetM(prev - 1, cur);
+  }
+}
+export function collectToc(paragraphs, toc, name = "") {
   if (!Array.isArray(paragraphs)) {
   } else {
     paragraphs.forEach((node) => {
       const [type, children] = node;
       const options = node[2] || {};
       if (type === "h") {
+        // console.log(children, options, name);
         const { level } = options;
         if (toc.level === 0) {
-          options.uid = name;
+          options.uid = options.page || name || "1";
           toc.level = level;
           toc.root = {
             uid: options.uid,
@@ -129,7 +136,7 @@ export function collectToc(paragraphs, toc, name = "root") {
         } else if (toc.level < level) {
           m[level] += 1;
           const num = m[level];
-          options.uid = `${toc.cur.uid}.${num}`;
+          options.uid = toc.cur.uid ? `${toc.cur.uid}.${num}` : num;
           // 2 -> 3 这种情况
           const n = {
             uid: options.uid,
@@ -145,13 +152,18 @@ export function collectToc(paragraphs, toc, name = "root") {
         } else {
           // 3 -> 2 / 3 -> 3 这两种情况
           if (toc.level > level) {
-            m[toc.level] = 0;
+            resetM(toc.level, level);
           }
           toc.level = level;
           m[level] += 1;
           const num = m[level];
           const sameLevelNode = findSameLevelNode(toc.cur, level);
-          options.uid = `${sameLevelNode.parent.uid}.${num}`;
+          options.uid =
+            level === 2
+              ? String(options.page)
+              : sameLevelNode.parent.uid
+              ? `${sameLevelNode.parent.uid}.${num}`
+              : num;
           const n = {
             uid: options.uid,
             level,
@@ -223,7 +235,8 @@ function collectHeading(ast) {
 }
 const RESOURCE_ROOT_DIR = path.join(process.cwd(), "posts");
 function parseYaml(content) {
-  const configStr = content.match(/---(.|\s)+---/);
+  const prev = content.split("\n").slice(0, 5).join("\n");
+  const configStr = prev.match(/---(.|\s)+---/);
   if (configStr) {
     const lines = configStr[0].split("\n");
     const str = lines.slice(1, -1).join("\n");
@@ -239,13 +252,6 @@ async function getTocFormMarkdownDirectly(markdown) {
     .use(function () {
       function compiler(ast) {
         const result = collectHeading(ast).filter((node) => node.length !== 0);
-        // .map((node) => {
-        //   return {
-        //     ...node,
-        //     index,
-        //     title,
-        //   };
-        // });
         return JSON.stringify(result, null, 2);
       }
       Object.assign(this, { Compiler: compiler });
@@ -331,8 +337,8 @@ export async function getWholeToc(filepath) {
 
 export async function getPagePropsFormMarkdown(filepath: string) {
   const { name } = path.parse(filepath);
-  // const c = readMarkdown(filepath);
-  // const yaml = parseYaml(c);
+  const c = readMarkdown(filepath);
+  const yaml = parseYaml(c);
   const resp = JSON.parse(await transform(filepath));
   const toc = {
     level: 0,
@@ -341,7 +347,7 @@ export async function getPagePropsFormMarkdown(filepath: string) {
   };
 
   const paragraphs = resp;
-  collectToc(paragraphs, toc);
+  collectToc(paragraphs, toc, name);
 
   const wholeToc = await getWholeToc(filepath);
 
@@ -350,12 +356,11 @@ export async function getPagePropsFormMarkdown(filepath: string) {
     root: null,
     cur: null,
   };
-
-  collectToc([["h", "", { level: 1, page: "/" }]].concat(wholeToc), wtoc);
+  collectToc([["h", "", { level: 1, page: "intro" }]].concat(wholeToc), wtoc);
   delete wtoc.cur;
 
   return {
-    // ...yaml,
+    title: yaml.title || "",
     content: paragraphs,
     isIndex: name === "index",
     wholeToc: wtoc.root ? simplifyParentKey([wtoc.root]) : [],
