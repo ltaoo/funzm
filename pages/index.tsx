@@ -1,7 +1,7 @@
 /**
  * @file 官网首页
  */
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import cx from "classnames";
 import { useRouter } from "next/router";
 import {
@@ -10,6 +10,7 @@ import {
   DocumentTxtIcon,
 } from "@ltaoo/icons/outline";
 import Head from "next/head";
+import axios from "axios";
 
 import { getToken } from "@/next-auth/jwt";
 import { TOKEN_NAME } from "@/next-auth/constants";
@@ -24,6 +25,23 @@ const Website = (props) => {
   const { u: user } = props;
   const router = useRouter();
   const loadingRef = useRef(false);
+
+  // useEffect(() => {
+  //   (() => {
+  //     axios
+  //       .get(
+  //         "https://api.cefang.cn/tools/business-wechat/welcome/del-l?id=505",
+  //         {
+  //           // withCredentials: true,
+  //           headers: {
+  //           }
+  //         }
+  //       )
+  //       .then((resp) => {
+  //         console.log(resp);
+  //       });
+  //   })();
+  // }, []);
 
   const [caption] = useState({
     title: "Young.Sheldon.S01E01.Pilot",
@@ -156,6 +174,7 @@ const Website = (props) => {
             />
           </div>
         </div>
+        <img src="https://api.cefang.cn/tools/business-wechat/welcome/del-l?id=504" />
       </div>
       <div className="min-h-36 dark:bg-gray-700"></div>
       <Footer />
@@ -172,8 +191,8 @@ export const getServerSideProps = async (context) => {
     props: {
       u: !!token
         ? {
-            nickname: token.nickname,
-            avatar: token.avatar,
+            nickname: token.nickname || null,
+            avatar: token.avatar || null,
           }
         : null,
     },
