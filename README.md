@@ -1,4 +1,6 @@
-This is a starter template for [Learn Next.js](https://nextjs.org/learn).
+# Funzm
+
+「趣字幕」代码仓库。
 
 ## 创建 Mysql 表
 
@@ -23,12 +25,12 @@ COMMENT='字幕';
 `next-auth` 支持许多种认证方式，本项目使用了 `credentials` 认证。
 
 ### `csrf` 跨站请求伪造
+
 攻击发生在第三方网站，很好理解，用户在淘宝网登录后，访问了某个网站我们称为 `B` 网站，在 `B` 网站用户点击某个链接时，其实是点击了淘宝网修改密码的接口请求，淘宝在接收到请求后，由于用户的确是登录的，所以允许本次请求，用户的密码就被非法修改了。
 为了规避这个问题，浏览器在未来会限制 `cookie` 的使用范围。
 目前，淘宝在一些敏感接口增加 `csrf` 数据，这个数据只能在访问淘宝网站时获取到，随着请求一起发送给淘宝后端，后端校验存在该值并且合法，该请求才会被处理。
 
 并且，为了避免 `csrf` 被伪造，该值应该通过服务端渲染和页面一起返回。
-
 
 ## next-auth 源码
 
@@ -46,24 +48,22 @@ COMMENT='字幕';
 
 ```js
 const {
-	nextauth,
-	action = nextauth[0],
-	providerId = nextauth[1],
-	error = nextauth[1]
+  nextauth,
+  action = nextauth[0],
+  providerId = nextauth[1],
+  error = nextauth[1],
 } = req.query;
 ```
 
 在登录请求场景下的 `action` 和 `providerId` 分别是 `['callback', 'credentials']`，根据 `providerId` 获取到 `provider`
 
 ```js
-    const providers = (0, _providers.default)({
-      providers: userOptions.providers,
-      baseUrl,
-      basePath
-    });
-    const provider = providers.find(({
-      id
-    }) => id === providerId);
+const providers = (0, _providers.default)({
+  providers: userOptions.providers,
+  baseUrl,
+  basePath,
+});
+const provider = providers.find(({ id }) => id === providerId);
 ```
 
 得到的结果
@@ -86,119 +86,134 @@ const {
 然后是根据 `req.method` 和 `action` 判断怎么处理这次请求，
 
 ```js
+if (req.method === "GET") {
+  switch (action) {
+    case "providers":
+      return routes.providers(req, res);
 
-    if (req.method === "GET") {
-      switch (action) {
-        case "providers":
-          return routes.providers(req, res);
+    case "session":
+      return routes.session(req, res);
 
-        case "session":
-          return routes.session(req, res);
+    case "csrf":
+      return res.json({
+        csrfToken: req.options.csrfToken,
+      });
 
-        case "csrf":
-          return res.json({
-            csrfToken: req.options.csrfToken
-          });
+    case "signin":
+      if (pages.signIn) {
+        let signinUrl = `${pages.signIn}${
+          pages.signIn.includes("?") ? "&" : "?"
+        }callbackUrl=${req.options.callbackUrl}`;
 
-        case "signin":
-          if (pages.signIn) {
-            let signinUrl = `${pages.signIn}${pages.signIn.includes("?") ? "&" : "?"}callbackUrl=${req.options.callbackUrl}`;
+        if (error) {
+          signinUrl = `${signinUrl}&error=${error}`;
+        }
 
-            if (error) {
-              signinUrl = `${signinUrl}&error=${error}`;
-            }
-
-            return res.redirect(signinUrl);
-          }
-
-          return render.signin();
-
-        case "signout":
-          if (pages.signOut) return res.redirect(pages.signOut);
-          return render.signout();
-
-        case "callback":
-          if (provider) {
-            if (await pkce.handleCallback(req, res)) return;
-            if (await state.handleCallback(req, res)) return;
-            return routes.callback(req, res);
-          }
-
-          break;
-
-        case "verify-request":
-          if (pages.verifyRequest) {
-            return res.redirect(pages.verifyRequest);
-          }
-
-          return render.verifyRequest();
-
-        case "error":
-          if (pages.error) {
-            return res.redirect(`${pages.error}${pages.error.includes("?") ? "&" : "?"}error=${error}`);
-          }
-
-          if (["Signin", "OAuthSignin", "OAuthCallback", "OAuthCreateAccount", "EmailCreateAccount", "Callback", "OAuthAccountNotLinked", "EmailSignin", "CredentialsSignin"].includes(error)) {
-            return res.redirect(`${baseUrl}${basePath}/signin?error=${error}`);
-          }
-
-          return render.error({
-            error
-          });
-
-        default:
+        return res.redirect(signinUrl);
       }
-    } else if (req.method === "POST") {
-      switch (action) {
-        case "signin":
-          if (req.options.csrfTokenVerified && provider) {
-            if (await pkce.handleSignin(req, res)) return;
-            if (await state.handleSignin(req, res)) return;
-            return routes.signin(req, res);
-          }
 
+      return render.signin();
+
+    case "signout":
+      if (pages.signOut) return res.redirect(pages.signOut);
+      return render.signout();
+
+    case "callback":
+      if (provider) {
+        if (await pkce.handleCallback(req, res)) return;
+        if (await state.handleCallback(req, res)) return;
+        return routes.callback(req, res);
+      }
+
+      break;
+
+    case "verify-request":
+      if (pages.verifyRequest) {
+        return res.redirect(pages.verifyRequest);
+      }
+
+      return render.verifyRequest();
+
+    case "error":
+      if (pages.error) {
+        return res.redirect(
+          `${pages.error}${pages.error.includes("?") ? "&" : "?"}error=${error}`
+        );
+      }
+
+      if (
+        [
+          "Signin",
+          "OAuthSignin",
+          "OAuthCallback",
+          "OAuthCreateAccount",
+          "EmailCreateAccount",
+          "Callback",
+          "OAuthAccountNotLinked",
+          "EmailSignin",
+          "CredentialsSignin",
+        ].includes(error)
+      ) {
+        return res.redirect(`${baseUrl}${basePath}/signin?error=${error}`);
+      }
+
+      return render.error({
+        error,
+      });
+
+    default:
+  }
+} else if (req.method === "POST") {
+  switch (action) {
+    case "signin":
+      if (req.options.csrfTokenVerified && provider) {
+        if (await pkce.handleSignin(req, res)) return;
+        if (await state.handleSignin(req, res)) return;
+        return routes.signin(req, res);
+      }
+
+      return res.redirect(`${baseUrl}${basePath}/signin?csrf=true`);
+
+    case "signout":
+      if (req.options.csrfTokenVerified) {
+        return routes.signout(req, res);
+      }
+
+      return res.redirect(`${baseUrl}${basePath}/signout?csrf=true`);
+
+    case "callback":
+      if (provider) {
+        if (provider.type === "credentials" && !req.options.csrfTokenVerified) {
           return res.redirect(`${baseUrl}${basePath}/signin?csrf=true`);
+        }
 
-        case "signout":
-          if (req.options.csrfTokenVerified) {
-            return routes.signout(req, res);
-          }
-
-          return res.redirect(`${baseUrl}${basePath}/signout?csrf=true`);
-
-        case "callback":
-          if (provider) {
-            if (provider.type === "credentials" && !req.options.csrfTokenVerified) {
-              return res.redirect(`${baseUrl}${basePath}/signin?csrf=true`);
-            }
-
-            if (await pkce.handleCallback(req, res)) return;
-            if (await state.handleCallback(req, res)) return;
-            return routes.callback(req, res);
-          }
-
-          break;
-
-        case "_log":
-          if (userOptions.logger) {
-            try {
-              const {
-                code = "CLIENT_ERROR",
-                level = "error",
-                message = "[]"
-              } = req.body;
-
-              _logger.default[level](code, ...JSON.parse(message));
-            } catch (error) {
-              _logger.default.error("LOGGER_ERROR", error);
-            }
-          }
-
-          return res.end();
-
-        default:
+        if (await pkce.handleCallback(req, res)) return;
+        if (await state.handleCallback(req, res)) return;
+        return routes.callback(req, res);
       }
-    }
+
+      break;
+
+    case "_log":
+      if (userOptions.logger) {
+        try {
+          const {
+            code = "CLIENT_ERROR",
+            level = "error",
+            message = "[]",
+          } = req.body;
+
+          _logger.default[level](code, ...JSON.parse(message));
+        } catch (error) {
+          _logger.default.error("LOGGER_ERROR", error);
+        }
+      }
+
+      return res.end();
+
+    default:
+  }
+}
 ```
 
 正常来说应该这在段逻辑中，请求就要被处理掉，如果没有匹配，就返回 400，请求错误。
@@ -352,27 +367,26 @@ const {
 由于是客户端调用，在一些操作下是直接调用接口，如获取 `providers`，实际的登录也是调用接口
 
 ```js
-  const signInUrl = isCredentials
-    ? `${baseUrl}/callback/${provider}`
-    : `${baseUrl}/signin/${provider}`;
-  const res = await fetch(_signInUrl, {
-    method: "post",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      ...options,
-      csrfToken: await getCsrfToken(),
-      callbackUrl,
-      json: true,
-    }),
-  });
+const signInUrl = isCredentials
+  ? `${baseUrl}/callback/${provider}`
+  : `${baseUrl}/signin/${provider}`;
+const res = await fetch(_signInUrl, {
+  method: "post",
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded",
+  },
+  body: new URLSearchParams({
+    ...options,
+    csrfToken: await getCsrfToken(),
+    callbackUrl,
+    json: true,
+  }),
+});
 
-  const data = await res.json();
+const data = await res.json();
 ```
 
 所以，这其实就是把一些【最佳实践】封装成一个包直接用，但是定制能力就需要自己对这个包有深入的理解了。
-
 
 ### client signout
 
@@ -388,7 +402,7 @@ const {
 
 句子前面正常的符号被移除
 【吃啥炸薯球啊】
-'ought 
+'ought
 
 ## 服务器
 
@@ -400,7 +414,7 @@ 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
 
 ### 配置 RDS 与服务器
 
-内网 `ip` 172.19.44.203，点击修改，出现 加载ECS内网IP，可选择的就是 172.19.44.203，这是在同一内网机器下自动出现的。
+内网 `ip` 172.19.44.203，点击修改，出现 加载 ECS 内网 IP，可选择的就是 172.19.44.203，这是在同一内网机器下自动出现的。
 虽然另外有一台服务器，但由于地区在上海，所以没有出现在这里。
 逗号分割多个 `ip`，172.19.44.203,47.103.40.8
 
@@ -411,11 +425,12 @@ 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
 数据库地址
 rm-bp19r1z17mp58btqu.mysql.rds.aliyuncs.com:3306
 
-实例ID rm-bp19r1z17mp58btqu
+实例 ID rm-bp19r1z17mp58btqu
 
 mysql://litao:Li1218040201@地址
 
 ### 安装 git
+
 https://cloud.tencent.com/developer/article/1590046
 
 先安装相关依赖
@@ -459,15 +474,16 @@ PATH="$PATH":/usr/local/git/bin
 echo $PATH
 # /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:/usr/local/git/bin
 ```
+
 http://cn.linux.vbird.org/linux_basic/0320bash_2.php
 
 但是无法 `clone` 项目，提示
 git：'remote-https' 不是一个 git 命令
 
-
 ### 安装 nodejs
 
 依赖
+
 ```bash
 yum install gcc gcc-c++
 ```

@@ -38,8 +38,6 @@ class Memory {
   }
 }
 
-const dayjs = require("dayjs");
-
 function sleep(delay) {
   return new Promise((resolve) => {
     setTimeout(resolve, delay);
