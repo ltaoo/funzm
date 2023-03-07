@@ -9,6 +9,7 @@ interface IProps {
   className?: string;
   loading?: boolean;
   noMore?: boolean;
+  children?: React.ReactNode;
   onLoadMore?: () => void;
 }
 const ScrollView: React.FC<IProps> = (props) => {

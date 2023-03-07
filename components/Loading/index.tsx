@@ -6,6 +6,9 @@ import { Dialog, Transition } from "@headlessui/react";
 
 export interface ModalProps {
   visible?: boolean;
+  children?: React.ReactNode;
+  onCancel?: () => void;
+  onOk?: () => void;
 }
 const Loading = (props) => {
   const { visible = false, children, onCancel, onOk } = props;

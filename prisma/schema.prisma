@@ -7,152 +7,355 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 这个是指「三方账户」
 model Account {
-  id                   Int  @id @default(autoincrement())
-  user_id              Int
-  type                 String
-  provider             String
-  // 唯一 id
-  provider_account_id  String
-  refresh_token        String?
-  access_token         String?
-  expires_at           Int?
-  token_type           String?
-  scope                String?
-  id_token             String?
-  session_state        String?
-
-  user                 User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id                  Int     @id @default(autoincrement())
+  user_id             Int
+  type                String
+  provider            String
+  provider_account_id String
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  token_type          String?
+  scope               String?
+  id_token            String?
+  session_state       String?
+  user                User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([provider, provider_account_id])
+  @@index([user_id], map: "accounts_user_id_fkey")
   @@map("accounts")
 }
 
 model User {
-  id               Int          @id @default(autoincrement())
-  email            String?      @unique
+  id               Int              @id @default(autoincrement())
+  email            String?          @unique
   email_verified   DateTime?
-
-  profile          Profile?
-  // 账号
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @default(now())
   accounts         Account[]
+  caption          Caption[]        @relation("captionTousers")
+  check_in_records CheckInRecord[]
   credential       Credential?
-  subscription     Subscription?
-  captions         Caption[]
   exam_scenes      ExamScene[]
   notes            Note[]
-  words            Word[]
-  spelling         SpellingResult[]
-  score_records    ScoreRecord[]
-  // packages         Package[]
-  check_in_records CheckInRecord[]
-  star_records     StarRecord[]
-  score            Score?
+  profile          Profile?
   rank             Rank?
-
-  created_at       DateTime  @default(now())
-  updated_at       DateTime  @default(now())
+  score            Score?
+  score_records    ScoreRecord[]
+  spelling         SpellingResult[]
+  star_records     StarRecord[]
+  subscription     Subscription?
+  words            Word[]
 
   @@map("users")
 }
 
 model VerificationToken {
   identifier String
-  token      String          @unique
+  token      String   @unique
   expires    DateTime
-
-  status     Int             @default(1)
+  status     Int      @default(1)
   user_id    Int?
 
   @@unique([identifier, token])
   @@map("verificationtokens")
 }
-model Credential {
-  user_id          Int          @unique
-  user             User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  password         String?
-  salt             String?
+model Credential {
+  user_id  Int     @unique
+  password String?
+  salt     String?
+  user     User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("credentials")
 }
 
-// 产品，从三方平台同步过来，或自己初始化
 model Product {
-  id          Int          @id @default(autoincrement())
-
-  active      Boolean      @default(false)
+  id          Int       @id @default(autoincrement())
+  active      Boolean   @default(false)
   name        String
   description String?
   image       String?
   metadata    Json?
-  created_at  DateTime     @default(now())
+  created_at  DateTime  @default(now())
   updated_at  DateTime?
-
   prices      Price[]
 
   @@map("products")
 }
 
 model Price {
-  id                Int         @id @default(autoincrement())
-  active            Boolean        @default(false)
+  id             Int            @id @default(autoincrement())
+  active         Boolean        @default(false)
+  product_id     Int
+  interval       PriceInterval?
+  unit_amount    Int?
+  interval_count Int?
+  type           PriceType?
+  created_at     DateTime       @default(now())
+  updated_at     DateTime?
+  product        Product        @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  subscriptions  Subscription[]
 
-  product_id        Int        
-  product           Product        @relation(fields: [product_id], references: [id], onDelete: Cascade)
-
-  interval          PriceInterval?
-
-  unit_amount       Int?
-  interval_count    Int?
-  type              PriceType?
-  created_at        DateTime       @default(now())
-  updated_at        DateTime?
-
-  subscriptions     Subscription[]
+  @@index([product_id], map: "prices_product_id_fkey")
   @@map("prices")
+}
+
+model Subscription {
+  id                   Int                @id @default(autoincrement())
+  type                 SubscriptionStatus
+  start_date           DateTime?
+  ended_at             DateTime?
+  trial_start          DateTime?
+  trial_end            DateTime?
+  cancel_at            DateTime?
+  cancel_at_period_end Boolean?
+  canceled_at          DateTime?
+  user_id              Int                @unique
+  created_at           DateTime           @default(now())
+  expired_at           DateTime?
+  price_id             Int
+  price                Price              @relation(fields: [price_id], references: [id])
+  user                 User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([price_id], map: "subscriptions_price_id_fkey")
+  @@map("subscriptions")
+}
+
+model Profile {
+  nickname String?
+  avatar   String?
+  user_id  Int     @unique
+  user     User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Score {
+  value   Int  @default(0)
+  user_id Int  @unique
+  user    User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("score")
+}
+
+model Rank {
+  level   Int  @default(1)
+  exp     Int  @default(0)
+  user_id Int  @unique
+  user    User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("rank")
+}
+
+model Paragraph {
+  id                  Int                 @id @default(autoincrement())
+  line                String
+  text1               String              @db.LongText
+  text2               String              @db.LongText
+  start               String
+  end                 String
+  language            String?
+  caption_id          Int
+  deleted             Boolean             @default(false)
+  indexes             String?
+  caption             Caption             @relation("captionToparagraphs", fields: [caption_id], references: [id], onDelete: Cascade)
+  exam_scenes         ExamScene[]
+  incorrect_paragraph IncorrectParagraph?
+  notes               Note[]
+  spellings           SpellingResult[]
+  words               Word[]
+
+  @@index([caption_id], map: "paragraphs_caption_id_fkey")
+  @@map("paragraphs")
+}
+
+model Reading {
+  id String @id @default(cuid())
+
+  @@map("readings")
+}
+
+model ExamScene {
+  id         Int              @id @default(autoincrement())
+  status     Int              @default(1)
+  type       Int              @default(1)
+  caption_id Int
+  user_id    Int
+  start_id   Int
+  score      Int?             @default(0)
+  created_at DateTime         @default(now())
+  begin_at   DateTime?
+  ended_at   DateTime?
+  index      Int
+  caption    Caption          @relation("captionToexam_scenes", fields: [caption_id], references: [id], onDelete: Cascade)
+  start      Paragraph        @relation(fields: [start_id], references: [id])
+  user       User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  spellings  SpellingResult[]
+
+  @@index([caption_id], map: "exam_scenes_caption_id_fkey")
+  @@index([start_id], map: "exam_scenes_start_id_fkey")
+  @@index([user_id], map: "exam_scenes_user_id_fkey")
+  @@map("exam_scenes")
+}
+
+model ExamStats {
+  exam_scene_total         Int
+  success_exam_scene_total Int
+  failed_exam_scene_total  Int
+  success_spellings_total  Int
+  failed_spellings_total   Int
+  skipped_spellings_total  Int
+  created_at               DateTime @default(now())
+  user_id                  Int
+
+  @@unique([user_id, created_at])
+  @@map("exam_stats")
+}
+
+model IncorrectParagraph {
+  user_id    Int
+  created_at DateTime  @default(now())
+  updated_at DateTime?
+  id         Int       @id @unique
+  paragraph  Paragraph @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@unique([id, user_id, created_at])
+  @@map("incorrect_paragraphs")
+}
+
+model SpellingResult {
+  id            Int        @id @default(autoincrement())
+  type          Int
+  user_id       Int
+  paragraph_id  Int
+  exam_scene_id Int?
+  input         String?
+  created_at    DateTime   @default(now())
+  exam_scene    ExamScene? @relation(fields: [exam_scene_id], references: [id], onDelete: Cascade)
+  paragraph     Paragraph  @relation(fields: [paragraph_id], references: [id], onDelete: Cascade)
+  user          User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([exam_scene_id], map: "spelling_results_exam_scene_id_fkey")
+  @@index([paragraph_id], map: "spelling_results_paragraph_id_fkey")
+  @@index([user_id], map: "spelling_results_user_id_fkey")
+  @@map("spelling_results")
+}
+
+model Note {
+  id           Int       @id @default(autoincrement())
+  content      String    @db.LongText
+  text         String?   @db.LongText
+  start        Int?
+  end          Int?
+  caption_id   Int
+  paragraph_id Int
+  user_id      Int
+  created_at   DateTime  @default(now())
+  caption      Caption   @relation("captionTonoets", fields: [caption_id], references: [id], onDelete: Cascade)
+  paragraph    Paragraph @relation(fields: [paragraph_id], references: [id], onDelete: Cascade)
+  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([caption_id], map: "noets_caption_id_fkey")
+  @@index([paragraph_id], map: "noets_paragraph_id_fkey")
+  @@index([user_id], map: "noets_user_id_fkey")
+  @@map("noets")
+}
+
+model Word {
+  id           Int        @id @default(autoincrement())
+  text         String
+  paragraph_id Int?
+  created_at   DateTime   @default(now())
+  user_id      Int
+  paragraph    Paragraph? @relation(fields: [paragraph_id], references: [id])
+  user         User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([paragraph_id], map: "words_paragraph_id_fkey")
+  @@index([user_id], map: "words_user_id_fkey")
+  @@map("words")
+}
+
+model ScoreRecord {
+  id         Int      @id @default(autoincrement())
+  user_id    Int?
+  type       Int
+  number     Int
+  desc       String?
+  created_at DateTime @default(now())
+  user       User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id], map: "score_records_user_id_fkey")
+  @@map("score_records")
+}
+
+model CheckInRecord {
+  id          Int      @id @default(autoincrement())
+  user_id     Int?
+  day         Int
+  retroactive Boolean? @default(false)
+  created_at  DateTime @default(now())
+  user        User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id], map: "check_in_records_user_id_fkey")
+  @@map("check_in_records")
+}
+
+model Item {
+  id    Int     @id @default(autoincrement())
+  name  String
+  price Int
+  desc  String?
+
+  @@map("items")
+}
+
+model StarRecord {
+  user_id    Int
+  caption_id Int
+  created_at DateTime @default(now())
+  caption    Caption  @relation("captionTostar_records", fields: [caption_id], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, caption_id])
+  @@index([caption_id], map: "star_records_caption_id_fkey")
+  @@map("star_records")
+}
+
+model Flag {
+  id                 Int  @id @default(autoincrement())
+  spelling_flag_id   Int?
+  exam_scene_flag_id Int?
+
+  @@map("flags")
+}
+
+model Caption {
+  id           Int          @id @default(autoincrement())
+  title        String
+  public       Boolean      @default(false)
+  user_id      Int
+  movie_id     Int?
+  created_at   DateTime     @default(now())
+  updated_at   DateTime?
+  users        User         @relation("captionTousers", fields: [user_id], references: [id], onDelete: Cascade, map: "Caption_user_id_fkey")
+  exam_scenes  ExamScene[]  @relation("captionToexam_scenes")
+  noets        Note[]       @relation("captionTonoets")
+  paragraphs   Paragraph[]  @relation("captionToparagraphs")
+  star_records StarRecord[] @relation("captionTostar_records")
+
+  @@index([user_id], map: "Caption_user_id_fkey")
 }
 
 enum PriceInterval {
   month
   year
 }
+
 enum PriceType {
   recurring
   one_time
-}
-
-// 订阅
-model Subscription {
-  id              Int          @id @default(autoincrement())
-
-  type            SubscriptionStatus
-  price_id        Int
-  price           Price              @relation(fields: [price_id], references: [id])
-
-  // 订阅开始时间
-  start_date           DateTime?
-  // 订阅结束时间
-  ended_at             DateTime?
-  // 试用开始
-  trial_start          DateTime?
-  // 试用结束
-  trial_end            DateTime?
-  // 取消时间
-  cancel_at            DateTime?
-  // 是否在周期内取消
-  cancel_at_period_end Boolean?
-  // 实际取消时间
-  canceled_at          DateTime?
-
-  user_id         Int      
-  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  created_at      DateTime     @default(now())
-  expired_at      DateTime?
-
-  @@map("subscriptions")
 }
 
 enum SubscriptionStatus {
@@ -163,295 +366,4 @@ enum SubscriptionStatus {
   past_due
   trialing
   unpaid
-}
-
-
-model Profile {
-  nickname        String?
-  avatar          String?
-  user_id         Int      
-  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@map("profiles")
-}
-
-// 用户拥有的积分
-model Score {
-  value           Int          @default(0)
-  user_id         Int      
-  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@map("score")
-}
-
-model Rank {
-  // 等级
-  level           Int          @default(1)
-  // 经验
-  exp             Int          @default(0)
-
-  user_id         Int      
-  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@map("rank")
-}
-
-// 字幕
-model Caption {
-  id             Int           @id @default(autoincrement())
-  title          String
-  public         Boolean       @default(false)
-  user_id        Int
-  movie_id       Int?      
-
-  created_at     DateTime      @default(now())
-  updated_at     DateTime?
-
-  user           User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  paragraphs     Paragraph[]
-  exam_scenes    ExamScene[]
-  notes          Note[]
-  star_records   StarRecord[]
-}
-
-model Paragraph {
-  id           Int      @id @default(autoincrement())
-  line         String
-  text1        String   @db.LongText
-  text2        String   @db.LongText
-  start        String
-  end          String
-  language     String?
-  caption_id   Int  
-
-  // 合并的句子切割点
-  indexes       String?
-  deleted      Boolean  @default(false)
-
-  caption      Caption  @relation(fields: [caption_id], references: [id], onDelete: Cascade)
-
-  exam_scenes  ExamScene[]
-  spellings    SpellingResult[]
-  words        Word[]
-  notes        Note[]
-  incorrect_paragraph IncorrectParagraph?
-
-  @@map("paragraphs")
-}
-
-// 阅读记录
-model Reading {
-  id           String    @id @default(cuid())
-
-  @@map("readings")
-}
-
-model ExamScene {
-  id              Int               @id @default(autoincrement())
-
-// 该测验属于整个测验的第几个
-  index           Int               
-  status          Int               @default(1)
-  type            Int               @default(1)
-
-  caption_id      Int    
-  user_id         Int
-
-// 开始句子
-  start_id        Int    
-
-  score           Int?                 @default(0)
-
-  spellings       SpellingResult[]
-  caption         Caption              @relation(fields: [caption_id], references: [id], onDelete: Cascade)
-  user            User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  start           Paragraph            @relation(fields: [start_id], references: [id])
-
-  created_at      DateTime   @default(now())
-  begin_at        DateTime?
-  ended_at        DateTime?
-
-  @@map("exam_scenes")
-}
-
-model ExamStats {
-  user_id                   Int
-
-  // 当天共计进行了多少次关卡
-  exam_scene_total          Int
-  // 成功次数
-  success_exam_scene_total  Int
-  // 失败次数
-  failed_exam_scene_total   Int
-  // 正确拼写次数
-  success_spellings_total   Int
-  // 错误拼写总数
-  failed_spellings_total    Int
-  // 跳过拼写总数
-  skipped_spellings_total   Int
-
-  created_at                DateTime   @default(now())
-
-  @@unique([user_id, created_at])
-
-  @@map("exam_stats")
-}
-
-// 似乎可以给 Paragraph 一个 hasIncorrectSpelling 标记，效果是一样的？
-model IncorrectParagraph {
-  id             Int        @id
-  user_id        Int
-
-  paragraph      Paragraph  @relation(fields: [id], references: [id], onDelete: Cascade)
-
-  created_at     DateTime    @default(now())
-  updated_at     DateTime?
-
-  @@unique([id, user_id, created_at])
-  
-  @@map("incorrect_paragraphs")
-}
-
-model SpellingResult {
-  id             Int        @id @default(autoincrement())
-  type           Int
-
-  user_id        Int
-
-  paragraph_id   Int
-
-
-  exam_scene_id  Int?
-
-  user           User?       @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  exam_scene     ExamScene?  @relation(fields: [exam_scene_id], references: [id], onDelete: Cascade)
-  paragraph      Paragraph   @relation(fields: [paragraph_id], references: [id], onDelete: Cascade)
-
-  input          String?
-
-  created_at     DateTime    @default(now())
-
-  @@map("spelling_results")
-}
-
-model Note {
-  id                    Int       @id @default(autoincrement())
-
-  content               String    @db.LongText
-  text                  String?   @db.LongText
-  start                 Int?
-  end                   Int?
-
-  caption_id            Int
-  caption               Caption @relation(fields: [caption_id], references: [id], onDelete: Cascade)
-
-  paragraph_id          Int
-  paragraph             Paragraph @relation(fields: [paragraph_id], references: [id], onDelete: Cascade)
-
-  user_id               Int  
-  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  created_at            DateTime  @default(now())
-
-  @@map("noets")
-}
-
-model Word {
-  id                    Int     @id @default(autoincrement())
-
-  text                  String
-
-  user_id               Int       
-  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  paragraph_id          Int?       
-  paragraph             Paragraph?     @relation(fields: [paragraph_id], references: [id])
-
-  created_at            DateTime   @default(now())
-
-  @@map("words")
-}
-
-// 积分记录
-model ScoreRecord {
-  id                    Int     @id @default(autoincrement())
-
-  user_id               Int?  
-  user                  User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  type                  Int
-  number                Int
-  desc                  String?
-
-  created_at            DateTime @default(now())
-
-  @@map("score_records")
-}
-
-// 签到记录
-model CheckInRecord {
-  id                    Int    @id @default(autoincrement())
-
-  user_id               Int?  
-  user                  User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  day                   Int
-  // 是否补签
-  retroactive           Boolean?  @default(false)
-  created_at            DateTime  @default(now())
-
-  @@map("check_in_records")
-}
-
-
-// 游戏道具
-model Item {
-  id                    Int     @id @default(autoincrement())
-
-  // type                  Int
-
-  name                  String
-  desc                  String?
-  price                 Int
-
-  @@map("items")
-}
-
-// user package
-// model Package {
-//   id                    Int     @id @default(autoincrement())
-
-//   item_id               Int    
-//   item                  Item      @relation(fields: [item_id], references: [id])
-//   num                   Int
-
-//   user_id               Int  
-//   user                  User     @relation(fields: [user_id], references: [id])
-
-//   @@map("packages")
-// }
-
-// 收藏的字幕
-model StarRecord {
-  user_id    Int        
-  caption_id Int
-
-  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  caption    Caption    @relation(fields: [caption_id], references: [id], onDelete: Cascade)
-
-  created_at DateTime   @default(now())
-
-  @@unique([user_id, caption_id])
-
-  @@map("star_records")
-}
-
-// 全局的标记
-model Flag {
-  id                    Int     @id @default(autoincrement())
-
-  spelling_flag_id      Int?
-  exam_scene_flag_id    Int?
-
-  @@map("flags")
 }

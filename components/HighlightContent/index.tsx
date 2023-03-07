@@ -23,7 +23,7 @@ interface IProps {
     start: number;
     end: number;
   }[];
-  children: string;
+  children: React.ReactNode;
   onSubmit?: (value: {
     id?: number;
     // 笔记内容

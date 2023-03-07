@@ -9,6 +9,7 @@ interface IProps {
   tipClassName?: string;
   theme?: "dark" | "light" | "yellow";
   tip?: string;
+  children?: React.ReactNode;
 }
 const Spin: React.FC<IProps> = (props) => {
   const { className, tipClassName, theme = "light", tip, children } = props;

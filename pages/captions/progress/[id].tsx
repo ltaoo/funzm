@@ -131,11 +131,11 @@ const CaptionProgressPage = () => {
               <div className="inline-flex items-center mt-2 px-4 py-2 rounded-xl bg-gray-800 space-x-2">
                 <LightningBoltIcon
                   className="w-6 h-6 text-gray-100 cursor-pointer"
-                  onClick={startExamScene(ExamType.Selection, pg)}
+                  onClick={startExamScene(ExamType.Selection, { id: scene_id })}
                 />
                 <PencilAltIcon
                   className="w-6 h-6 text-gray-100 cursor-pointer"
-                  onClick={startExamScene(ExamType.Spelling, pg)}
+                  onClick={startExamScene(ExamType.Spelling, { id: scene_id })}
                 />
                 <MicrophoneIcon
                   className="w-6 h-6 text-gray-100 cursor-pointer"

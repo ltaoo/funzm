@@ -2,7 +2,7 @@
  * @file 用户服务
  */
 import Joi from "joi";
-import { User } from ".prisma/client";
+// import { User } from ".prisma/client";
 
 import prisma from "@/lib/prisma";
 import * as utils from "@/lib/utils";
@@ -28,6 +28,9 @@ export function findUserByEmail(email) {
   });
 }
 
+type User = {
+  id: number;
+};
 /**
  * Create a new `User` document from a `Credentials` set.
  * @NOTE Handles `password`, `salt`, and `uid` values.

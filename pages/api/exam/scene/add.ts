@@ -83,7 +83,7 @@ export default async function provideExamSceneAddingService(
     return resp(existing, res);
   }
   if (status === ExamStatus.Started) {
-    if (dayjs(begin_at).add(2, "min").isAfter(dayjs())) {
+    if (dayjs(begin_at).add(2, "minute").isAfter(dayjs())) {
       await prisma.examScene.update({
         where: {
           id,

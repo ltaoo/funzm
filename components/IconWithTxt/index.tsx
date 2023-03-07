@@ -15,6 +15,7 @@ interface IProps {
   className?: string;
   size?: "small" | "default" | "large";
   disabled?: boolean;
+  children?: React.ReactNode;
   onClick?: (event?: React.MouseEvent) => void;
 }
 const IconWithTxt: React.FC<IProps> = (props) => {

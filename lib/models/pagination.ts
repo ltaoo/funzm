@@ -1,5 +1,3 @@
-import { Prisma } from ".prisma/client";
-
 /**
  * 
  * const [params, getResult] = paginationFactory({
@@ -18,7 +16,13 @@ export function paginationFactory(params): [any, (list, total: number) => any] {
 
 export function paginationParams(params) {
   const { page = 1, pageSize = 10, sort, start, skip = 0, search } = params;
-  const result: Prisma.ParagraphFindManyArgs = {
+  const result: {
+    where: string;
+    skip: number;
+    take: number;
+    orderBy?: string;
+    cursor?: { id: number };
+  } = {
     where: search,
     skip: (page - 1) * pageSize + Number(skip),
     take: Number(pageSize),

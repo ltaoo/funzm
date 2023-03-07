@@ -8,6 +8,7 @@ import { useVisible } from "@/hooks";
 interface IProps {
   title?: string;
   content?: string;
+  children?: React.ReactNode;
   onOk?: () => void;
   onCancel?: () => void;
 }

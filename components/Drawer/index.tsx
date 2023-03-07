@@ -5,7 +5,11 @@ import { Fragment, useCallback, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@ltaoo/icons/outline";
 
-const Drawer = (props) => {
+const Drawer: React.FC<{
+  visible: boolean;
+  children?: React.ReactNode;
+  onCancel?: () => void;
+}> = (props) => {
   const { visible, children, onCancel } = props;
 
   const handleClose = useCallback(() => {

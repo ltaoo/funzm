@@ -1,4 +1,4 @@
-import { User, Credential } from ".prisma/client";
+// import { User, Credential } from ".prisma/client";
 
 import * as utils from "@/lib/utils";
 import { PBKDF2 } from "@/lib/utils/crypto";
@@ -28,7 +28,10 @@ export function hash(password: string, salt: SALT): Promise<PASSWORD> {
  * Determine if the incoming `password` matches the `User.password` value.
  */
 export async function compare(
-  user: Credential,
+  user: {
+    salt: string;
+    password: string;
+  },
   password: PASSWORD | string
 ): Promise<boolean> {
   return (await hash(password, user.salt as SALT)) === user.password;
@@ -48,7 +51,7 @@ export async function prepare(password: string) {
  * Insert a new `reset::{token}` document.
  * @NOTE Initiates the "Password Reset" pipeline.
  */
-export async function forgot(user: User): Promise<boolean> {
+export async function forgot(user): Promise<boolean> {
   // Create new TOKENs until find unused value
   //   const token = await utils.until(toUID, find);
 

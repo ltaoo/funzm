@@ -6,8 +6,11 @@ import { Dialog, Transition } from "@headlessui/react";
 
 export interface ModalProps {
   visible?: boolean;
+  children?: React.ReactNode;
+  onCancel?: () => void;
+  onOk?: () => void;
 }
-const Modal = (props) => {
+const Modal: React.FC<ModalProps> = (props) => {
   const { visible = false, children, onCancel, onOk } = props;
 
   const closeModal = useCallback(() => {
