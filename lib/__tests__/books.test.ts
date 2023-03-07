@@ -62,6 +62,13 @@ describe("generate toc", () => {
               level: 3,
               text: "单句：五种基本句型",
               children: [],
+              // parent: {
+              //   level: 2,
+              //   parent: {
+              //     text: "旋元佑文法进阶",
+              //   },
+              //   text: "第一章 基本句型",
+              // },
             },
             {
               level: 3,

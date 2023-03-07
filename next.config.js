@@ -18,7 +18,4 @@ module.exports = {
     };
     return config;
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 };

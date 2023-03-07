@@ -86,12 +86,15 @@ export function splitEnglish(paragraph) {
 }
 
 function findSameLevelNode(node, lv) {
-  const { level } = node;
-  if (level !== lv) {
-    return findSameLevelNode(node.parent, lv);
+  if (!node) {
+    return null;
   }
+  // const { level } = node;
+  // if (level !== lv) {
+  //   return findSameLevelNode(node.parent, lv);
+  // }
   if (node.parent === undefined) {
-    const r = node.children.find((n) => findSameLevelNode(n, level));
+    const r = node.children.find((n) => findSameLevelNode(n, lv));
     if (r === undefined) {
       return node;
     }
