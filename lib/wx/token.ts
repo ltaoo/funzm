@@ -2,7 +2,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 
 export const WEAPP_ID = "wx8c1c3e9e6bb5f673";
-export const WEAPP_SECRET = "7d1ba1ca8eca342cc96667d9d3e46f8e";
+export const WEAPP_SECRET = process.env.SECRET;
 
 let ACCESS_TOKEN: string | null = null;
 let EXPIRES_TIME = null;
@@ -14,6 +14,9 @@ let retryTimes = 0;
  * @url https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/access-token/auth.getAccessToken.html
  */
 async function fetchAccessToken() {
+  if (!WEAPP_SECRET) {
+    throw new Error("缺少小程序 Secret");
+  }
   const resp = await axios.get(
     `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${WEAPP_ID}&secret=${WEAPP_SECRET}`
   );

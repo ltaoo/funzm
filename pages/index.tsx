@@ -174,7 +174,6 @@ const Website = (props) => {
             />
           </div>
         </div>
-        <img src="https://api.cefang.cn/tools/business-wechat/welcome/del-l?id=504" />
       </div>
       <div className="min-h-36 dark:bg-gray-700"></div>
       <Footer />
