@@ -7,6 +7,7 @@ import SiteLayout from "@/layouts/site";
 const HelpPage = () => {
   const session = useSession();
   return (
+    // @ts-ignore
     <SiteLayout user={session?.user}>
       <div className="">
         <div className="w-full overflow-hidden px-4 md:px-20 md:mx-auto md:w-240">

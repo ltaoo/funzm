@@ -78,6 +78,7 @@ export default async function callbackHandler(
       }
     }
     session = await getSession(sessionToken)
+    // @ts-ignore
     if (session?.userId) {
       user = await getUser(session.userId)
       isSignedIn = !!user

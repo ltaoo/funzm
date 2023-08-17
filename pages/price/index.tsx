@@ -7,6 +7,7 @@ import { useSession } from "@/next-auth/client";
 const PricePage = () => {
   const session = useSession();
   return (
+    // @ts-ignore
     <SiteLayout user={session?.user}>
       <div className="flex justify-center">
         <div className="flex space-x-12 mt-24">
