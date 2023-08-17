@@ -18,7 +18,7 @@ const footer = () => {
             <p className="inline-block cursor-pointer">联系我们</p> */}
             <img
               className="w-48 h-48"
-              src="https://static.ltaoo.work/litao-qrcode.png"
+              src="//static.ltaoo.work/litao-qrcode.png"
             />
           </div>
         </div>

@@ -138,7 +138,7 @@ const Website = (props) => {
         <div className="mt-8 px-24">
           <img
             className="w-full border border-solid border-gray-300 rounded-xl shadow-3xl"
-            src="https://static.ltaoo.work/www.funzm.com_example.png"
+            src="//static.ltaoo.work/www.funzm.com_example.png"
           />
         </div>
         <div className="mt-24">
@@ -148,7 +148,7 @@ const Website = (props) => {
           <div className="mt-8 px-24">
             <img
               className="w-full border border-solid border-gray-300 rounded-xl shadow-3xl"
-              src="https://static.ltaoo.work/funzm_note_profile.png"
+              src="//static.ltaoo.work/funzm_note_profile.png"
             />
           </div>
         </div>
@@ -159,7 +159,7 @@ const Website = (props) => {
           <div className="mt-8 px-24">
             <img
               className="w-full border border-solid border-gray-300 rounded-xl shadow-3xl"
-              src="https://static.ltaoo.work/www.funzm.com_scene.png"
+              src="//static.ltaoo.work/www.funzm.com_scene.png"
             />
           </div>
         </div>
@@ -170,7 +170,7 @@ const Website = (props) => {
           <div className="mt-8 px-24">
             <img
               className="w-full border border-solid border-gray-300 rounded-xl shadow-3xl"
-              src="https://static.ltaoo.work/www.funzm.com_spellings.png"
+              src="//static.ltaoo.work/www.funzm.com_spellings.png"
             />
           </div>
         </div>
